@@ -38,6 +38,7 @@ A API devolve códigos, nunca frases ([RN-I18-004](i18n.md)). Os nomes ficam em 
 | `UNSUPPORTED_SCHEMA_VERSION` | JSON de uma versão mais nova que a do sistema | 422 |
 | `FILE_TOO_LARGE` | Arquivo importado acima do limite | 413 |
 | `INVALID_PLANT` | A planta não pode rodar; acompanha os erros por elemento | 422 |
+| `VALIDATION_ERROR` | Corpo, parâmetros ou *query* fora do formato; acompanha a lista `{ path, code }` | 422 |
 | `INVALID_GROUP_CODE` | Código de grupo inexistente ou desativado | 404 |
 
 ## Índice

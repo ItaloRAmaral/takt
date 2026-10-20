@@ -116,7 +116,7 @@ Detalhe: [milestones.md](product/milestones.md).
 | [product/rules/](product/rules/README.md) | Regras de negócio com ID (`RN-...`) | Criado (39 regras) |
 | product/use-cases/ | Casos de uso com ID (`UC-...`) | No início de cada marco |
 | [pdr/](pdr/README.md) | Decisões de produto (PDR) e regras reservadas | Criado (19 PDRs) |
-| adr/ | Decisões de arquitetura (ADR) | Sessão de arquitetura |
+| [adr/](adr/README.md) | Decisões de arquitetura (ADR) | Em andamento (8 ADRs) |
 | [archive/](archive/) | Relatório inicial, fonte para os documentos acima | Arquivado |
 
 **Convenções:** cada documento abre com um resumo de 3 a 5 linhas e a data de atualização; um tema por arquivo, até cerca de 300 linhas; uma única fonte de verdade (este arquivo resume e aponta). Os IDs de regras e casos de uso aparecem nos nomes dos testes. PDRs e ADRs aceitos não são editados: uma mudança vira um registro novo.

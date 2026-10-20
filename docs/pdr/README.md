@@ -1,6 +1,6 @@
 # Registros de decisão de produto (PDR)
 
-> **Resumo.** Cada PDR registra uma decisão de produto: contexto, decisão, alternativas, consequências e as regras de negócio que ela gera. Decisões técnicas ficam nos ADRs, em `docs/adr/` (a criar na sessão de arquitetura).
+> **Resumo.** Cada PDR registra uma decisão de produto: contexto, decisão, alternativas, consequências e as regras de negócio que ela gera. Decisões técnicas ficam nos ADRs, em [`../adr/`](../adr/README.md).
 
 Atualizado em 20/10/2026.
 
