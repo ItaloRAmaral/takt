@@ -6,7 +6,7 @@ Atualizado em 20/10/2026.
 
 | Pesquisa | Pergunta | Data | Usada em |
 | --- | --- | --- | --- |
-| [Aquecimento em simulação didática](aquecimento-em-simulacao-didatica.md) | Começar vazio ou em regime estável; como dimensionar o aquecimento; como validar o motor contra casos analíticos | 20/10/2026 | PDR-0020; ADR do motor (a escrever) |
+| [Aquecimento em simulação didática](aquecimento-em-simulacao-didatica.md) | Começar vazio ou em regime estável; como dimensionar o aquecimento; como validar o motor contra casos analíticos | 20/10/2026 | PDR-0020, ADR-0011 |
 | [Explicação em camadas na interface](explicacao-em-camadas-na-interface.md) | A literatura valida dica + painel "Saiba mais" + explicação do resultado? | 20/10/2026 | PDR-0021 |
 
 Notas: [notes/aquecimento/](notes/aquecimento/), [notes/explicacao/](notes/explicacao/).

@@ -1,6 +1,6 @@
 # Regras de explicação e ajuda
 
-> **Resumo.** Dica curta e painel "Saiba mais" para todo termo, indicador e campo; explicação do resultado revelada em degraus, terminando numa hipótese, nunca numa ordem. A ajuda é sob demanda e pode ser desligada; a informação correta sobre o número nunca se desliga.
+> **Resumo.** Dica curta e painel "Saiba mais" para todo termo, indicador e campo; explicação do resultado revelada em degraus, terminando numa hipótese, nunca numa ordem. A ajuda é sob demanda e pode ser desligada; a informação correta sobre o número e os alertas de estado da fábrica nunca se desligam.
 
 Atualizado em 20/10/2026 · Origem: [PDR-0021](../../pdr/0021-explicacao-em-camadas.md). Base: [pesquisa sobre explicação em camadas](../../research/explicacao-em-camadas-na-interface.md).
 
@@ -67,3 +67,16 @@ Atualizado em 20/10/2026 · Origem: [PDR-0021](../../pdr/0021-explicacao-em-cama
 - **Origem:** PDR-0021.
 - **Exemplo:** ao duplicar um cenário com três parâmetros alterados: "Mudar uma coisa por vez deixa claro o efeito de cada uma. Quer separar em três cenários?"
 - **Quando violada:** não se aplica (sugestão).
+
+### RN-HLP-010: Alertas de estado da fábrica
+
+- **Enunciado:** situações que pedem atenção ficam sempre visíveis, na cena 3D (sobre o elemento) e no painel de resultados, com cor **e** ícone, mesmo com as ajudas desligadas: gargalo; fila crescendo; buffer cheio; estação bloqueada (sem espaço à frente) ou sem material (nada chegando); máquina parada por falha; aviso de utilização do gargalo ([RN-SIM-011](simulation.md)).
+- **Origem:** PDR-0021.
+- **Exemplo:** durante a reprodução, M2 fica com contorno vermelho e o ícone de chave inglesa enquanto está em reparo; o buffer B1 mostra "cheio" e M1, à frente dele, aparece como bloqueada.
+- **Quando violada:** teste de interface com as ajudas desligadas.
+- **Critério de "fila crescendo", escolhido pelo usuário por buffer:**
+  - **tamanho fixo:** a fila passou de N peças;
+  - **porcentagem da capacidade:** a fila passou de X% da capacidade do buffer;
+  - **tendência:** a fila aumentou de forma contínua nos últimos M minutos simulados.
+- **Padrão, se o usuário não escolher:** porcentagem da capacidade (80%) nos buffers com capacidade definida; tendência nas filas sem limite. **Estimativa:** valores sem base em literatura, a revisar com o uso.
+- **Em aberto:** os valores padrão de M e a forma de medir a tendência.

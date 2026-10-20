@@ -19,6 +19,7 @@ Quem nunca viu o Takt monta uma linha de 3 estações e roda em até **5 minutos
   - **explicação do resultado em degraus**: meta → dica de processo → diagnóstico depois de o usuário prever → hipótese para testar;
   - **planejamento de experimentos** sob demanda.
 - **Ajuda desligável:** o usuário desliga e religa dicas e ajudas. O modo, o aviso de utilização, a incerteza e o empate nunca se desligam.
+- **Alertas de estado sempre visíveis:** gargalo, fila crescendo, buffer cheio, estação bloqueada ou sem material e máquina em falha aparecem sobre o elemento na cena e no painel de resultados, com cor e ícone ([RN-HLP-010](rules/help.md)).
 - **Erro no lugar certo:** um problema da planta aparece no elemento afetado.
 
 ## Editor

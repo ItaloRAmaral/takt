@@ -2,7 +2,7 @@
 
 | Campo | Valor |
 | --- | --- |
-| Status | Aceito (experimental: revisar ao fim do marco 4) |
+| Status | Proposto (experimental: revisar ao fim do marco 4) |
 | Data | 20/10/2026 |
 | Relator | Italo |
 | Aprovadores | Italo |

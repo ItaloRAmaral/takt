@@ -2,7 +2,7 @@
 
 | Campo | Valor |
 | --- | --- |
-| Status | Aceito |
+| Status | Proposto |
 | Data | 20/10/2026 |
 | Relator | Italo |
 | Aprovadores | Italo |
@@ -30,8 +30,9 @@ O Takt precisa ser fácil de usar e **ensinar o que mostra**. A proposta inicial
 2. **Ajuda sob demanda por padrão.** O usuário pede; o sistema não sai explicando. Sem modo "iniciante × avançado".
 3. **O usuário pode desligar as dicas e as ajudas, e religar quando quiser.** A preferência fica salva no perfil.
 4. **Informação correta sobre o número não é ajuda e não se desliga:** modo da execução, aviso de utilização do gargalo, incerteza (intervalo de confiança) e empate dentro da variação ([PDR-0020](0020-modos-de-simulacao-e-aquecimento.md)).
-5. **Fontes bibliográficas só nos documentos**, nunca na interface.
-6. **Explicações geradas por modelos de texto fixos**, a partir das mesmas definições de indicador que o motor usa. Sem IA generativa.
+5. **Alertas de estado da fábrica também não são ajuda e não se desligam:** gargalo, fila crescendo, buffer cheio, estação bloqueada ou sem material e máquina parada por falha ficam visíveis na cena 3D e no painel de resultados, com cor **e** ícone.
+6. **Fontes bibliográficas só nos documentos**, nunca na interface.
+7. **Explicações geradas por modelos de texto fixos**, a partir das mesmas definições de indicador que o motor usa. Sem IA generativa.
 
 ## Alternativas consideradas
 
@@ -59,6 +60,7 @@ O Takt precisa ser fácil de usar e **ensinar o que mostra**. A proposta inicial
 - `RN-HLP-007`: explicações geradas a partir das definições de indicador do motor, sem IA generativa.
 - `RN-HLP-008`: informação correta sobre o número nunca se desliga.
 - `RN-HLP-009`: sugestões de planejamento de experimentos sob demanda.
+- `RN-HLP-010`: alertas de estado da fábrica sempre visíveis, na cena e nos resultados.
 
 ## Reflete em
 

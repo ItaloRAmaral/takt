@@ -60,6 +60,31 @@ Fonte: pesquisa [Aquecimento em simulação didática](../research/aquecimento-e
 
 Documentação de ferramentas consultada (aquecimento em produtos comerciais): ajuda do Simul8, fórum do Simio, fórum do FlexSim, ajuda do Siemens Plant Simulation v15 e do ProModel. Os links estão no relatório da pesquisa.
 
+## Geração de números aleatórios
+
+Pesquisa rápida de 20/10/2026, para a escolha do gerador do motor.
+
+| Obra | O que embasa | Lido |
+| --- | --- | --- |
+| L'Ecuyer, P. "Good Parameters and Implementations for Combined Multiple Recursive Random Number Generators". *Operations Research* 47(1), 1999 | Definição do MRG32k3a | Não (citado pelas fontes abaixo) |
+| L'Ecuyer, P.; Simard, R.; Chen, E. J.; Kelton, W. D. "An Object-Oriented Random-Number Package with Many Long Streams and Substreams". *Operations Research* 50(6):1073–1075, 2002 (DOI [10.1287/opre.50.6.1073.358](https://pubsonline.informs.org/doi/suppl/10.1287/opre.50.6.1073.358)) | Pacote RngStreams: sequências e subsequências independentes; implementações de referência em C, C++ e Java | Resumo |
+| L'Ecuyer, P. et al. Artigo da *Winter Simulation Conference* 2001 ([PDF](https://informs-sim.org/wsc01papers/012.PDF)) | O pacote de sequências foi implementado no Arena e no AutoMod | Trecho |
+| MathWorks. "Creating and Controlling a Random Number Stream" ([documentação](https://www.mathworks.com/help/matlab/math/creating-and-controlling-a-random-number-stream.html)) | MRG32k3a no MATLAB: período 2^191, sequências e subsequências | Trecho |
+| ns-3 / ns-2. Documentação de geração de números aleatórios ([ns-2](https://www.isi.edu/websites/nsnam/ns/doc/node267.html); [ns-3 RngStream](https://www.nsnam.org/docs/release/3.9/doxygen/classns3_1_1_rng_stream.html)) | MRG32k3a como gerador padrão de simuladores de rede | Trecho |
+| Intel oneMKL, "mrg32k3a" ([documentação](https://www.intel.com/content/www/us/en/docs/onemkl/developer-reference-dpcpp/2025-2/mrg32k3a-001.html)); NVIDIA cuRAND, "Testing" ([documentação](https://docs.nvidia.com/cuda/archive/13.4.1/curand/testing.html)) | MRG32k3a em bibliotecas numéricas; resultados no BigCrush | Trecho |
+| "Assessing the Stochastic Properties of Modern Pseudo-Random Generators for Parallel Computing". arXiv:2605.18227, 2026 ([PDF](https://arxiv.org/pdf/2605.18227)) | Qualidade do MRG32k3a com muitos estados iniciais (pré-publicação, sem revisão por pares) | Trecho |
+| Vigna, S. Implementação de MRG32k3a sem testes condicionais ([repositório](https://awesome.ecosyste.ms/projects/github.com%2Fvigna%2Fmrg32k3a)) | Implementação alternativa de referência, com saída idêntica à original | Trecho |
+| Schmeiser, B. W.; Kachitvichyanukul, V. "Correlation Induction without the Inverse Transformation". WSC 1986 | Métodos de rejeição dessincronizam os fluxos; inversão os mantém | Trecho |
+| Glasserman, P.; Yao, D. D. "Some Guidelines and Guarantees for Common Random Numbers". *Management Science* 38(6):884–908, 1992 ([PDF](https://business.columbia.edu/sites/default/files-efs/pubfiles/4261/glasserman_yao_guidelines.pdf)) | Ganho dos números aleatórios comuns depende de monotonicidade | Sim (pesquisa anterior) |
+| Haas, P. Notas de aula CS 590M, UMass ([slides](https://people.cs.umass.edu/~phaas/CS590M/slides/slecture11h.pdf)) | Sincronização e fluxos dedicados por variável aleatória | Trecho |
+| Runuran (pacote R), "use.aux.urng" ([documentação](https://rdrr.io/cran/Runuran/man/use.aux.urng-method.html)) | Inversão cria fluxos correlacionados a partir dos mesmos uniformes | Trecho |
+| Wichura, M. J. "Algorithm AS 241: The Percentage Points of the Normal Distribution". *Applied Statistics* 37(3):477–484, 1988 ([PDF](https://csg.sph.umich.edu/abecasis/gas_power_calculator/algorithm-as-241-the-percentage-points-of-the-normal-distribution.pdf)) | Inversa da normal com cerca de 16 dígitos de precisão | Trecho |
+| R Core. `qnorm.c` ([código](https://svn.r-project.org/browse/R/trunk/src/nmath/qnorm.c?peg=11368)) | O R usa o AS 241, com melhorias nas caudas | Trecho |
+| SAS. "The Inverse CDF Method" ([blog](https://blogs.sas.com/content/iml/2013/07/22/the-inverse-cdf-method.html)) | Normal truncada pela inversão em [F(a), F(b)] | Trecho |
+| GNU Octave, `triinv` ([documentação](https://octave.sourceforge.io/statistics/function/triinv.html)) | Referência para conferir a inversa da triangular | Trecho |
+| pure-rand (npm) ([README](https://cdn.jsdelivr.net/npm/pure-rand@8.4.0/README.md)) | Alternativa em JavaScript: xoroshiro128+, com saltos | Trecho |
+| stdlib (npm), `@stdlib/random-base-mt19937` ([README](https://github.com/stdlib-js/random-base-mt19937/blob/umd/README.md)) | Alternativa em JavaScript: Mersenne Twister | Trecho |
+
 ## Explicações na interface e aprendizagem
 
 Fonte: pesquisa [Explicação em camadas na interface](../research/explicacao-em-camadas-na-interface.md) (20/10/2026), onde está a lista completa (68 itens). Abaixo, as obras que embasam decisões. "Prévio" = citado de conhecimento prévio do pesquisador, sem reabrir a fonte; conferir antes de uso público.

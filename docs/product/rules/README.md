@@ -40,6 +40,7 @@ A API devolve códigos, nunca frases ([RN-I18-004](i18n.md)). Os nomes ficam em 
 | `INVALID_PLANT` | A planta não pode rodar; acompanha os erros por elemento | 422 |
 | `VALIDATION_ERROR` | Corpo, parâmetros ou *query* fora do formato; acompanha a lista `{ path, code }` | 422 |
 | `INVALID_GROUP_CODE` | Código de grupo inexistente ou desativado | 404 |
+| `SIMULATION_LIMIT_EXCEEDED` | A execução passou de um teto de segurança (elementos, duração ou eventos) | 422 |
 
 ## Índice
 
@@ -53,4 +54,4 @@ A API devolve códigos, nunca frases ([RN-I18-004](i18n.md)). Os nomes ficam em 
 | [simulation.md](simulation.md) | Simulação | `RN-SIM-001` a `012` |
 | [editor.md](editor.md) | Editor 3D | `RN-EDT-001` a `004` |
 | [i18n.md](i18n.md) | Idiomas | `RN-I18-001` a `004` |
-| [help.md](help.md) | Explicação e ajuda | `RN-HLP-001` a `009` |
+| [help.md](help.md) | Explicação e ajuda | `RN-HLP-001` a `010` |
