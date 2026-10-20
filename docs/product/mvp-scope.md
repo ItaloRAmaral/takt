@@ -13,7 +13,7 @@ Atualizado em 20/10/2026 · Decisões: [PDR-0006](../pdr/0006-escopo-do-mvp.md),
 | Roteamento | Por qualidade, por percentual, fila mais curta; limite de retrabalho | Prioridade, por produto, por condição |
 | Editor | Grade 3D com encaixe, rotação de 90°, paleta, conectar, propriedades, desfazer | Posicionamento livre, distâncias e colisões, importação de CAD |
 | Estrutura | Uma fábrica com uma ou poucas linhas (zonas) | Várias fábricas, redes |
-| Simulação | Reprodução controlável (play, pause, 1x a 100x); replicações com intervalo de confiança; semente fixa | Interação em tempo real, otimização automática |
+| Simulação | Reprodução controlável (play, pause, 1x a 100x); replicações com intervalo de confiança; semente fixa; **três modos** (turno, continuar do turno anterior, regime estável); **assistente de aquecimento (MSER-5)**; aviso de utilização do gargalo; números aleatórios comuns entre cenários | Interação em tempo real, otimização automática |
 | Indicadores | Vazão, WIP, lead time, utilização, OEE, gargalo destacado | CEP, Pareto de paradas, custos |
 | Didática | Cenário guiado do gargalo, indicadores explicados | Biblioteca de aulas, trilhas, provas, missões |
 | Cenários | Comparar dois cenários lado a lado | Ramificação e versionamento |

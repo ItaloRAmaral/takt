@@ -34,6 +34,7 @@ Atualizado em 20/10/2026.
 | [0017](0017-repositorio-fechado.md) | Repositório fechado | Aceito | 19/10/2026 |
 | [0018](0018-identidade-visual-e-ux.md) | Identidade visual e critério de facilidade | Aceito | 19/10/2026 |
 | [0019](0019-hierarquia-de-papeis.md) | Hierarquia de papéis | Aceito | 20/10/2026 |
+| [0020](0020-modos-de-simulacao-e-aquecimento.md) | Modos de simulação, assistente de aquecimento e aviso de utilização | Aceito | 20/10/2026 |
 
 ## Regras de negócio derivadas
 
@@ -46,6 +47,6 @@ IDs citados pelos PDRs; o texto exato está em [`product/rules/`](../product/rul
 | `RN-GRP` | Grupos | 001–004 | PDR-0011 |
 | `RN-PLT` | Plantas | 001–004 | PDR-0012 |
 | `RN-JSN` | JSON | 001–007 | PDR-0013 |
-| `RN-SIM` | Simulação | 001–006 | PDR-0008, 0014 |
+| `RN-SIM` | Simulação | 001–012 | PDR-0008, 0014, 0020 |
 | `RN-EDT` | Editor | 001–004 | PDR-0007 |
 | `RN-I18` | Idiomas | 001–004 | PDR-0016 |

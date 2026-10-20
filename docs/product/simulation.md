@@ -17,6 +17,20 @@ Uma fila de eventos ordenada pelo tempo (chegada, início e fim de processo, fal
 - **Replicações:** falhas e defeitos são aleatórios, então uma rodada só engana. Padrão: 30 replicações (ajustáveis de 5 a 100), semente 42.
 - **Log de eventos como saída:** a cena 3D só reproduz; nunca calcula.
 
+## Modos de execução
+
+O usuário escolhe; cada modo é explicado na interface ([PDR-0020](../pdr/0020-modos-de-simulacao-e-aquecimento.md), [regras](rules/simulation.md#modos-de-execução-e-aquecimento)).
+
+| Modo | Começa | Responde a | Comparável com a literatura? |
+| --- | --- | --- | --- |
+| **Turno** (padrão) | Vazio, sem aquecimento | Como foi este turno, incluindo o enchimento | Só com a média transiente |
+| **Continuar do turno anterior** | Estado final salvo de uma execução anterior | Como é um turno típico, já com peças na linha | Não diretamente |
+| **Regime estável** | Vazio, com aquecimento descartado (sugerido por MSER-5) | Capacidade de longo prazo | Sim (M/M/1, Little, Hopp e Spearman) |
+
+**Por que importa (fato, Law; Banks et al.):** começar vazio subestima filas e WIP, e mais replicações não corrigem esse viés. No M/M/1 com ρ = 0,8, a média de L num turno de 480 unidades de tempo é 3,79, não 4.
+
+**Aviso:** no modo turno, acima de ρ ≈ 0,85 no gargalo, o resultado avisa que o turno mede sobretudo o enchimento da linha.
+
 ## Indicadores do MVP
 
 - **Vazão:** peças boas por hora.
@@ -39,6 +53,11 @@ Testes automáticos escritos **antes** do motor. O motor está pronto para a sal
 | Qualquer rodada estável | WIP = vazão × lead time | Lei de Little |
 | Falhas com MTBF 240 min e MTTR 15 min | Disponibilidade ≈ 94,1% (240 / 255) | Definição de disponibilidade |
 | Retrabalho com probabilidade p, sem limite | Passagens esperadas por peça = 1 / (1 − p) | Distribuição geométrica |
+| Turno vazio, M/M/1 com ρ = 0,8, T = 480 | Média de L ≈ 3,79 (viés de começar vazio) | [Pesquisa sobre aquecimento](../research/aquecimento-em-simulacao-didatica.md) |
+| Lei de Little em janela finita, contando o WIP inicial | Igualdade exata, sem estatística (teste unitário) | Little (2011), LL.1 e LL.2 |
+| MSER-5 no M/M/1 com ρ = 0,8 | Corte da ordem de algumas centenas de unidades de tempo | Pesquisa sobre aquecimento |
+
+Os casos de regime estável (M/M/1, Little em regime, Hopp e Spearman) rodam no modo regime estável. **Estimativa:** ±5% em L com ρ = 0,8 exige cerca de 1,7×10⁵ unidades de tempo somadas entre replicações; testes rápidos de regressão podem usar ρ = 0,5.
 | k estações paralelas idênticas, tempo c | Capacidade = k / c | Hopp e Spearman |
 
 Referências completas: [references.md](references.md).

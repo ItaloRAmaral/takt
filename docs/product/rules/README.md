@@ -50,6 +50,6 @@ A API devolve códigos, nunca frases ([RN-I18-004](i18n.md)). Os nomes ficam em 
 | [groups.md](groups.md) | Grupos | `RN-GRP-001` a `004` |
 | [plants.md](plants.md) | Plantas | `RN-PLT-001` a `004` |
 | [json.md](json.md) | Importar e exportar JSON | `RN-JSN-001` a `007` |
-| [simulation.md](simulation.md) | Simulação | `RN-SIM-001` a `006` |
+| [simulation.md](simulation.md) | Simulação | `RN-SIM-001` a `012` |
 | [editor.md](editor.md) | Editor 3D | `RN-EDT-001` a `004` |
 | [i18n.md](i18n.md) | Idiomas | `RN-I18-001` a `004` |
