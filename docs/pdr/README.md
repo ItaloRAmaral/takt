@@ -35,6 +35,7 @@ Atualizado em 20/10/2026.
 | [0018](0018-identidade-visual-e-ux.md) | Identidade visual e critério de facilidade | Aceito | 19/10/2026 |
 | [0019](0019-hierarquia-de-papeis.md) | Hierarquia de papéis | Aceito | 20/10/2026 |
 | [0020](0020-modos-de-simulacao-e-aquecimento.md) | Modos de simulação, assistente de aquecimento e aviso de utilização | Aceito | 20/10/2026 |
+| [0021](0021-explicacao-em-camadas.md) | Explicação em camadas e ajuda sob demanda | Aceito | 20/10/2026 |
 
 ## Regras de negócio derivadas
 
@@ -50,3 +51,4 @@ IDs citados pelos PDRs; o texto exato está em [`product/rules/`](../product/rul
 | `RN-SIM` | Simulação | 001–012 | PDR-0008, 0014, 0020 |
 | `RN-EDT` | Editor | 001–004 | PDR-0007 |
 | `RN-I18` | Idiomas | 001–004 | PDR-0016 |
+| `RN-HLP` | Explicação e ajuda | 001–009 | PDR-0021 |

@@ -60,6 +60,51 @@ Fonte: pesquisa [Aquecimento em simulação didática](../research/aquecimento-e
 
 Documentação de ferramentas consultada (aquecimento em produtos comerciais): ajuda do Simul8, fórum do Simio, fórum do FlexSim, ajuda do Siemens Plant Simulation v15 e do ProModel. Os links estão no relatório da pesquisa.
 
+## Explicações na interface e aprendizagem
+
+Fonte: pesquisa [Explicação em camadas na interface](../research/explicacao-em-camadas-na-interface.md) (20/10/2026), onde está a lista completa (68 itens). Abaixo, as obras que embasam decisões. "Prévio" = citado de conhecimento prévio do pesquisador, sem reabrir a fonte; conferir antes de uso público.
+
+| Obra | O que embasa | Lido |
+| --- | --- | --- |
+| Nielsen, J. "Progressive Disclosure". NN/g, 2006 | No máximo dois níveis de revelação (dica → painel) | Sim |
+| Kendrick, A. "Tooltip Guidelines". NN/g, 2019 | Dica curta, nunca com informação essencial; abrir por foco e toque | Sim |
+| Laubheimer, P. "Onboarding Tutorials vs. Contextual Help". NN/g, 2023 | Ajuda que o usuário puxa, em vez de tours obrigatórios | Sim |
+| Fessenden, T. "Modal & Nonmodal Dialogs". NN/g, 2017 | Painel lateral não modal, que mantém o contexto | Sim |
+| Nielsen, J. "Paradox of the Active User". NN/g, 1998 (sobre Carroll e Rosson, 1987) | Usuários agem antes de ler; ajuda curta e ligada à tarefa | Sim |
+| Carroll, J. M. *The Nurnberg Funnel*. MIT Press, 1990 | Instrução minimalista, ligada ao sistema real | Secundário |
+| Novick, D. G.; Ward, K. "Why Don't People Read the Manual?". SIGDOC 2006 | Pessoas evitam manuais e ajuda online | Sim |
+| W3C. WCAG 2.2, critério 1.4.13 "Content on Hover or Focus" | Dica dispensável com Esc, que aceita o ponteiro por cima e persiste | Sim |
+| W3C WAI. ARIA Authoring Practices, "Tooltip Pattern" | Nada focável dentro da dica; `aria-describedby` | Sim |
+| Pickering, H. "Tooltips & Toggletips". *Inclusive Components*, 2017 | "Saiba mais" como botão próprio (*toggletip*), que funciona no toque | Sim |
+| IBM. Carbon Design System, "Tooltip" | Dica de definição para termos; regras de campo sempre visíveis | Sim |
+| Chandler, P.; Sweller, J. "The Split-Attention Effect...". *Br. J. Educ. Psychol.*, 1992; Ginns, P. *Learning and Instruction*, 2006 | Explicação perto do que explica | Secundário |
+| Mayer, R. E. *Multimedia Learning*. 3. ed. Cambridge, 2020 | Sinalização, segmentação, contiguidade, pré-treino | Secundário (tamanhos de efeito divergem entre edições) |
+| de Jong, T.; van Joolingen, W. R. "Scientific Discovery Learning with Computer Simulations...". *RER* 68(2), 1998 | Dificuldades do aluno em simulações: hipóteses, experimentos, interpretação, regulação | Secundário |
+| Alfieri, L. et al. "Does Discovery-Based Instruction Enhance Learning?". *J. Educ. Psychol.* 103(1), 2011 | Descoberta sem apoio perde; descoberta orientada ganha | Sim |
+| Lazonder, A. W.; Harmsen, R. "Meta-Analysis of Inquiry-Based Learning: Effects of Guidance". *RER* 86(3), 2016 | Orientação melhora a aprendizagem em simulações | Sim |
+| Podolefsky, N. S.; Moore, E. B.; Perkins, K. K. "Implicit Scaffolding in Interactive Simulations". 2013 (PhET) | Guiar pelo próprio desenho da simulação, não só por texto | Sim |
+| Wieman, C. E.; Adams, W. K.; Perkins, K. K. "PhET: Simulations That Enhance Learning". *Science* 322, 2008 | Simulações interativas no ensino | Secundário |
+| Barbieri, C. A. et al. "A Meta-Analysis of the Worked Examples Effect...". *Educ. Psychol. Rev.* 35, 2023 | Exemplos resolvidos | Sim |
+| Fyfe, E. R. et al. "Concreteness Fading...". *Educ. Psychol. Rev.* 26, 2014 | Do concreto (a planta aberta) ao abstrato (a regra geral) | Sim |
+| Walkington, C. A. "Using Adaptive Learning Technologies to Personalize Instruction...". *J. Educ. Psychol.* 105(4), 2013 | Personalização de contexto | Prévio |
+| Sterman, J. D. "Modeling Managerial Behavior: Misperceptions of Feedback...". *Management Science* 35(3), 1989 | Intuição falha em sistemas com fluxo e atraso; justifica explicar resultados | Sim |
+| Dobson, G.; Shumsky, R. A. "Web-Based Simulations for Teaching Queueing, Little's Law...". *INFORMS Trans. Educ.* 7(1), 2006 | Precedente de simulações web no ensino de operações | Sim |
+| Hattie, J.; Timperley, H. "The Power of Feedback". *RER* 77(1), 2007 | Meta, situação atual e próximo passo no feedback | Prévio |
+| Wisniewski, B.; Zierer, K.; Hattie, J. "The Power of Feedback Revisited". *Front. Psychol.* 10, 2020 | Feedback rico em informação tem o maior efeito | Sim |
+| Shute, V. J. "Focus on Formative Feedback". *RER* 78(1), 2008 | Feedback específico e elaborado; evitar dicas que sempre terminam na resposta | Prévio |
+| Van der Kleij, F. M. et al. "Effects of Feedback in a Computer-Based Learning Environment...". *RER* 85(4), 2015 | Feedback elaborado em ambientes digitais | Sim |
+| Kluger, A. N.; DeNisi, A. "The Effects of Feedback Interventions on Performance". *Psychol. Bull.* 119(2), 1996 | Feedback mal desenhado pode piorar o desempenho | Prévio |
+| Kalyuga, S. et al. "The Expertise Reversal Effect". *Educ. Psychologist* 38(1), 2003 | Explicação que ajuda o iniciante atrapalha o experiente | Resumo |
+| Salden, R. J. C. M. et al. "The Expertise Reversal Effect and Worked Examples in Tutored Problem Solving". *Instr. Sci.* 38, 2010 | Retirar a explicação conforme o domínio | Prévio |
+| Karich, A. C.; Burns, M. K.; Maki, K. E. "Updated Meta-Analysis of Learner Control...". *RER* 84(3), 2014 | Deixar o aluno escolher o nível de ajuda tem efeito quase nulo | Resumo |
+| Aleven, V. et al. "Help Seeking and Help Design in Interactive Learning Environments". *RER* 73(3), 2003 | Alunos usam mal a ajuda sob demanda | Prévio |
+| Koedinger, K. R.; Aleven, V. "Exploring the Assistance Dilemma...". *Educ. Psychol. Rev.* 19(3), 2007 | Dar ou reter informação: dilema sem solução única | Sim |
+| Sinha, T.; Kapur, M. "When Problem Solving Followed by Instruction Works...". *RER* 91(5), 2021 | Tentar antes de receber a explicação (*productive failure*) | Secundário |
+| Bansal, G. et al. "Does the Whole Exceed its Parts?". CHI 2021; Buçinca, Z. et al. "To Trust or to Think". CSCW 2021 | Explicações aumentam a aceitação cega; decidir antes de ver reduz | Sim |
+| Belia, S. et al. "Researchers Misunderstand Confidence Intervals...". *Psychol. Methods* 10(4), 2005 | Intervalos de confiança são mal lidos | Sim |
+| Hullman, J.; Resnick, P.; Adar, E. "Hypothetical Outcome Plots...". *PLOS ONE*, 2015; Padilla, L.; Kay, M.; Hullman, J. "Uncertainty Visualization", 2022 | Como mostrar incerteza a leigos | Sim |
+| van der Bles, A. M. et al. "The Effects of Communicating Uncertainty on Public Trust...". *PNAS* 117(14), 2020 | Mostrar incerteza não reduz a confiança na fonte | Sim |
+
 ## Mercado
 
 As fontes do levantamento de concorrência estão no [relatório inicial](../archive/2026-10-19-relatorio-inicial.md#fontes).

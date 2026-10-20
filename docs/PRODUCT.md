@@ -119,7 +119,7 @@ Detalhe: [milestones.md](product/milestones.md).
 | [pdr/](pdr/README.md) | Decisões de produto (PDR) e regras reservadas | Criado (19 PDRs) |
 | [adr/](adr/README.md) | Decisões de arquitetura (ADR) | Em andamento (10 ADRs) |
 | [architecture/](architecture/README.md) | Como o sistema funciona hoje (documentos vivos) | Em andamento (`takt-core-api`) |
-| [research/](research/README.md) | Pesquisas na literatura (relatórios e notas) | 1 pesquisa |
+| [research/](research/README.md) | Pesquisas na literatura (relatórios e notas) | 2 pesquisas |
 | [archive/](archive/) | Relatório inicial, fonte para os documentos acima | Arquivado |
 
 **Convenções:** cada documento abre com um resumo de 3 a 5 linhas e a data de atualização; um tema por arquivo, até cerca de 300 linhas; uma única fonte de verdade (este arquivo resume e aponta). Os IDs de regras e casos de uso aparecem nos nomes dos testes. PDRs e ADRs aceitos não são editados: uma mudança vira um registro novo.

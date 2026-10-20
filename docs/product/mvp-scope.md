@@ -15,7 +15,7 @@ Atualizado em 20/10/2026 · Decisões: [PDR-0006](../pdr/0006-escopo-do-mvp.md),
 | Estrutura | Uma fábrica com uma ou poucas linhas (zonas) | Várias fábricas, redes |
 | Simulação | Reprodução controlável (play, pause, 1x a 100x); replicações com intervalo de confiança; semente fixa; **três modos** (turno, continuar do turno anterior, regime estável); **assistente de aquecimento (MSER-5)**; aviso de utilização do gargalo; números aleatórios comuns entre cenários | Interação em tempo real, otimização automática |
 | Indicadores | Vazão, WIP, lead time, utilização, OEE, gargalo destacado | CEP, Pareto de paradas, custos |
-| Didática | Cenário guiado do gargalo, indicadores explicados | Biblioteca de aulas, trilhas, provas, missões |
+| Didática | Cenário guiado do gargalo; dica e painel "Saiba mais" em todo termo e indicador; explicação do resultado em degraus com previsão; sugestões de planejamento de experimentos; ajuda desligável | Biblioteca de aulas, trilhas, provas, missões; retirada automática da ajuda conforme o domínio |
 | Cenários | Comparar dois cenários lado a lado | Ramificação e versionamento |
 | Acesso | Login (e-mail e senha), organizações, papéis, plano gratuito, grupos, contas demo, 18+ | SSO, cobrança, analista, convite por e-mail |
 | Dados | Importar e exportar JSON por papel | Dados reais, CSV |

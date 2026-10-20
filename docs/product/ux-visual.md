@@ -13,7 +13,12 @@ Quem nunca viu o Takt monta uma linha de 3 estações e roda em até **5 minutos
 - **Nunca tela vazia:** ao abrir, já existe uma fábrica de exemplo.
 - **Valores padrão sensatos:** um elemento solto na grade já funciona.
 - **Desfazer sempre:** errar sem medo.
-- **Termo técnico com explicação:** "OEE" acompanhado de uma linha em linguagem simples.
+- **Explicação em camadas, sob demanda** ([PDR-0021](../pdr/0021-explicacao-em-camadas.md), [regras](rules/help.md)):
+  - **dica** de uma frase em todo termo, indicador e campo;
+  - **painel "Saiba mais"** ao lado, sem bloquear a tela, do concreto (a planta aberta) ao abstrato (a regra geral);
+  - **explicação do resultado em degraus**: meta → dica de processo → diagnóstico depois de o usuário prever → hipótese para testar;
+  - **planejamento de experimentos** sob demanda.
+- **Ajuda desligável:** o usuário desliga e religa dicas e ajudas. O modo, o aviso de utilização, a incerteza e o empate nunca se desligam.
 - **Erro no lugar certo:** um problema da planta aparece no elemento afetado.
 
 ## Editor
