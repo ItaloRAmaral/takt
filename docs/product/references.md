@@ -180,6 +180,27 @@ Fonte: pesquisa [Agentes e skills da comunidade](../research/agentes-e-skills-da
 | Anthropic. [`claude-code-action`](https://github.com/anthropics/claude-code-action) e [`claude-code-security-review`](https://github.com/anthropics/claude-code-security-review) | Revisão em pull request; a segunda está parada desde 02/2026 |
 | Snyk ToxicSkills, NVIDIA SkillSpector e `snyk/agent-scan` (links no relatório) | Incidentes com skills de terceiros e ferramentas para verificá-las |
 
+## Estilo de código
+
+Fonte: pesquisa [Guia de estilo de código](../research/guia-de-estilo-de-codigo.md) (21/10/2026), com a lista completa de links, inclusive os estudos empíricos. Usada em [`code-style.md`](../architecture/code-style.md) e em `.claude/rules/`.
+
+| Fonte | O que embasa |
+| --- | --- |
+| Ousterhout e Martin. ["aposd-vs-clean-code"](https://github.com/johnousterhout/aposd-vs-clean-code) (2024–2025); Ousterhout, *A Philosophy of Software Design* | Tamanho de função sem limite fixo, módulos profundos, comentários do porquê |
+| Fowler. [BeckDesignRules](https://martinfowler.com/bliki/BeckDesignRules.html), [Yagni](https://martinfowler.com/bliki/Yagni.html), [FunctionLength](https://martinfowler.com/bliki/FunctionLength.html) | Ordem de prioridade do design, YAGNI e sua exceção, extrair por intenção |
+| Metz. ["The Wrong Abstraction"](https://sandimetz.com/blog/2016/1/20/the-wrong-abstraction); Dodds, ["AHA Programming"](https://kentcdodds.com/blog/aha-programming); Abramov, ["Goodbye, Clean Code"](https://overreacted.io/goodbye-clean-code/) | Duplicação em vez da abstração errada; regra de três |
+| Hofmeister, Siegmund e Holt. SANER 2017 ([PDF](https://www.se.cs.uni-saarland.de/publications/docs/HoSeHo17.pdf)) | Nomes por extenso lidos mais rápido |
+| Google. [TypeScript Style Guide](https://google.github.io/styleguide/tsguide.html); [AIP-140](https://google.aip.dev/140) e [AIP-141](https://google.aip.dev/141) | Convenções de TypeScript; unidade como sufixo do nome |
+| typescript-eslint. [Configs](https://typescript-eslint.io/users/configs) e [regras](https://typescript-eslint.io/rules/); TypeScript, [TSConfig Reference](https://www.typescriptlang.org/tsconfig/) e [Enums](https://www.typescriptlang.org/docs/handbook/enums.html) | O que a ferramenta impõe; proibição de `enum` |
+| Microsoft. Anúncios do [TypeScript 6.0](https://devblogs.microsoft.com/typescript/announcing-typescript-6-0/) e do [7.0](https://devblogs.microsoft.com/typescript/announcing-typescript-7-0/) | Decisão pendente D5 |
+| NestJS. [Custom providers](https://docs.nestjs.com/fundamentals/custom-providers), [Exception filters](https://docs.nestjs.com/exception-filters); Prisma, ["Prisma ORM 8 in NestJS"](https://www.prisma.io/blog/prisma-orm-8-nestjs) | Portas como token, `@Inject` explícito, filtro global |
+| Prisma. [Client extensions](https://www.prisma.io/docs/orm/prisma-client/client-extensions), [Transactions](https://www.prisma.io/docs/orm/prisma-client/queries/transactions), [exemplo de RLS](https://github.com/prisma/prisma-client-extensions/tree/main/row-level-security) | Decisão pendente D1 |
+| Cockburn. ["Hexagonal Architecture"](https://alistair.cockburn.us/hexagonal-architecture/); Fowler, [Repository](https://martinfowler.com/eaaCatalog/repository.html) e [DDD_Aggregate](https://martinfowler.com/bliki/DDD_Aggregate.html); Microsoft, [persistence layer design](https://learn.microsoft.com/en-us/dotnet/architecture/microservices/microservice-ddd-cqrs-patterns/infrastructure-persistence-layer-design) | Uma porta por conversa, um repositório por raiz de agregado |
+| Seemann. ["Interfaces are not abstractions"](https://blog.ploeh.dk/2010/12/02/Interfacesarenotabstractions/) e ["Functional architecture is Ports and Adapters"](https://blog.ploeh.dk/2016/03/18/functional-architecture-is-ports-and-adapters/); Bernhardt, ["Functional Core, Imperative Shell"](https://www.destroyallsoftware.com/screencasts/catalog/functional-core-imperative-shell) | Critério contra porta 1:1; motor como núcleo funcional |
+| MDN. [Math](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math) e [Map](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Map); V8, ["Fast properties"](https://v8.dev/blog/fast-properties) | Ordem de iteração, forma estável no laço quente; decisão pendente D4 |
+| Anthropic. Claude Code Docs, [path-specific rules](https://code.claude.com/docs/en/memory#path-specific-rules) | Arquivos de `.claude/rules/` com `paths` |
+| `cliniccontrol` (projeto anterior do fundador, referência, não padrão) | Problemas a não repetir e itens de segurança da checklist de revisão |
+
 ## Mercado
 
 As fontes do levantamento de concorrência estão no [relatório inicial](../archive/2026-10-19-relatorio-inicial.md#fontes).

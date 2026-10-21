@@ -22,10 +22,11 @@ Takt is a web platform with an editable 3D virtual factory, driven by a discrete
 | `docs/adr/` | Architecture decision records (ADR) |
 | `docs/product/rules/` | Business rules with stable IDs (`RN-...`) and error codes |
 | `docs/product/` | Vision, scope, access, plant model, simulation, UX, milestones, risks, glossary, references |
-| `docs/architecture/` | Living docs: how each app and lib works today |
+| `docs/architecture/` | Living docs: how each app and lib works today; `code-style.md` is the code style guide |
 | `docs/research/` | Literature and technical research reports |
 | `.claude/skills/`, `.claude/agents/` | Project skills and subagents; create or change them with the `writing-skills-and-agents` skill |
 | `.claude/agent-notes/` | Sources and specs of each subagent |
+| `.claude/rules/` | Short, path-scoped digests of the style guide per area (API, engine, schema, web, tests); change them with `docs/architecture/code-style.md` in the same pull request |
 | `.claude/settings.json`, `.claude/hooks/` | Project permissions and hooks (blocks git commands that create commits or publish) |
 
 Read only what the task needs; every doc starts with a short summary.
@@ -44,6 +45,8 @@ Read only what the task needs; every doc starts with a short summary.
 - Each milestone starts by writing its use cases (`docs/product/use-cases/`) and adjusting the rules it touches.
 
 ## Hard rules for code
+
+Style follows `docs/architecture/code-style.md`; its principles may be broken only with the justification it requires in the plan. The rules below never are.
 
 - `@takt/sim-engine` never imports React, Three.js or DOM APIs, and never uses `Math.random` (ADR-0001, ADR-0011).
 - In `takt-core-api`, `domain/` imports nothing external (no `@nestjs/*`, `@prisma/*`, `zod`) (ADR-0002).

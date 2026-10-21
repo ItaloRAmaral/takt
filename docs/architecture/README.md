@@ -41,6 +41,7 @@ Atualizado em 20/10/2026.
 
 | Documento | Conteúdo | Status |
 | --- | --- | --- |
+| [code-style.md](code-style.md) | Guia de estilo: princípios de design, critérios de desvio, TypeScript, convenções por projeto, checklist de revisão | Criado |
 | [takt-core-api.md](takt-core-api.md) | API: estrutura, fluxo de uma requisição, erros, validação, banco, observabilidade, segurança | Criado |
 | `takt-web-app.md` | Front-end, cena 3D, estado, armazenamento local | Na implementação ([ADR-0012](../adr/0012-front-end.md)) |
 | `sim-engine.md` | Motor de simulação | Após o ADR do motor |
