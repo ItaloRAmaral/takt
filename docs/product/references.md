@@ -130,6 +130,53 @@ Fonte: pesquisa [Explicação em camadas na interface](../research/explicacao-em
 | Hullman, J.; Resnick, P.; Adar, E. "Hypothetical Outcome Plots...". *PLOS ONE*, 2015; Padilla, L.; Kay, M.; Hullman, J. "Uncertainty Visualization", 2022 | Como mostrar incerteza a leigos | Sim |
 | van der Bles, A. M. et al. "The Effects of Communicating Uncertainty on Public Trust...". *PNAS* 117(14), 2020 | Mostrar incerteza não reduz a confiança na fonte | Sim |
 
+## Front-end
+
+Fonte: pesquisa [Escolhas técnicas do front-end](../research/escolhas-tecnicas-do-front-end.md) (20/10/2026), com a lista completa (cerca de 180 itens, entre documentação oficial, avisos de segurança, registros do npm e pesquisas de mercado). Abaixo, as fontes primárias que embasam as recomendações.
+
+| Fonte | O que embasa |
+| --- | --- |
+| Next.js. "Next.js Security Update: October 14, 2026" ([blog](https://nextjs.org/blog/nextjs-security-update-october-14-2026)); NVD, CVE-2025-29927 ([nvd](https://nvd.nist.gov/vuln/detail/cve-2025-29927)); Datadog, CVE-2025-55182 ([artigo](https://securitylabs.datadoghq.com/articles/cve-2025-55182-react2shell-remote-code-execution-react-server-components/)) | Vulnerabilidades graves no servidor do framework |
+| Next.js Docs. "Static Exports" e "rewrites" ([static](https://nextjs.org/docs/app/guides/static-exports); [rewrites](https://nextjs.org/docs/app/api-reference/config/next-config-js/rewrites)) | Exportação estática não tem rewrites nem proxy |
+| TanStack. "Security update: CVE-2026-102989" ([blog](https://tanstack.com/blog/tanstack-start-security-update-cve-2026-102989)); GitHub Advisory GHSA-2w69-qvjg-hvjx (React Router) | Vulnerabilidades nos servidores de outros frameworks |
+| Vite. "Announcing Vite 8" ([blog](https://vite.dev/blog/announcing-vite8)); Vite Docs, "Server Options" e "Web Workers" | Vite 8, proxy de desenvolvimento, Workers |
+| Remix. "React Router v8" ([blog](https://remix.run/blog/react-router-v8)); React Router Docs, "SPA Mode" | React Router 8 |
+| Nx Docs. "React Router guide" ([docs](https://nx.dev/docs/technologies/react/guides/react-router)) | Suporte do Nx |
+| Devographics. State of JS 2025 e State of React 2024–2025 ([JS](https://2025.stateofjs.com/en-US/libraries/); [React](https://2025.stateofreact.com/en-US/libraries/state-management/)) | Adoção e satisfação de frameworks e bibliotecas de estado |
+| pmndrs. R3F "Scaling performance", "Performance pitfalls", "Testing" ([docs](https://r3f.docs.pmnd.rs/advanced/scaling-performance)) | Limite de chamadas de desenho, atualizações fora do React, testes |
+| three.js Docs. BatchedMesh, Raycaster, TransformControls ([docs](https://threejs.org/docs/pages/TransformControls.html)) | Instâncias, seleção, encaixe e rotação |
+| gpuweb. "Implementation Status" ([wiki](https://github.com/gpuweb/gpuweb/wiki/Implementation-Status)); caniuse, WebGPU | Suporte a WebGPU por navegador; necessidade de WebGL2 |
+| Microsoft. "Announcing Babylon.js 9.0" ([blog](https://blogs.windows.com/windowsdeveloper/2026/03/26/announcing-babylon-js-9-0)) | Alternativa 3D |
+| MDN. "Storage quotas and eviction criteria" ([MDN](https://developer.mozilla.org/en-US/docs/Web/API/Storage_API/Storage_quotas_and_eviction_criteria)); WebKit, "Full Third-Party Cookie Blocking and More" (2020) e "Updates to Storage Policy" (2023) | Safari apaga dados do site após 7 dias sem interação |
+| Surma. "Is postMessage slow?" ([artigo](https://surma.dev/things/is-postmessage-slow/), 2019) | Custo de cópia entre Worker e página |
+| Immer Docs. Patches; TanStack Query Docs. Comparison | Desfazer e dados do servidor |
+| shadcn/ui. "Base UI as the Default" e "React Aria" ([changelog](https://ui.shadcn.com/docs/changelog/2026-07-base-ui-default)) | Base de componentes |
+| Base UI, React Aria e Radix. Documentação de Tooltip | Comportamento da dica no toque e no foco |
+| next-intl Docs. "Core library (use-intl)" ([docs](https://next-intl.dev/docs/environments/core-library)); MDN, `Intl.NumberFormat` e `Intl.PluralRules` | i18n com mensagens ICU; plural do pt-BR |
+| React. "Static React DOM APIs" ([docs](https://react.dev/reference/react-dom/static)) | Geração de HTML no build (`prerender`), sem servidor em execução |
+| React Router Docs. "Pre-Rendering" ([docs](https://reactrouter.com/how-to/pre-rendering)) | `ssr: false` com `prerender` de páginas escolhidas e HTML de *fallback* |
+| npm registry: react 19.3.1 (14/10/2026), @react-three/fiber 9.8.2 (aceita React ≥19 e <19.4), react-router 8.5.0 | Versões e compatibilidade, consultadas em 20/10/2026 |
+| ECharts Handbook, "Aria" ([docs](https://echarts.apache.org/handbook/en/best-practices/aria/)); Recharts Docs, "Performance guide" | Gráficos acessíveis e com muitos pontos |
+
+## Agentes, skills e hooks do Claude Code
+
+Fonte: pesquisa [Agentes e skills da comunidade](../research/agentes-e-skills-da-comunidade.md) (20/10/2026), com estrelas e datas conferidas na API do GitHub e a lista completa de links.
+
+| Fonte | O que embasa |
+| --- | --- |
+| Anthropic. Claude Code Docs: [memory](https://docs.claude.com/en/docs/claude-code/memory), [sub-agents](https://code.claude.com/docs/en/sub-agents), [skills](https://code.claude.com/docs/en/skills), [hooks guide](https://code.claude.com/docs/en/hooks-guide), [permissions](https://code.claude.com/docs/en/permissions), [plugin security](https://code.claude.com/docs/en/plugins/security) | Estrutura do `CLAUDE.md`, subagentes, skills, hooks e permissões; hook que bloqueia `git commit` |
+| Anthropic. "Skill authoring best practices" ([docs](https://platform.claude.com/docs/en/agents-and-tools/agent-skills/best-practices)) | Como escrever skills: descrição, tamanho, referências, avaliação |
+| Anthropic. Plugins oficiais [`code-review`](https://github.com/anthropics/claude-plugins-official/blob/main/plugins/code-review/commands/code-review.md) e [`feature-dev`](https://github.com/anthropics/claude-plugins-official/tree/main/plugins/feature-dev) | Revisão com corte por confiança; agentes só de leitura |
+| obra. [superpowers](https://github.com/obra/superpowers/tree/main/skills) | Revisor com contexto novo, "Declined to judge", TDD estrito, testes de pressão de skills |
+| Sentry. [`security-review`](https://github.com/getsentry/skills/blob/main/skills/security-review/SKILL.md) | Revisão de segurança só com alta confiança |
+| Trail of Bits. [skills](https://github.com/trailofbits/skills) | Revisão diferencial, verificação de falsos positivos, cadeia de suprimentos |
+| Matt Pocock. [`tdd`](https://github.com/mattpocock/skills/blob/main/skills/engineering/tdd/SKILL.md) e [`improve-codebase-architecture`](https://github.com/mattpocock/skills/blob/main/skills/engineering/improve-codebase-architecture/SKILL.md) | Valor esperado vindo da especificação; não rediscutir decisões aceitas |
+| wshobson. [`architecture-decision-records`](https://github.com/wshobson/agents/blob/main/plugins/documentation-generation/skills/architecture-decision-records/SKILL.md) | Skill de ADR com modelos carregados sob demanda |
+| Test Double. "Keep your coding agent on task with mutation testing" ([artigo](https://testdouble.com/insights/keep-your-coding-agent-on-task-with-mutation-testing)) | Ciclo de mutação com agente |
+| Playwright. "Test Agents" ([docs](https://playwright.dev/docs/test-agents)) | Agentes de planejamento, geração e correção de testes ponta a ponta |
+| Anthropic. [`claude-code-action`](https://github.com/anthropics/claude-code-action) e [`claude-code-security-review`](https://github.com/anthropics/claude-code-security-review) | Revisão em pull request; a segunda está parada desde 02/2026 |
+| Snyk ToxicSkills, NVIDIA SkillSpector e `snyk/agent-scan` (links no relatório) | Incidentes com skills de terceiros e ferramentas para verificá-las |
+
 ## Mercado
 
 As fontes do levantamento de concorrência estão no [relatório inicial](../archive/2026-10-19-relatorio-inicial.md#fontes).

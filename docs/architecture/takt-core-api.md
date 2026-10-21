@@ -75,7 +75,7 @@ Verificado pelo eslint-plugin-boundaries ([ADR-0002](../adr/0002-arquitetura-hex
 
 Exemplo: `POST /orgs/:orgId/plants/:plantId/publish`.
 
-1. **Proxy:** o `takt-web-app` repassa `/api/...` para a API ([ADR-0005](../adr/0005-sessao-no-banco-com-cookie.md)).
+1. **Proxy:** o proxy reverso repassa `/api/...` para a API ([ADR-0005](../adr/0005-sessao-no-banco-com-cookie.md), [ADR-0012](../adr/0012-front-end.md)).
 2. **Contexto:** o interceptor de observabilidade cria o contexto da requisição (`requestId`, início, rota, módulo).
 3. **Validação:** o pipe Zod valida parâmetros, *query* e corpo em modo estrito. Falha → `VALIDATION_ERROR`.
 4. **Guard de autorização** ([ADR-0006](../adr/0006-autorizacao-por-organizacao.md)):

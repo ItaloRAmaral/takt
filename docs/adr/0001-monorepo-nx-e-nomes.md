@@ -2,7 +2,7 @@
 
 | Campo | Valor |
 | --- | --- |
-| Status | Proposto |
+| Status | Aceito |
 | Data | 20/10/2026 |
 | Relator | Italo |
 | Aprovadores | Italo |
@@ -21,7 +21,7 @@ O fundador já usou Nx no projeto `cliniccontrol`. **Estimativa:** Nx e Turborep
 
 ```
 apps/
-  takt-web-app/       Next.js: interface, cena 3D, editor; proxy /api em produção
+  takt-web-app/       Vite + React + React Router (estático): interface, cena 3D, editor (ADR-0012)
   takt-core-api/      NestJS: núcleo de negócio (identidade, organizações, papéis,
                       planos, grupos, registro de plantas, auditoria)
 libs/
@@ -76,4 +76,3 @@ libs/
 
 ## Em aberto
 
-- Arquitetura do `takt-web-app` (tema próprio).

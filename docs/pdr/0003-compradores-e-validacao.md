@@ -2,7 +2,7 @@
 
 | Campo | Valor |
 | --- | --- |
-| Status | Proposto |
+| Status | Aceito |
 | Data | 19/10/2026 |
 | Relator | Italo |
 | Aprovadores | Italo |

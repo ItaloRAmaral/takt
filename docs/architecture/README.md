@@ -16,13 +16,13 @@ Atualizado em 20/10/2026.
 ```
  Navegador
  ┌──────────────────────────────────────────────────────────────┐
- │ takt-web-app (Next.js)                                       │
+ │ takt-web-app (Vite + React, estático)                        │
  │   editor e cena 3D ── @takt/sim-engine (Web Worker)          │
  │   IndexedDB (rascunhos locais)    @takt/plant-schema         │
  └───────────────┬──────────────────────────────────────────────┘
                  │ HTTPS, cookie de sessão (mesmo site)
  ┌───────────────▼──────────────────────────────────────────────┐
- │ proxy /api (takt-web-app em produção)                        │
+ │ proxy reverso: arquivos estáticos + /api → API               │
  └───────────────┬──────────────────────────────────────────────┘
  ┌───────────────▼──────────────────────────────────────────────┐
  │ takt-core-api (NestJS): identidade, organizações, papéis,    │
@@ -42,6 +42,6 @@ Atualizado em 20/10/2026.
 | Documento | Conteúdo | Status |
 | --- | --- | --- |
 | [takt-core-api.md](takt-core-api.md) | API: estrutura, fluxo de uma requisição, erros, validação, banco, observabilidade, segurança | Criado |
-| `takt-web-app.md` | Front-end, cena 3D, estado, armazenamento local | Após o ADR do front-end |
+| `takt-web-app.md` | Front-end, cena 3D, estado, armazenamento local | Na implementação ([ADR-0012](../adr/0012-front-end.md)) |
 | `sim-engine.md` | Motor de simulação | Após o ADR do motor |
 | `plant-schema.md` | Esquema, validação e migrações da planta | Após o ADR do motor |

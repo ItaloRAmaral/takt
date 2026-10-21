@@ -1,8 +1,8 @@
-# ADR-0005: Sessão no banco com cookie e proxy pelo front
+# ADR-0005: Sessão no banco com cookie e proxy reverso no mesmo site
 
 | Campo | Valor |
 | --- | --- |
-| Status | Proposto |
+| Status | Aceito |
 | Data | 20/10/2026 |
 | Relator | Italo |
 | Aprovadores | Italo |
@@ -26,8 +26,8 @@ Forças:
 3. **Expiração deslizante:** a sessão expira após **7 dias sem uso** e é renovada quando usada, **no máximo uma vez por dia** (para não escrever no banco a cada requisição). Nas **contas demo**, a sessão dura **1 dia**.
 4. **Revogação:** sair apaga a sessão; trocar a senha apaga as outras sessões do usuário; "sair de todos os dispositivos" apaga todas.
 5. **Proteção contra CSRF:** `SameSite=Lax` mais checagem de origem nas requisições que alteram dados.
-6. **Mesmo site em produção por proxy:** o `takt-web-app` responde em `/api/...` e repassa para a `takt-core-api`. Para o navegador, tudo é um único site, e o cookie não é tratado como de terceiros.
-7. **Desenvolvimento:** `localhost` com portas diferentes. **Fato:** cookies não separam por porta, então funciona sem proxy.
+6. **Mesmo site em produção por proxy reverso:** um proxy único serve os arquivos estáticos do `takt-web-app` e repassa `/api/...` para a `takt-core-api` ([ADR-0012](0012-front-end.md)). Para o navegador, tudo é um único site, e o cookie não é tratado como de terceiros.
+7. **Desenvolvimento:** o proxy do Vite repassa `/api` para a API local, espelhando a produção, sem CORS.
 8. **Limpeza periódica** das sessões expiradas.
 
 ## Alternativas consideradas
@@ -56,7 +56,7 @@ Forças:
 | **CSRF** (um site malicioso dispara ações usando o cookie) | Ações em nome do usuário | `SameSite=Lax` e checagem de origem nas requisições que alteram dados; nenhuma alteração por `GET` |
 | **Fixação de sessão** | O atacante reaproveita uma sessão criada por ele | Um token novo a cada login |
 | **Vazamento da tabela de sessões** | Sessões sequestradas | Guardar só o hash do token, se a biblioteca permitir; caso contrário, registrar o risco e restringir o acesso à tabela |
-| **XSS** (script malicioso na página) | Mesmo sem ler o cookie, o script age em nome do usuário | Política de segurança de conteúdo (CSP) no front; nada de HTML do usuário renderizado sem escape |
+| **XSS** (script malicioso na página) | Mesmo sem ler o cookie, o script age em nome do usuário | Política de segurança de conteúdo (CSP) aplicada pelo proxy reverso; nada de HTML do usuário renderizado sem escape |
 | **Cookie trafegando sem TLS** | Roubo do cookie na rede | `Secure` e HSTS em produção |
 | **Cabeçalhos do proxy falsificados** (`X-Forwarded-For`) | IP errado no log e limite de tentativas contornado | Confiar só nos cabeçalhos vindos do proxy conhecido |
 

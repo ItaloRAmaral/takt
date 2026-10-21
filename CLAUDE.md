@@ -1,0 +1,64 @@
+# Takt
+
+## What this is
+
+Takt is a web platform with an editable 3D virtual factory, driven by a discrete-event simulation engine, for teaching, training and (later) analyzing production engineering. It is a portfolio project first and a sellable product later.
+
+**Start every task by reading `docs/PRODUCT.md`.** It is the entry point and links to everything else.
+
+## Never infer, never assume
+
+- Do not state anything you have not verified. If it is not in the code or the docs, either **ask the user** or **ask permission to research it** (official docs, literature, industry sources).
+- When in doubt about intent, scope or a decision, **ask** instead of choosing silently.
+- Every reference used in a decision is listed in `docs/product/references.md`. Research reports go to `docs/research/`.
+- If no published, reliable source exists, say so explicitly and label the claim as an estimate.
+
+## Where things live
+
+| Path | What |
+| --- | --- |
+| `docs/PRODUCT.md` | Product overview and documentation map |
+| `docs/pdr/` | Product decision records (PDR) |
+| `docs/adr/` | Architecture decision records (ADR) |
+| `docs/product/rules/` | Business rules with stable IDs (`RN-...`) and error codes |
+| `docs/product/` | Vision, scope, access, plant model, simulation, UX, milestones, risks, glossary, references |
+| `docs/architecture/` | Living docs: how each app and lib works today |
+| `docs/research/` | Literature and technical research reports |
+
+Read only what the task needs; every doc starts with a short summary.
+
+## Language
+
+- Docs, PDRs and ADRs: Portuguese (pt-BR).
+- Code, identifiers, commit messages, this file, skills and agents: English. `docs/product/glossary.md` maps pt-BR terms to code names.
+
+## How we work
+
+- **Never run `git commit` or `git push`.** When work is ready, give the user the Conventional Commits message and the exact list of files to stage.
+- All code reaches `main` through a pull request.
+- A new product or technical decision becomes a PDR or ADR with status "Proposto". Accepted records are never edited; a change is a new record that supersedes the old one.
+- Business rules and architecture docs are living docs: update them in the same pull request that changes the behavior.
+- Each milestone starts by writing its use cases (`docs/product/use-cases/`) and adjusting the rules it touches.
+
+## Hard rules for code
+
+- `@takt/sim-engine` never imports React, Three.js or DOM APIs, and never uses `Math.random` (ADR-0001, ADR-0011).
+- In `takt-core-api`, `domain/` imports nothing external (no `@nestjs/*`, `@prisma/*`, `zod`) (ADR-0002).
+- Authorization is always decided on the server, per organization; a role is never global (ADR-0006).
+- Every business table has `organization_id` and row-level security (ADR-0003).
+- Input is validated once, at the edge, with Zod in strict mode; responses use explicit output DTOs (ADR-0008).
+- The API returns error codes, never sentences (`docs/product/rules/README.md`).
+- Units go in field names (`cycleSec`, `mtbfMin`).
+- No secrets in the repository; logs never contain personal data, passwords, tokens or cookies (ADR-0007).
+- Prefer small, tested in-house code over unmaintained dependencies; dependencies are updated manually (ADR-0010, ADR-0012).
+
+## Tests
+
+- Arrange, Act, Assert, separated by blank lines, without comments; one Act per test; no logic in tests.
+- Test names start with the rule or use case ID: `RN-PLT-002: ...`.
+- TDD for the engine and for `RN-...` rules.
+- Coverage of at least 90% (lines and branches) in every project; mutation score of at least 80% in the engine and the API domain (ADR-0009).
+
+## Commands
+
+To be filled in when the Nx workspace is created.
