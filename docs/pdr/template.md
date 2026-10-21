@@ -6,6 +6,7 @@
 | Data | DD/MM/AAAA |
 | Relator | Quem redigiu |
 | Aprovadores | Quem aprovou |
+| Substitui | PDR-NNNN, se esta decisão substitui outra (senão, remova a linha) |
 
 ## Contexto
 

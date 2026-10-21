@@ -8,7 +8,7 @@ Atualizado em 20/10/2026. Todos os registros abaixo foram aceitos por Italo em 2
 
 - **Um ADR por decisão**, numerado em sequência (`NNNN-titulo.md`), a partir do [modelo](template.md).
 - **Completos e enxutos:** decisão, alternativas, riscos e conformidade, com detalhe suficiente para implementar sem adivinhar. Estrutura de pastas, fluxos e exemplos de código vão para [`../architecture/`](../architecture/README.md). Os ADRs 0001 a 0007 foram escritos antes desta regra e mantêm parte desse detalhe.
-- **Status:** **proposto** (rascunho, editável) → **aceito** (só depois da aprovação final de Italo; a partir daí não é editado) → **substituído** (uma mudança num ADR aceito vira um ADR novo). ADRs experimentais têm data de revisão.
+- **Status:** **proposto** (rascunho, editável) → **aceito** (só depois da aprovação final de Italo; a partir daí não é editado) → **substituído** (uma mudança num ADR aceito vira um ADR novo, que cita o antigo no campo "Substitui"; o antigo recebe só a nota "Substituído por ADR-NNNN"). ADRs experimentais têm data de revisão.
 - **Seção "Riscos de segurança"** obrigatória: ameaças que a decisão cria ou trata, com a mitigação; se não houver impacto, isso é dito explicitamente.
 - **Seção "Conformidade"** obrigatória: lint, teste ou revisão que garante a decisão.
 - **Seção "Em aberto"**: o que ainda não foi decidido, para não virar decisão silenciosa.

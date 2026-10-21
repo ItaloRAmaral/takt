@@ -6,6 +6,7 @@
 | Data | DD/MM/AAAA |
 | Relator | Quem redigiu |
 | Aprovadores | Quem aprovou |
+| Substitui | ADR-NNNN, se esta decisão substitui outra (senão, remova a linha) |
 | Escopo | App ou lib afetada (por exemplo, `takt-core-api`) |
 
 ## Contexto

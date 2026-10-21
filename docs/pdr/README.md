@@ -7,7 +7,7 @@ Atualizado em 20/10/2026. Todos os registros abaixo foram aceitos por Italo em 2
 ## Como funciona
 
 - **Um PDR por decisão**, numerado em sequência (`NNNN-titulo.md`), a partir do [modelo](template.md).
-- **Status:** **proposto** (rascunho, editável) → **aceito** (só depois da aprovação final de Italo; a partir daí não é editado) → **substituído** (uma mudança num PDR aceito vira um PDR novo, e o antigo recebe só a nota "Substituído por PDR-NNNN").
+- **Status:** **proposto** (rascunho, editável) → **aceito** (só depois da aprovação final de Italo; a partir daí não é editado) → **substituído** (uma mudança num PDR aceito vira um PDR novo, que cita o antigo no campo "Substitui"; o antigo recebe só a nota "Substituído por PDR-NNNN").
 - **Regras derivadas:** o PDR lista os IDs e a intenção. O texto exato e testável fica em [`../product/rules/`](../product/rules/), e cada regra aponta de volta para o PDR de origem.
 - **Reflete em:** o PDR aponta para os documentos de produto onde a decisão aparece.
 
