@@ -24,6 +24,9 @@ Takt is a web platform with an editable 3D virtual factory, driven by a discrete
 | `docs/product/` | Vision, scope, access, plant model, simulation, UX, milestones, risks, glossary, references |
 | `docs/architecture/` | Living docs: how each app and lib works today |
 | `docs/research/` | Literature and technical research reports |
+| `.claude/skills/`, `.claude/agents/` | Project skills and subagents; create or change them with the `writing-skills-and-agents` skill |
+| `.claude/agent-notes/` | Sources and specs of each subagent |
+| `.claude/settings.json`, `.claude/hooks/` | Project permissions and hooks (blocks git commands that create commits or publish) |
 
 Read only what the task needs; every doc starts with a short summary.
 
