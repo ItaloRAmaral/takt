@@ -18,10 +18,11 @@
 | Shape: reference-backed. Scenario finding, test writing and verification are each needed at different moments; inline rejected because one file would load all of it every time. | `writing-skills-and-agents` writing rules | estimate |
 | One skill for test-first (Mode A) and coverage of existing code (Mode B): the same writing and verifying rules apply to both. | #1, #2, #6 | estimate |
 | Mode B proves tests with mutation, because tests written after the code never had a red step; without mutation, list the breaking change per test and never edit production code to prove it. | #1 ("test passes immediately"), #3 | estimate |
-| Code-analysis checklist (branches, errors, guards, boundaries, state, side effects, user input, ordering, arithmetic, concurrency). | #1 mutation check list, #2, ADR-0006/0011 threats | guess |
+| Code-analysis checklist (branches, errors, guards, boundaries, state, side effects, user input, ordering, arithmetic, concurrency; plus multi-key comparisons per level, internal paths forced through the public interface, realistic call sequences, and the public-contract test). | #1 mutation check list, #2, ADR-0006/0011 threats; scenario comparison of the 2026-11-03 behavior test | guess |
 | A business scenario without a rule gets a proposed rule with its PDR origin; no PDR means the user decides on a new one. | #5, #6 | fact |
 | Thresholds live in configuration and CI; the skill reports the tools' output. | #3, ADR-0009 | fact |
 | Test names in English. | `CLAUDE.md` "Language"; #5 example | fact |
+| `it.each` literal tables allowed under four conditions (same behavior and assertion shape, literals only, no `if`, ID plus varying value in the name; success and error in separate tables). | [Vitest `test.each`](https://vitest.dev/api/#test-each) ("run the same test with different variables", read 2026-11-03); user decision 2026-11-03 | fact |
 | Examples adapted, not copied: the sources' examples use comments or logic inside tests, which ADR-0009 forbids. | #1, #4 | fact |
 
 ## Adapted text
@@ -34,7 +35,6 @@
 ## Open gaps
 
 - Commands: `CLAUDE.md` "Commands" is empty until the Nx workspace exists; the skill asks for them until then.
-- Whether a literal table with `it.each` counts as "logic in the test" (ADR-0009) is not decided; ask the user.
 - Behavior tests not run yet (criteria 2, 3 and 4 apply). With no code in the repository, they can only use fixtures.
 - Playwright conventions (end-to-end) will need their own reference once the front-end starts.
 
@@ -43,3 +43,5 @@
 | Date | Change |
 | --- | --- |
 | 2026-11-03 | Created. |
+| 2026-11-03 | Behavior test, 4 subagents, fixtures. `mode-b-code-without-rules`: with the skill, 18 scenarios plus a property test, each with source, level and break, expected survivors listed, stopped for approval and for a contradiction with ADR-0011 (extra `elementId` tie-break), drafted RN-SIM-013 noting no PDR covers it; baseline listed 41 scenarios (more boundary and heap-structure cases), also found the ADR-0011 contradiction, wrote no tests (it read `CLAUDE.md` and `.claude/rules/`). `mode-a-test-quality`: with the skill, wrote the first test and factory, stopped at "verify red" because no test command exists, asked instead of guessing; baseline completed red-green by borrowing Vitest 1.0.4 and tsc 5.3.3 from another project on the machine, added three unplanned files and decided `GroupId`, the error type and duplicates alone (listed as assumptions), used commit scope `core-api` instead of `takt-core-api`. Open: exception tests put the Act inside `expect(() => ...).toThrow()`, which blurs AAA; feeds decision D3. Unknown until Stryker runs: whether the skill's narrower scenario list (only scenarios with a plausible break) loses mutation score against the baseline's broader one. |
+| 2026-11-03 | Scenario-by-scenario comparison of `mode-b-code-without-rules` (user request): of the baseline's 22 extra scenarios, 9 were redundant or low value (cut correctly), 8 depended on open questions, 5 were valuable and missed (kind beats element id, heap right-child and left-only paths, interleaved push/pop, refill after a full queue pops, element id compared by code unit). The skill also treated `sequence` as internal although it is a field of the exported, returned `SimEvent`. Added to `references/scenarios.md`: multi-key comparisons per level, internal paths forced through the public interface, realistic call sequences, "left out" list, and the public-contract test. Rerun with Stryker on real engine code to compare mutation scores. |

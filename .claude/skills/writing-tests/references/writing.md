@@ -16,6 +16,7 @@
 - **One Act per test.** Two actions are two tests.
 - **No logic in the test:** no `if`, loops or computed expectations deciding what to assert. Logic in a test is code without a test.
 - **One behavior per test.** An "and" in the name means two tests.
+- **Case tables (`it.each`)** are allowed for boundaries and variants, under four conditions: every row has the same behavior and assertion shape; the table holds only literals; the body has no `if`; the name starts with the ID and shows the varying value (Vitest fills `%i`, `%s` from the row). Success and error cases with different shapes go in separate tables. A table that needs an `if` in its body is two tests pretending to be one.
 - Test through the public boundary (the seam), never private functions or internal state.
 
 ## Names

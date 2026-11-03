@@ -30,8 +30,13 @@ Test at the public boundary of the unit (its seam: the entity's methods, the use
 | ordering and time (engine) | ties at the same instant, determinism with a fixed seed, same output on a second run |
 | arithmetic | units, rounding, precision limits, division by zero |
 | concurrency (API) | two requests at once against a limit or a unique constraint |
+| a comparison or ordering with several keys (sort, priority, tie-break) | one scenario per level, where that key decides and the next one would say the opposite; swapping the order of two keys must fail a test |
+| internal paths reached only by certain input shapes (data-structure branches, rebalancing, retries) | drive each path through the public interface with an input built to force it; do not rely on a big random input happening to cover it |
+| how callers really use it | the realistic sequence of operations: interleaved calls, reuse after emptying, after filling, after an error |
 
-For each scenario, name the break it catches: the production change that would make the test fail. A scenario that catches no plausible break is not worth a test.
+For each scenario, name the break it catches: the production change that would make the test fail. A scenario that catches no plausible break is not worth a test, but list it under "left out" with the reason, so the user sees what was cut.
+
+**Public contract vs internal detail.** Everything the module exports, and every field of every value it returns, is public contract and may be tested; asserting it is not a change detector. Only what never leaves the module (private fields, private functions) is internal. Check the exports and return types in the code before deciding; do not ask the user what the code already answers.
 
 ## When a scenario has no rule
 

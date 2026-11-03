@@ -10,6 +10,7 @@ paths:
 Source of truth: `docs/architecture/code-style.md`, section 10, and ADR-0009.
 
 - Arrange, Act, Assert separated by blank lines, with no comments; one Act per test; no `if` or loops deciding what to assert.
+- `it.each` tables are allowed only when every row has the same behavior and assertion shape, the table holds only literals, the body has no `if`, and the name starts with the ID and shows the varying value. Success and error cases with different shapes go in separate tables.
 - The test name starts with the rule or use case ID: `RN-PLT-002: ...`.
 - TDD for the engine and `RN-...` rules: write the test, watch it fail, then write the code.
 - Factories such as `makePlant(overrides)` with fixed data; no random data without a seed.

@@ -186,6 +186,7 @@ Esta seção começa só com o que o [ADR-0012](../adr/0012-front-end.md) e o AD
 O [ADR-0009](../adr/0009-estrategia-de-testes.md) decide a estratégia; aqui ficam as convenções de escrita.
 
 - **AAA** separado por linha em branco, **sem comentários**; um único Act; sem `if` nem laço para decidir o que verificar.
+- **Tabela de casos (`it.each`) é permitida** com quatro condições: todas as linhas têm o mesmo comportamento e a mesma forma de verificação; a tabela só tem valores literais; o corpo não tem `if`; o nome começa com o ID e mostra o valor que varia. Sucesso e erro com formatos diferentes ficam em tabelas separadas. Decisão do fundador em 03/11/2026.
 - **Nome do teste começa com o ID** da regra ou do caso de uso: `RN-PLT-002: ...`.
 - **TDD** no motor e nas regras `RN-...`: o teste é escrito e falha antes do código.
 - **Dados:** fábricas `makePlant(overrides)` com dados fixos; nada de dado aleatório sem semente.

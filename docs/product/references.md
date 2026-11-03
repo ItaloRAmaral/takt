@@ -199,6 +199,7 @@ Fonte: pesquisa [Guia de estilo de código](../research/guia-de-estilo-de-codigo
 | Seemann. ["Interfaces are not abstractions"](https://blog.ploeh.dk/2010/12/02/Interfacesarenotabstractions/) e ["Functional architecture is Ports and Adapters"](https://blog.ploeh.dk/2016/03/18/functional-architecture-is-ports-and-adapters/); Bernhardt, ["Functional Core, Imperative Shell"](https://www.destroyallsoftware.com/screencasts/catalog/functional-core-imperative-shell) | Critério contra porta 1:1; motor como núcleo funcional |
 | MDN. [Math](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math) e [Map](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Map); V8, ["Fast properties"](https://v8.dev/blog/fast-properties) | Ordem de iteração, forma estável no laço quente; decisão pendente D4 |
 | Anthropic. Claude Code Docs, [path-specific rules](https://code.claude.com/docs/en/memory#path-specific-rules) | Arquivos de `.claude/rules/` com `paths` |
+| Vitest. API, [`test.each`](https://vitest.dev/api/#test-each) (lido em 03/11/2026) | Tabela de casos permitida nos testes, com quatro condições |
 | `cliniccontrol` (projeto anterior do fundador, referência, não padrão) | Problemas a não repetir e itens de segurança da checklist de revisão |
 
 ## Mercado

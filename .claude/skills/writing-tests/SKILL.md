@@ -22,7 +22,7 @@ A test earns its place by catching a real break: a wrong branch, a missing check
 - **A business behavior without an `RN-...` rule** gets a proposed rule first (`references/scenarios.md`); the user approves it before the test is written. **Anything else without an ID to name the test by:** ask the user.
 - **A failing test on existing code may be a bug.** Never change the expected value to make it pass; stop and report it to the user.
 - Ask at most 3 questions per message; talk to the user in their language; never run git commands that create commits or publish.
-- Commands come from `CLAUDE.md` "Commands". If the command you need is not there, ask; never guess one.
+- Commands come from `CLAUDE.md` "Commands". If the command you need is not there, ask; never guess one, and never run tests with tools borrowed from outside this repository (another project's installed Vitest, a global binary): their versions are not Takt's, so a green run there proves nothing here.
 
 ## Mode A: test-first, under an approved plan
 
