@@ -24,9 +24,10 @@ Takt is a web platform with an editable 3D virtual factory, driven by a discrete
 | `docs/product/` | Vision, scope, access, plant model, simulation, UX, milestones, risks, glossary, references |
 | `docs/architecture/` | Living docs: how each app and lib works today; `code-style.md` is the code style guide |
 | `docs/research/` | Literature and technical research reports |
+| `docs/plans/` | Implementation plans (pt-BR), written with the `planning-code-changes` skill, and the reviewer measurement table |
 | `.claude/skills/`, `.claude/agents/` | Project skills and subagents; create or change them with the `writing-skills-and-agents` skill |
 | `.claude/agent-notes/` | Sources and specs of each subagent |
-| `.claude/rules/` | Short, path-scoped digests of the style guide per area (API, engine, schema, web, tests); change them with `docs/architecture/code-style.md` in the same pull request |
+| `.claude/rules/` | Short, path-scoped digests of the style guide per area (API, engine, schema, web, tests, comments); change them with `docs/architecture/code-style.md` in the same pull request |
 | `.claude/settings.json`, `.claude/hooks/` | Project permissions and hooks (blocks git commands that create commits or publish) |
 
 Read only what the task needs; every doc starts with a short summary.
@@ -39,6 +40,7 @@ Read only what the task needs; every doc starts with a short summary.
 ## How we work
 
 - **Never run `git commit` or `git push`**, nor other git commands that create commits, move refs or publish (`merge`, `rebase`, `cherry-pick`, `revert`, `am`, `tag`). When work is ready, give the user the Conventional Commits message and the exact list of files to stage.
+- Every code or configuration change starts from a plan the user approved (`planning-code-changes` skill): a short plan in the conversation for small, local changes, a full plan in `docs/plans/` otherwise. Even a fully specified change can leave gaps. Only prose docs, comments and formatting skip planning.
 - All code reaches `main` through a pull request.
 - A new product or technical decision becomes a PDR or ADR with status "Proposto". Accepted records are never edited; a change is a new record that supersedes the old one. The new record names the old one in its "Substitui" field, and the old one gets only the note "Substituído por PDR/ADR-NNNN" in its status.
 - Business rules and architecture docs are living docs: update them in the same pull request that changes the behavior.

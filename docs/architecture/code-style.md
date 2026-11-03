@@ -29,7 +29,7 @@ A ordem de prioridade são as quatro regras do design simples de Kent Beck: **pa
 | Módulos profundos | Prefira interfaces simples que escondem bastante trabalho (Ousterhout). Método que só repassa a chamada é sinal de alerta, exceto onde o ADR-0002 impõe a camada. | Revisão |
 | Padrões de projeto | Só para uma variação que existe hoje, ou que é barata agora e cara depois. Nunca "por precaução". | Revisão |
 | Herança | Evite. Superclasse só com dois usos reais e nome de domínio (nada de `Base` ou `Abstract`). Portas como classes abstratas não contam: são contratos, não herança de comportamento. | Revisão |
-| Comentários em produção | Explicam o **porquê**, invariantes, unidades, fórmulas e a fonte na literatura, e os contratos públicos (JSDoc nos exports das libs). Comentário que repete o código é proibido. | Revisão |
+| Comentários em produção | **O código deve se explicar sozinho.** Se um trecho precisa de comentário para ser entendido, primeiro deixe-o claro: um nome melhor, uma função extraída com nome de intenção, um tipo mais preciso. Comente só o que o código não consegue dizer: complexidade inerente (fórmula, algoritmo da literatura, com a fonte), invariantes e unidades que o tipo não expressa, e o porquê de uma escolha não óbvia (contorno de defeito, decisão de desempenho medida). **JSDoc é obrigatório** nos exports públicos das libs. Comentário que repete o código é proibido. Decisão do fundador em 21/10/2026. | Revisão |
 | Comentários em testes | Proibidos, por decisão do ADR-0009 (AAA separado por linha em branco). | Revisão |
 
 ## 3. Quando quebrar um princípio de estilo
@@ -208,7 +208,7 @@ O que nenhuma ferramenta pega:
 - [ ] Nenhum segredo em arquivo versionado, inclusive arquivos de configuração de ferramentas.
 - [ ] `@Inject(Token)` explícito nos construtores de adaptadores e controllers.
 - [ ] Erro esperado tratado pelo chamador; `switch` sobre o código é exaustivo.
-- [ ] Comentários de produção explicam o porquê; testes sem comentários.
+- [ ] Trecho que precisava de explicação foi primeiro deixado claro no código; os comentários que sobraram dizem só o que o código não consegue dizer; exports públicos das libs têm JSDoc; testes sem comentários.
 
 ## Decisões pendentes
 
