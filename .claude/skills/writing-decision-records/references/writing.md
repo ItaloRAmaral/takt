@@ -44,7 +44,7 @@ File name: `NNNN-` plus a short title in lower case, no accents, words joined by
 
 ## ADR only
 
-- **Riscos de segurança** (required): the threats the decision creates or must handle, each with impact and mitigation, in the template's table. Check the threat tables of the related ADRs (for example ADR-0003, ADR-0006, ADR-0011) for threats this decision touches. With no security impact, say so in one line and why.
+- **Riscos de segurança** (required): only the threats this decision creates or changes, each with impact and mitigation, in the template's table. Check the threat tables of the related ADRs (for example ADR-0003, ADR-0006, ADR-0011): a threat already handled there, which this decision does not change, goes in one line after the table that names it and links the record, never as a row. A long table of threats the decision did not create makes it look riskier than it is and gives one threat two sources. With no security impact, say so in one line and why.
 - **Conformidade** (required): how anyone can check that the decision is followed. Prefer a check a machine runs (a lint rule, a test, a CI step) over "code review", and name it precisely enough to implement.
 - **Relacionados:** PDRs, rules and ADRs.
 - **Em aberto:** what this record leaves undecided, so it does not become a silent decision.
@@ -59,7 +59,7 @@ Before the hand-over, check the draft against each item and fix what fails:
 3. The options include every real alternative, and each has a real reason to lose.
 4. No accepted record is contradicted without being named in "Substitui" or "Contexto".
 5. The negative consequences are as concrete as the positive ones.
-6. ADR: "Riscos de segurança" and "Conformidade" are filled in, and the conformance check can be implemented as written.
+6. ADR: "Riscos de segurança" lists only threats this decision creates or changes, "Conformidade" is filled in, and the conformance check can be implemented as written.
 7. PDR: no testable rule text in the PDR; every rule ID is free in its domain file.
 8. The index row is added, and every new external source is in `docs/product/references.md`.
 9. The record fits in one or two pages, and detail that describes how the code works is in `docs/architecture/` instead.

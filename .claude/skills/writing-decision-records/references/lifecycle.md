@@ -26,13 +26,14 @@ PDRs and ADRs are numbered separately.
 1. Create `docs/<pdr|adr>/NNNN-titulo.md` from the template (`writing.md`).
 2. Add the row to the index in the folder's `README.md`, with status "Proposto" and the record's date. Update the README's "Atualizado em" date, and keep its opening sentence true: today it says every record was accepted, which stops being true once a draft is listed.
 3. Add every new external source to `docs/product/references.md`, in the section of its topic, with what it supports. A long study goes to `docs/research/` first, with the user's permission.
+4. Update the record counts in the documentation map of `docs/PRODUCT.md` (for example "12 ADRs"), saying how many are proposed.
 
 ## Accepting
 
 Only when the user accepts that record by its number. Then, in the same change:
 
 1. **The record:** status `Aceito` (or, for an experimental ADR, `Aceito (experimental: revisar <quando>)`, as ADR-0002), "Aprovadores" filled in with who accepted. The date stays.
-2. **The index:** status and, for the ADR README, the "Temas ainda sem ADR" list if the topic was there.
+2. **The indexes:** status in the folder's README, the counts in `docs/PRODUCT.md` and, for the ADR README, the "Temas ainda sem ADR" list if the topic was there.
 3. **PDR rules:** write each derived rule to its domain file in `docs/product/rules/`, in the README's format, with "Origem" pointing to the PDR. Update the range in the rules index (`docs/product/rules/README.md`) and the "Regras de negócio derivadas" table in `docs/pdr/README.md`. Check the IDs are still free.
 4. **Living docs:** every doc that pointed to the decision as pending or that the record lists in "Reflete em" or "Relacionados": for example the pending table and the "pendente (Dn)" notes in `docs/architecture/code-style.md`, the matching line in `.claude/rules/`, and the area's doc in `docs/architecture/`. Change only what the decision changes.
 5. **The record it supersedes,** if any: see below.

@@ -116,8 +116,8 @@ Detalhe: [milestones.md](product/milestones.md).
 | [product/references.md](product/references.md) | Bibliografia e o que cada obra embasa | Criado |
 | [product/rules/](product/rules/README.md) | Regras de negócio com ID (`RN-...`) | Criado (39 regras) |
 | product/use-cases/ | Casos de uso com ID (`UC-...`) | No início de cada marco |
-| [pdr/](pdr/README.md) | Decisões de produto (PDR) e regras reservadas | Criado (19 PDRs) |
-| [adr/](adr/README.md) | Decisões de arquitetura (ADR) | Em andamento (12 ADRs) |
+| [pdr/](pdr/README.md) | Decisões de produto (PDR) e regras reservadas | Criado (21 PDRs) |
+| [adr/](adr/README.md) | Decisões de arquitetura (ADR) | Em andamento (13 ADRs, 1 proposto) |
 | [architecture/](architecture/README.md) | Como o sistema funciona hoje (documentos vivos) e o guia de estilo de código | Em andamento (`code-style`, `takt-core-api`) |
 | [research/](research/README.md) | Pesquisas na literatura (relatórios e notas) | 4 pesquisas |
 | [archive/](archive/) | Relatório inicial, fonte para os documentos acima | Arquivado |

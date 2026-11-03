@@ -35,7 +35,7 @@
 
 ## Open gaps
 
-- Behavior tests not run yet (criteria 2, 3 and 4 apply). First real use: the ADR for D3.
+- Both behavior-test cases ran against a repository whose `CLAUDE.md` and READMEs already state the rules, so the baseline was strong; the case that should separate them (a decision needing research and labels, like D3) is untested.
 - Trigger lists in `SPEC.md` pending the user's review.
 - Rejected drafts and partial superseding are undefined in the Takt docs; the skill asks the user.
 
@@ -44,3 +44,5 @@
 | Date | Change |
 | --- | --- |
 | 2026-11-03 | Created. Numbering commands run on the repository: `ls docs/adr \| grep -E '^[0-9]{4}-' \| sort \| tail -n 1` → `0012-front-end.md`; same for `docs/pdr` → `0021-explicacao-em-camadas.md` (templates and README excluded). |
+| 2026-11-03 | Behavior test, 4 subagents. `skip-trivial` (Vitest patch bump): with and baseline both refused to create a record and said where the version goes; with cited the three criteria and the example table. `supersede-accepted` (ADR-0009 to 85%): both left ADR-0009 untouched and drafted ADR-0013 "Proposto" with "Substitui", all template sections, the reason marked pending instead of invented, and an index row; with asked 3 questions, baseline 7 (over the limit). Baseline also updated the ADR count in `docs/PRODUCT.md`, which the skill missed: added to `references/lifecycle.md` (draft and acceptance). Repository checksums unchanged after the runs. |
+| 2026-11-03 | First real use (ADR-0013, D3). The security table grew to 11 rows, most of them threats already handled by ADR-0003, 0006 and 0007; the user questioned it. `references/writing.md`: list only threats the decision creates or changes, and name the others in one line with links (rule and self-check item 6). |
