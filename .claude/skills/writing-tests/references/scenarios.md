@@ -42,7 +42,7 @@ For each scenario, name the break it catches: the production change that would m
 
 | Scenario | What to do |
 | --- | --- |
-| business behavior (what a user, role, plan or plant may or may not do) with no `RN-...` | propose a rule in the format of `docs/product/rules/README.md`, in pt-BR, with its "Origem" (the PDR it comes from). If no PDR covers the intent, say so: a new intent needs a PDR, and that is the user's decision. Write the test only after the user approves the rule and it is added to the rules file. |
+| business behavior (what a user, role, plan or plant may or may not do) with no `RN-...` | propose a rule in the format of `docs/product/rules/README.md`, in pt-BR, with its "Origem" (the PDR it comes from). If no PDR covers the intent, say so: a new intent needs a PDR (`writing-decision-records` skill), and that is the user's decision. Write the test only after the user approves the rule and it is added to the rules file. |
 | anything else (technical behavior, a contract between modules, an engine invariant) with no ID to name the test by | ask the user how to name it; do not invent an ID |
 | code behavior that contradicts a rule | a bug or a stale rule: stop and ask |
 

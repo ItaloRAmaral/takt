@@ -24,7 +24,7 @@ The plan is where mistakes are cheapest. A gap found here costs a line; found in
 - **Never infer.** On any doubt about a rule, scope, value, name or behavior: read the code and the docs first (`docs/PRODUCT.md`, `docs/product/`, rules, PDRs, ADRs, `docs/architecture/`, `CLAUDE.md`). If the answer is not there, ask the user. A guessed value in a plan becomes a guessed value in code, and nobody notices.
 - Ask at most 3 questions per message; talk to the user in their language.
 - Plans are written in pt-BR (they live in `docs/`); code identifiers stay in English.
-- Follow `docs/architecture/code-style.md`. Its style principles may be broken only with the five items its section 3 requires, written in the plan. `CLAUDE.md`, accepted ADRs and PDRs, and `RN-...` rules are never broken by a plan; if one is in the way, propose a new record instead.
+- Follow `docs/architecture/code-style.md`. Its style principles may be broken only with the five items its section 3 requires, written in the plan. `CLAUDE.md`, accepted ADRs and PDRs, and `RN-...` rules are never broken by a plan; if one is in the way, propose a new record instead (`writing-decision-records` skill).
 - Never run git commands that create commits or publish; each task lists a suggested commit message for the user.
 - This skill only plans. Do not write production code or tests while planning.
 

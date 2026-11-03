@@ -42,7 +42,7 @@ Read only what the task needs; every doc starts with a short summary.
 - **Never run `git commit` or `git push`**, nor other git commands that create commits, move refs or publish (`merge`, `rebase`, `cherry-pick`, `revert`, `am`, `tag`). When work is ready, give the user the Conventional Commits message and the exact list of files to stage.
 - Every code or configuration change starts from a plan the user approved (`planning-code-changes` skill): a short plan in the conversation for small, local changes, a full plan in `docs/plans/` otherwise. Even a fully specified change can leave gaps. Only prose docs, comments and formatting skip planning.
 - All code reaches `main` through a pull request.
-- A new product or technical decision becomes a PDR or ADR with status "Proposto". Accepted records are never edited; a change is a new record that supersedes the old one. The new record names the old one in its "Substitui" field, and the old one gets only the note "Substituído por PDR/ADR-NNNN" in its status.
+- A new product or technical decision that is hard to reverse, surprising without context and a real trade-off becomes a PDR or ADR with status "Proposto" (`writing-decision-records` skill); smaller decisions go in the plan or the commit. Accepted records are never edited; a change is a new record that supersedes the old one. The new record names the old one in its "Substitui" field, and the old one gets only the note "Substituído por PDR/ADR-NNNN" in its status.
 - Business rules and architecture docs are living docs: update them in the same pull request that changes the behavior.
 - Each milestone starts by writing its use cases (`docs/product/use-cases/`) and adjusting the rules it touches.
 
