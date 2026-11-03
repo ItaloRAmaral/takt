@@ -2,7 +2,7 @@
 
 > **Resumo.** API NestJS com arquitetura hexagonal e módulos por contexto. Cada requisição passa por validação (Zod), autorização num guard único (sessão → organização → permissão → plano), caso de uso, banco com RLS e termina numa linha de log canônica. O domínio não conhece framework nem banco.
 
-Atualizado em 20/10/2026 · Decisões: [ADR-0001](../adr/0001-monorepo-nx-e-nomes.md) a [ADR-0008](../adr/0008-validacao-de-dados.md).
+Atualizado em 03/11/2026 · Decisões: [ADR-0001](../adr/0001-monorepo-nx-e-nomes.md) a [ADR-0008](../adr/0008-validacao-de-dados.md) e [ADR-0013](../adr/0013-erros-esperados.md).
 
 ## Responsabilidades
 
@@ -21,7 +21,7 @@ apps/takt-core-api/src/
     plants/            registro, publicação, cópia, importação, exportação
     audit/             registro de ações sensíveis
   shared/
-    kernel/            Result, DomainError, identificadores
+    kernel/            DomainError, identificadores                   ADR-0013
     authz/             guard, decoradores, mapa papel → permissões   ADR-0006
     database/          cliente Prisma, extensão de RLS               ADR-0003
     observability/     contexto por requisição, log canônico, tracing ADR-0007
@@ -110,7 +110,7 @@ Resposta de erro:
 
 O `requestId` aparece na resposta para cruzar com o log.
 
-**Em aberto:** `Result` tipado × exceções de domínio.
+Erros esperados são exceções ([ADR-0013](../adr/0013-erros-esperados.md)): o domínio e a aplicação lançam, e só o filtro global (`APP_FILTER`) captura e traduz `code` em status, por uma tabela tipada sobre todos os códigos. O erro lançado dentro de uma transação sai dela sem ser capturado, e o Prisma desfaz a transação. Erro sem `code` é defeito: 500 genérico e log com a pilha.
 
 ## Validação
 
@@ -197,7 +197,6 @@ Padrões: AAA separado por linhas em branco, um único "Act", sem lógica no tes
 
 ## Em aberto
 
-- `Result` × exceções de domínio.
 - Biblioteca de integração Zod + NestJS + OpenAPI.
 - Tabelas finais (marco 4).
 - Limites de elementos e conexões por planta.

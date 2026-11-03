@@ -2,10 +2,10 @@
 
 | Campo | Valor |
 | --- | --- |
-| Status | Proposto |
+| Status | Aceito |
 | Data | 03/11/2026 |
 | Relator | Italo |
-| Aprovadores | pendente |
+| Aprovadores | Italo |
 | Escopo | `takt-core-api`, `@takt/sim-engine`, `takt-web-app` (casca do Worker), testes do monorepo |
 
 ## Contexto

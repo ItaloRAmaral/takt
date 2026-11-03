@@ -16,4 +16,5 @@ Source of truth: `docs/architecture/code-style.md`, section 7, and ADR-0011. On 
 - No `enum`; `erasableSyntaxOnly` is on.
 - Comment formulas with their source, assumptions and units (for example AS 241, Wichura 1988); JSDoc on public exports.
 - TDD: the failing test comes first. Literature cases use a fixed seed and a tolerance from the confidence interval (ADR-0009).
+- Expected errors (for example `SIMULATION_LIMIT_EXCEEDED` when a safety cap is passed, checked with counters in the main loop) are thrown once as the engine's own error class with a literal `code` (ADR-0013); the Worker shell catches them and posts `{ code, details }` to the page, because an `Error` loses its `code` across `postMessage`.
 - Cross-browser reproducibility of `Math` functions is pending (D4); do not promise identical numbers across JavaScript engines.

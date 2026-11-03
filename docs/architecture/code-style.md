@@ -2,7 +2,7 @@
 
 > **Resumo.** Como escrever código no Takt: princípios de design, critérios para quebrar um princípio quando ele vira excesso de engenharia, convenções de TypeScript e convenções por projeto (API, motor, esquema, web, testes). O guia fica abaixo do `CLAUDE.md`, dos ADRs e PDRs aceitos e das regras `RN-...`. Cada regra diz se é imposta por **ferramenta** ou verificada na **revisão**.
 
-Atualizado em 21/10/2026 · Base: pesquisa [Guia de estilo de código](../research/guia-de-estilo-de-codigo.md) · Decisões: [ADR-0001](../adr/0001-monorepo-nx-e-nomes.md), [ADR-0002](../adr/0002-arquitetura-hexagonal-por-contexto.md), [ADR-0008](../adr/0008-validacao-de-dados.md) a [ADR-0012](../adr/0012-front-end.md).
+Atualizado em 03/11/2026 · Base: pesquisa [Guia de estilo de código](../research/guia-de-estilo-de-codigo.md) · Decisões: [ADR-0001](../adr/0001-monorepo-nx-e-nomes.md), [ADR-0002](../adr/0002-arquitetura-hexagonal-por-contexto.md), [ADR-0008](../adr/0008-validacao-de-dados.md) a [ADR-0013](../adr/0013-erros-esperados.md).
 
 Este guia tem uma versão curta para o Claude Code em [`.claude/rules/`](../../.claude/rules/), um arquivo por área. **O guia é a fonte da verdade.** Quando os dois divergirem, vale o guia, e os dois mudam no mesmo pull request.
 
@@ -90,7 +90,8 @@ Para cada desvio, o plano registra **cinco coisas**:
 ## 5. Erros
 
 - **Dois tipos.** Erro **esperado** faz parte do fluxo de negócio (`PLAN_LIMIT`, `FORBIDDEN`, uma regra `RN-...`, `SIMULATION_LIMIT_EXCEEDED`) e tem um `code` literal da tabela de [regras](../product/rules/README.md). **Defeito** é bug: `throw new Error(...)`, pego pelo filtro global e registrado no log (ADR-0007).
-- **Formato do erro esperado:** `Result` ou exceção de domínio com `code`, **pendente (D3)**. Até a decisão, siga o exemplo em [takt-core-api.md](takt-core-api.md#erros).
+- **Formato do erro esperado:** exceção com `code` literal, em todo o repositório ([ADR-0013](../adr/0013-erros-esperados.md)); sem tipo `Result`. Na API, estende `DomainError`; no motor, a classe-base de erro do próprio motor. A `message` é interna, para o log.
+- **Ninguém captura erro esperado no meio do caminho**, só nas duas fronteiras que o traduzem: o filtro global da API (`code` → status) e a casca do Worker (`code` como dado para a página). Nunca dentro do callback de uma transação: lançar é o que faz o rollback. Efeitos externos (e-mail, notificação) só depois do *commit*.
 - **Identifique pelo `code`**, nunca pela mensagem.
 - **`throw` só de `Error`** e `catch (e: unknown)` (ferramenta: `only-throw-error`, `useUnknownInCatchVariables`).
 - **Ao reembrulhar,** passe o original em `cause`. **Nunca** serialize `cause`, `message` de biblioteca ou erro do Prisma numa resposta: a resposta só leva o código.
@@ -186,6 +187,7 @@ Esta seção começa só com o que o [ADR-0012](../adr/0012-front-end.md) e o AD
 O [ADR-0009](../adr/0009-estrategia-de-testes.md) decide a estratégia; aqui ficam as convenções de escrita.
 
 - **AAA** separado por linha em branco, **sem comentários**; um único Act; sem `if` nem laço para decidir o que verificar.
+- **Erro esperado no teste** ([ADR-0013](../adr/0013-erros-esperados.md)): em código assíncrono, o Act é a chamada e o Assert usa `await expect(promise).rejects.toMatchObject({ code })`; em código síncrono, o helper `catchError(fn)` devolve o erro e o Assert verifica o `code`. Nunca `expect(() => ...).toThrow()`, que junta Act e Assert, e nunca pela mensagem.
 - **Tabela de casos (`it.each`) é permitida** com quatro condições: todas as linhas têm o mesmo comportamento e a mesma forma de verificação; a tabela só tem valores literais; o corpo não tem `if`; o nome começa com o ID e mostra o valor que varia. Sucesso e erro com formatos diferentes ficam em tabelas separadas. Decisão do fundador em 03/11/2026.
 - **Nome do teste começa com o ID** da regra ou do caso de uso: `RN-PLT-002: ...`.
 - **TDD** no motor e nas regras `RN-...`: o teste é escrito e falha antes do código.
@@ -219,6 +221,5 @@ Estes pontos conflitam com registros aceitos ou fecham um "Em aberto" deles, e c
 | --- | --- | --- |
 | D1 | Versão do Prisma e transação do RLS (ADR-0003) | marco 4 |
 | D2 | Portas de leitura que devolvem tipo próprio (ADR-0002) | revisão do fim do marco 4 |
-| D3 | `Result` ou exceções para erros esperados (ADR-0002) | marco 1 |
 | D4 | Precisão de `Math` entre navegadores (ADR-0011, RN-SIM-001) | marco 1 (medir) |
 | D5 | TypeScript 6 ou 7 | marco 1 |

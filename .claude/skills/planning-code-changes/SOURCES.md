@@ -39,7 +39,7 @@
 
 - Behavior tests not run yet (criteria 2, 3 and 4 apply).
 - Commands in `CLAUDE.md` are not written yet; until the Nx workspace exists, plans must ask for them.
-- The error style in the template example depends on decision D3.
+- The error style in the template example follows ADR-0013 (accepted 2026-11-03).
 - Execution of an approved plan is out of scope; a separate skill may come later.
 
 ## Changelog

@@ -72,6 +72,6 @@ Behavior tests (criteria 2, 3 and 4 apply), with fixtures because the repository
 
 ## Maintenance
 
-- Update `references/writing.md` when ADR-0009 or the error style (decision D3) changes.
+- Update `references/writing.md` when ADR-0009 or the error style (ADR-0013) changes.
 - Fill the commands in `CLAUDE.md` when the Nx workspace exists, then rerun the behavior tests on real code.
 - Add a Playwright reference when the front-end starts.

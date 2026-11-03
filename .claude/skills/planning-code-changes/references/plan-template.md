@@ -144,9 +144,9 @@ Posso seguir?
 it('RN-PLT-002: refuses to publish a real plant', () => {
   const plant = makePlant({ kind: 'real' });
 
-  const result = plant.publishTo(makeGroup());
+  const error = catchError(() => plant.publishTo(makeGroup()));
 
-  expect(result).toEqual(failure('REAL_PLANT_NOT_PUBLISHABLE'));
+  expect(error).toMatchObject({ code: 'FORBIDDEN' });
 });
 ```
 
@@ -154,7 +154,7 @@ it('RN-PLT-002: refuses to publish a real plant', () => {
 
 Comando: <do CLAUDE.md "Commands"> · Esperado: FALHA porque `publishTo` não existe
 
-- [ ] **Passo 3: implementar `publishTo(group: Group): <tipo de retorno decidido>` em `caminho/exato/arquivo.ts`**
+- [ ] **Passo 3: implementar `publishTo(group: Group): void` em `caminho/exato/arquivo.ts`, lançando `RealPlantNotPublishableError`**
 
 <Uma linha sobre a abordagem, só quando a assinatura e o teste deixam escolha.>
 
@@ -165,7 +165,7 @@ Comando: <...> · Esperado: PASSA
 **Commit sugerido:** `feat(takt-core-api): <...>` · arquivos: <lista>
 ````
 
-The example uses a `failure(...)` result only to show the format; the real error style depends on decision D3 in `code-style.md`. Copy whatever is decided, never the example.
+Expected errors are exceptions with a `code`, asserted through `catchError` in sync code and `rejects` in async code (ADR-0013).
 
 ## Roadmap template (pt-BR)
 
@@ -206,7 +206,7 @@ Use when the request covers several parts that can each ship and be tested on th
 
 ## Riscos e decisões pendentes
 
-<Decisões em aberto que bloqueiam algum sub-plano (por exemplo, D3 a D5 do guia de estilo), com o sub-plano afetado.>
+<Decisões em aberto que bloqueiam algum sub-plano (por exemplo, D4 e D5 do guia de estilo), com o sub-plano afetado.>
 ````
 
 Each sub-plan is then written with the detailed template, one at a time, after the roadmap is approved.

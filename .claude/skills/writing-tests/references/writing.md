@@ -65,11 +65,11 @@ describe('Plant.publishTo', () => {
     const plant = makePlant({ kind: 'real' });
     const group = makeGroup();
 
-    const result = plant.publishTo(group.id);
+    const error = catchError(() => plant.publishTo(group.id));
 
-    expect(result).toEqual(failure('FORBIDDEN'));
+    expect(error).toMatchObject({ code: 'FORBIDDEN' });
   });
 });
 ```
 
-The `failure(...)` shape only illustrates; the real error style depends on decision D3 in `docs/architecture/code-style.md`. Copy what is decided, never the example.
+Expected errors are exceptions with a `code` (ADR-0013). In sync code, `catchError` keeps the Act on its own line; in async code, the Act is the call (`const promise = useCase.execute(command);`) and the Assert is `await expect(promise).rejects.toMatchObject({ code: 'FORBIDDEN' })`. Never `expect(() => ...).toThrow()`, and never assert on the message.

@@ -21,7 +21,7 @@ Examples from Takt:
 
 | Decision | Record? | Why |
 | --- | --- | --- |
-| `Result` or exceptions for expected errors (D3) | yes, ADR | every use case, port and test signature depends on it; both options are common; tests read differently with each |
+| `Result` or exceptions for expected errors (D3, became ADR-0013) | yes, ADR | every use case, port and test signature depends on it; both options are common; tests read differently with each |
 | MRG32k3a as the engine's generator (ADR-0011) | yes, ADR | changing it changes every stored result; a reader would ask why not `Math.random` |
 | a real plant is never published to a group (PDR-0012) | yes, PDR | a product limit users meet; produces rules |
 | bump Vitest from one patch version to the next | no | easy to reverse, no trade-off |

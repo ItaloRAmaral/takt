@@ -22,7 +22,8 @@ Source of truth: `docs/architecture/code-style.md`, sections 3, 5 and 6. Layout 
 - Thin script: load → call domain → save → audit → return. A business `if` here means the rule is in the wrong place.
 - Ports are abstract classes (contract and DI token), one per conversation with the outside (persistence, `Clock`, `IdGenerator`, `AuditLog`, `TransactionRunner`). Pure deterministic code is called directly.
 - Repository methods are collection-like and exist only when a use case calls them. No `update(dto)`, no generic `findAll()`, no `organizationId` parameter (RLS filters).
-- Pending decisions: transaction/RLS mechanism (D1, follow ADR-0003 until decided), read ports (D2, ports return entities until decided), `Result` vs exceptions (D3, follow `docs/architecture/takt-core-api.md` until decided).
+- Pending decisions: transaction/RLS mechanism (D1, follow ADR-0003 until decided), read ports (D2, ports return entities until decided).
+- Expected errors are exceptions with a literal `code` that extend `DomainError` (ADR-0013); no `Result` type. Never catch one in a use case, controller or transaction callback: only the global filter translates `code` to status, and throwing is what rolls the transaction back. External side effects (e-mail, notifications) only after commit. The response carries only `code`, declared `details` and `requestId`.
 
 ## Infra (`infra/`) and HTTP (`http/`)
 
