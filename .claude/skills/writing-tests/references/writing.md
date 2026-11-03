@@ -16,14 +16,14 @@
 - **One Act per test.** Two actions are two tests.
 - **No logic in the test:** no `if`, loops or computed expectations deciding what to assert. Logic in a test is code without a test.
 - **One behavior per test.** An "and" in the name means two tests.
-- **Case tables (`it.each`)** are allowed for boundaries and variants, under four conditions: every row has the same behavior and assertion shape; the table holds only literals; the body has no `if`; the name starts with the ID and shows the varying value (Vitest fills `%i`, `%s` from the row). Success and error cases with different shapes go in separate tables. A table that needs an `if` in its body is two tests pretending to be one.
+- **Case tables (`it.each`)** are allowed for boundaries and variants, under four conditions: every row has the same behavior and assertion shape; the table holds only literals; the body has no `if`; the name starts with the ID (when there is one) and shows the varying value (Vitest fills `%i`, `%s` from the row). Success and error cases with different shapes go in separate tables. A table that needs an `if` in its body is two tests pretending to be one.
 - Test through the public boundary (the seam), never private functions or internal state.
 
 ## Names
 
 - Start with the ID of the rule or use case it proves: `RN-PLT-002: refuses to publish a real plant`. In English, like all code.
 - After the ID, describe the behavior (what), not the mechanism (how).
-- No ID available: see `scenarios.md`, "When a scenario has no rule".
+- No ID available: a business behavior gets a proposed rule first (`scenarios.md`); anything else gets only the plain description, for example `rejects Math.random in the engine`.
 
 ## Expected values
 

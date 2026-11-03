@@ -63,7 +63,7 @@ Style follows `docs/architecture/code-style.md`; its principles may be broken on
 ## Tests
 
 - Arrange, Act, Assert, separated by blank lines, without comments; one Act per test; no logic in tests.
-- Test names start with the rule or use case ID: `RN-PLT-002: ...`.
+- Test names start with the rule or use case ID: `RN-PLT-002: ...`. A test with neither (tooling, a technical invariant) has only a plain description of the behavior; never invent an ID.
 - TDD for the engine and for `RN-...` rules.
 - Coverage of at least 90% (lines and branches) in every project; mutation score of at least 80% in the engine and the API domain (ADR-0009).
 

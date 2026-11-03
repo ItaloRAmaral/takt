@@ -43,7 +43,7 @@ Should not trigger:
 
 - First actions: find the mode (A: under an approved plan; B: existing code); read the rules, use cases, ADRs and code involved; for Mode B, build the scenario list and get approval first.
 - Output: tests in the project, the run, coverage and mutation output, and the hand-over in `SKILL.md`.
-- Hard constraints: never infer expected values; AAA without comments, one Act, no logic, ID in the name; no production code without a failing test first (Mode A); never change an expected value to make a test pass; never edit production code to prove a test; never lower thresholds or hide survivors; commands only from `CLAUDE.md`; no git commands that commit or publish.
+- Hard constraints: never infer expected values; AAA without comments, one Act, no logic, ID in the name when there is one; no production code without a failing test first (Mode A); never change an expected value to make a test pass; never edit production code to prove a test; never lower thresholds or hide survivors; commands only from `CLAUDE.md`; no git commands that commit or publish.
 
 ## Files
 

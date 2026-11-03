@@ -19,7 +19,7 @@ A test earns its place by catching a real break: a wrong branch, a missing check
 
 - **Never infer.** On any doubt about expected behavior, values or names: read the rules, the docs and the code first; if the answer is not there, ask the user. A guessed expected value turns a test into a lie that passes.
 - **Every change to code starts from an approved plan** (`CLAUDE.md`). Tests for existing code too: show the scenario list as a short plan, or as a full plan if it is large, and wait for approval before writing them.
-- **A business behavior without an `RN-...` rule** gets a proposed rule first (`references/scenarios.md`); the user approves it before the test is written. **Anything else without an ID to name the test by:** ask the user.
+- **A business behavior without an `RN-...` rule** gets a proposed rule first (`references/scenarios.md`); the user approves it before the test is written. **Anything else without an ID** (technical behavior, tooling, an engine invariant): name the test with a plain description of the behavior; never invent an ID.
 - **A failing test on existing code may be a bug.** Never change the expected value to make it pass; stop and report it to the user.
 - Ask at most 3 questions per message; talk to the user in their language; never run git commands that create commits or publish.
 - Commands come from `CLAUDE.md` "Commands". If the command you need is not there, ask; never guess one, and never run tests with tools borrowed from outside this repository (another project's installed Vitest, a global binary): their versions are not Takt's, so a green run there proves nothing here.

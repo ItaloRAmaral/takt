@@ -188,8 +188,8 @@ O [ADR-0009](../adr/0009-estrategia-de-testes.md) decide a estratégia; aqui fic
 
 - **AAA** separado por linha em branco, **sem comentários**; um único Act; sem `if` nem laço para decidir o que verificar.
 - **Erro esperado no teste** ([ADR-0013](../adr/0013-erros-esperados.md)): em código assíncrono, o Act é a chamada e o Assert usa `await expect(promise).rejects.toMatchObject({ code })`; em código síncrono, o helper `catchError(fn)` devolve o erro e o Assert verifica o `code`. Nunca `expect(() => ...).toThrow()`, que junta Act e Assert, e nunca pela mensagem.
-- **Tabela de casos (`it.each`) é permitida** com quatro condições: todas as linhas têm o mesmo comportamento e a mesma forma de verificação; a tabela só tem valores literais; o corpo não tem `if`; o nome começa com o ID e mostra o valor que varia. Sucesso e erro com formatos diferentes ficam em tabelas separadas. Decisão do fundador em 03/11/2026.
-- **Nome do teste começa com o ID** da regra ou do caso de uso: `RN-PLT-002: ...`.
+- **Tabela de casos (`it.each`) é permitida** com quatro condições: todas as linhas têm o mesmo comportamento e a mesma forma de verificação; a tabela só tem valores literais; o corpo não tem `if`; o nome começa com o ID, quando houver, e mostra o valor que varia. Sucesso e erro com formatos diferentes ficam em tabelas separadas. Decisão do fundador em 03/11/2026.
+- **Nome do teste começa com o ID** da regra ou do caso de uso: `RN-PLT-002: ...`. Sem regra nem caso de uso (ferramenta, invariante técnico), o nome é só a descrição do comportamento, sem ID inventado. Decisão do fundador em 03/11/2026.
 - **TDD** no motor e nas regras `RN-...`: o teste é escrito e falha antes do código.
 - **Dados:** fábricas `makePlant(overrides)` com dados fixos; nada de dado aleatório sem semente.
 - **Casos de uso** testados com os adaptadores em memória, sem *mocks* de biblioteca.

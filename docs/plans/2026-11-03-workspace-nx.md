@@ -32,6 +32,8 @@
 | Idade mínima de uma versão antes de instalá-la ("Em aberto" no ADR-0010) | 7 dias | 03/11/2026 |
 | Incluir hooks locais e CI neste plano | Sim | 03/11/2026 |
 | Atualizar o Node e o pnpm da máquina | Sim; feito em 03/11/2026: Node 24.22.2 (padrão do nvm) e pnpm 12.16.0 pelo corepack | 03/11/2026 |
+| Nome de teste sem `RN-...` nem `UC-...` | Só a descrição do comportamento, sem ID; vale para todo o projeto (`CLAUDE.md`, guia seção 10, skill de testes) | 03/11/2026 |
+| Escopo do commit | Opcional; quando houver, só os da lista | 03/11/2026 |
 
 ## Decisões técnicas deste plano
 
@@ -85,18 +87,18 @@
 
 | Requisito | Nível | Teste | Tarefa |
 | --- | --- | --- | --- |
-| Motor sem fontes de não determinismo (ADR-0011; guia, seção 7) | unitário, tabela `it.each` | `ADR-0011: rejects $api in the engine`, uma linha por forma: `Math.random()`, `globalThis.Math.random()`, `Date.now()`, `globalThis.Date.now()`, `new Date()`, `Date()`, `performance.now()` | 3 |
-| Motor sem React nem Three.js (ADR-0001, ADR-0011) | unitário, `it.each` | `ADR-0001: rejects importing $specifier in the engine`, uma linha por `react`, `react-dom`, `three`, `@react-three/fiber` | 3 |
-| Motor sem globais do navegador (ADR-0011) | unitário, `it.each` | `ADR-0011: rejects the browser global $name in the engine`, uma linha por `window`, `document`, `navigator`, `fetch`, `localStorage` | 3 |
-| Motor importa só tipos do esquema (ADR-0011) | unitário | `ADR-0011: allows a type import from the plant schema in the engine` e `ADR-0011: rejects a value import from the plant schema in the engine` | 3 |
-| Esquema não importa o motor (ADR-0001) | unitário | `ADR-0001: rejects importing the engine in the plant schema` | 3 |
-| Sem `enum`, sem `export default`, sem `console` (guia, seção 4) | unitário | `STYLE-4: rejects enum declarations`, `STYLE-4: rejects default exports`, `STYLE-4: rejects console calls` (nas duas bibliotecas) | 3 |
-| Nomes em *kebab-case* (guia, seção 4) | unitário | `STYLE-4: rejects file names that are not kebab-case` | 3 |
-| Controles positivos (foco 8) | unitário | `STYLE-4: accepts a file that follows every rule`, `STYLE-4: accepts a default export in a config file`, `STYLE-4: accepts $name as a file name` (`it.each` com `plant.spec.ts` e `vite.config.ts`) | 3 |
+| Motor sem fontes de não determinismo (ADR-0011; guia, seção 7) | unitário, tabela `it.each` | `rejects $api in the engine`, uma linha por forma: `Math.random()`, `globalThis.Math.random()`, `Date.now()`, `globalThis.Date.now()`, `new Date()`, `Date()`, `performance.now()` | 3 |
+| Motor sem React nem Three.js (ADR-0001, ADR-0011) | unitário, `it.each` | `rejects importing $specifier in the engine`, uma linha por `react`, `react-dom`, `three`, `@react-three/fiber` | 3 |
+| Motor sem globais do navegador (ADR-0011) | unitário, `it.each` | `rejects the browser global $name in the engine`, uma linha por `window`, `document`, `navigator`, `fetch`, `localStorage` | 3 |
+| Motor importa só tipos do esquema (ADR-0011) | unitário | `allows a type import from the plant schema in the engine` e `rejects a value import from the plant schema in the engine` | 3 |
+| Esquema não importa o motor (ADR-0001) | unitário | `rejects importing the engine in the plant schema` | 3 |
+| Sem `enum`, sem `export default`, sem `console` (guia, seção 4) | unitário | `rejects enum declarations`, `rejects default exports`, `rejects console calls` (nas duas bibliotecas) | 3 |
+| Nomes em *kebab-case* (guia, seção 4) | unitário | `rejects file names that are not kebab-case` | 3 |
+| Controles positivos (foco 8) | unitário | `accepts a file that follows every rule`, `accepts a default export in a config file`, `accepts $name as a file name` (`it.each` com `plant.spec.ts` e `vite.config.ts`) | 3 |
 | Metas de cobertura e mutação; hooks; CI; versões; pnpm | verificação | comandos e saídas esperadas em cada tarefa | 1, 2, 4 a 7 |
 
 - **Níveis usados e por quê:** só unitário. Os testes de conformidade rodam o ESLint de verdade pela API (`ESLint#lintText`), sobre trechos literais, e verificam o `ruleId` e a linha de cada mensagem. Integração, API, propriedade e ponta a ponta não se aplicam: não há banco, rota, motor nem tela.
-- **Nome dos testes:** não há `RN-...` nem `UC-...` para estas regras. Proposta: `ADR-NNNN:` quando um ADR exige a regra, `STYLE-<seção>:` quando ela vem do guia (pergunta 1 da entrega).
+- **Nome dos testes:** não há `RN-...` nem `UC-...` para estas regras, então o nome é só a descrição do comportamento, sem ID (decisão do usuário). A coluna "Requisito" diz de qual ADR ou seção do guia vem cada regra.
 - **Dados de teste:** trechos de código literais; tabelas `it.each` só com literais e o valor variável no nome (guia, seção 10).
 - **Metas:** 90% de linhas e ramificações configuradas nas duas bibliotecas; mutação de 80% configurada no motor. Os arquivos de teste ficam fora da cobertura; nenhuma outra exclusão.
 - **Como rodar:** os comandos que a tarefa 8 grava no `CLAUDE.md`.
@@ -182,7 +184,7 @@ Nenhuma.
 it.each([
   { api: 'Math.random()' },
   { api: 'Date.now()' },
-])('ADR-0011: rejects $api in the engine', async ({ api }) => {
+])('rejects $api in the engine', async ({ api }) => {
   const code = `export const value = ${api};\n`;
 
   const messages = await lintEngineFile('value.ts', code);
@@ -232,14 +234,14 @@ it.each([
 - Modificar: `package.json` (script `prepare: husky`)
 
 - [ ] **Passo 1:** `.prettierrc.json`: `{ "singleQuote": true }`; `.prettierignore`: `*.md`, `.claude`, `pnpm-lock.yaml`, `coverage`, `reports`, `.stryker-tmp`, `dist`.
-- [ ] **Passo 2:** `commitlint.config.mjs`: `extends: ['@commitlint/config-conventional']`, `scope-enum` com os escopos das restrições globais (nível erro); escopo vazio permitido ou não, conforme a pergunta 2 da entrega.
+- [ ] **Passo 2:** `commitlint.config.mjs`: `extends: ['@commitlint/config-conventional']`, `scope-enum` com os escopos das restrições globais (nível erro), escopo vazio permitido (decisão do usuário).
 - [ ] **Passo 3:** `.lintstagedrc.json`: `*.{ts,tsx,mjs,js}` → `prettier --write` e `eslint --max-warnings=0`; `*.{json,yml,yaml}` → `prettier --write`.
 - [ ] **Passo 4:** hooks, com mensagens em inglês:
   - `pre-commit`: se o binário `gitleaks` não existir, sai com erro e a mensagem "gitleaks 8.30.1 is required; see docs/architecture/workspace.md" (foco 11); senão, `pnpm exec lint-staged` e `gitleaks git --pre-commit --staged --redact` (conferir com `gitleaks git --help`).
   - `commit-msg`: `pnpm exec commitlint --edit "$1"`.
   - `pre-push`: lê as referências da entrada padrão e sai com erro se alguma referência remota for exatamente `refs/heads/main`, com a mensagem "Direct push to main is not allowed: open a pull request" (ADR-0010).
 - [ ] **Passo 5: verificar, pelo usuário** (o Claude Code não roda `git commit` nem `git push`):
-  - numa branch descartável, `feat(motor): x` é recusado; `feat(sim-engine): x` passa; `docs: x` passa ou não, conforme a pergunta 2;
+  - numa branch descartável, `feat(motor): x` é recusado; `feat(sim-engine): x` passa; `docs: x` passa;
   - um arquivo com `AKIA` seguido de 16 caracteres maiúsculos (segredo falso no formato de chave da AWS) é recusado pelo pre-commit; com o `gitleaks` fora do PATH, o pre-commit falha com a mensagem acima;
   - `git push origin HEAD:main` é recusado; o push de uma branch `main-fix` passa;
   - `pnpm exec prettier --check .` passa e não lista nenhum `.md` nem arquivo de `.claude/`.
@@ -287,7 +289,7 @@ it.each([
 | 1 | Arquivos temporários de prova poderiam entrar num commit | autorrevisão | sim | sufixo `.proof.ts` no `.gitignore` |
 | 2 | `type:lib` só depende de `type:lib` não está escrito no ADR-0001 | autorrevisão | sim | marcada como derivada |
 | 3 | `pnpm config get` pode não ler o `pnpm-workspace.yaml` | autorrevisão | sim | prova pela recusa de uma versão de 1 dia |
-| 4 | Testes de regras do guia nomeados como `ADR-0010:` | autorrevisão | sim | prefixo `STYLE-4:`, pergunta ao usuário |
+| 4 | Testes de regras do guia nomeados como `ADR-0010:` | autorrevisão | sim | o usuário decidiu: sem ID, só a descrição |
 | 5 | Geração e lockfile fora da política de 7 dias e de scripts | plan-reviewer, erro | sim | conferido: o gerador não tem opção para pular a instalação; lockfile descartado, política global na geração |
 | 6 | Arquivos de configuração reprovam no lint (`export default`, `.mjs` sem tsconfig, sufixos intermediários) | plan-reviewer, erro | sim | conferido no guia, seção 4; exceção e controles positivos |
 | 7 | Comentário planejado dentro de arquivo de teste | plan-reviewer, erro | sim | regra dura; nome autoexplicativo e motivo no doc vivo |

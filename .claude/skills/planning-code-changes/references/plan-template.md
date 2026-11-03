@@ -84,7 +84,7 @@ Posso seguir?
 
 <Os testes são planejados com o mesmo cuidado que o código. Níveis e metas vêm do ADR-0009; não invente outros.>
 
-| Requisito, regra ou linha do foco de revisão | Nível | Teste (nome começa com o ID) | Tarefa |
+| Requisito, regra ou linha do foco de revisão | Nível | Teste (nome começa com o ID, quando houver) | Tarefa |
 | --- | --- | --- | --- |
 
 - **Níveis usados e por quê:** <unitário (entidades, casos de uso com adaptadores em memória, funções do motor); integração (Prisma, RLS e isolamento contra PostgreSQL real, com o usuário `takt_app`); API (matriz papel × rota, validação, formato de erro, log canônico); propriedade (fast-check, por exemplo Lei de Little e conservação no motor); ponta a ponta (Playwright). Diga quais níveis este plano usa e por que os outros não se aplicam.>
