@@ -2,7 +2,7 @@
 
 > **Resumo.** Planos de implementação: o que vai ser construído, em quais arquivos, com quais testes, quais ameaças são tratadas e quais princípios de estilo são quebrados e por quê. Toda mudança de código ou configuração começa por um plano aprovado: curto, na conversa, para mudanças pequenas e locais; completo, nesta pasta, para o resto. Só texto de documentação, comentários e formatação dispensam plano. Os planos são escritos com a skill `planning-code-changes` (`.claude/skills/planning-code-changes/`).
 
-Atualizado em 21/10/2026.
+Atualizado em 03/11/2026.
 
 ## Como funciona
 
@@ -17,6 +17,7 @@ Atualizado em 21/10/2026.
 
 | Plano | Status | Data |
 | --- | --- | --- |
+| [Workspace Nx do marco 1](2026-11-03-workspace-nx.md) | Proposto | 03/11/2026 |
 
 ## Medição do revisor
 
@@ -24,3 +25,4 @@ O revisor fica só se achar o que a autorrevisão não acha. Depois de cinco pla
 
 | Plano | Data | Critério | Autorrevisão | Só o revisor (erros / sugestões) | Rejeitados |
 | --- | --- | --- | --- | --- | --- |
+| [Workspace Nx do marco 1](2026-11-03-workspace-nx.md) | 03/11/2026 | 3 (segurança: segredos, dependências, token do CI) | 4 | 6 / 17 | 1 |
