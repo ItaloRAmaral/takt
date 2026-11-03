@@ -1,0 +1,74 @@
+# Writing a test
+
+## Contents
+
+- Structure
+- Names
+- Expected values
+- Data
+- Doubles
+- Levels
+- Example
+
+## Structure
+
+- **Arrange, Act, Assert**, separated by one blank line, **with no comments** (ADR-0009).
+- **One Act per test.** Two actions are two tests.
+- **No logic in the test:** no `if`, loops or computed expectations deciding what to assert. Logic in a test is code without a test.
+- **One behavior per test.** An "and" in the name means two tests.
+- Test through the public boundary (the seam), never private functions or internal state.
+
+## Names
+
+- Start with the ID of the rule or use case it proves: `RN-PLT-002: refuses to publish a real plant`. In English, like all code.
+- After the ID, describe the behavior (what), not the mechanism (how).
+- No ID available: see `scenarios.md`, "When a scenario has no rule".
+
+## Expected values
+
+- **Derive them independently:** a literal, a value worked out by hand, the example from the rule, or a published reference value (literature cases for the engine, with the source cited in the test data). Never compute the expected value with the code under test or its helpers: that test passes no matter what the code does.
+- **No change detectors:** do not assert a constant's value, an exact message, or private structure. Assert the behavior that depends on it (not "`MAX_RETRIES` is 5" but "the sixth attempt never happens").
+- Errors are asserted by **code** (`FORBIDDEN`), never by message.
+
+## Data
+
+- **Factories** with fixed data and overrides: `makePlant({ kind: 'real' })`. Each test creates its own data; no test depends on another's.
+- **No randomness without a fixed seed.** Property tests (fast-check) use a fixed seed; engine tests use a fixed simulation seed.
+- **Only fake data,** never real or production data (ADR-0009, security risks).
+
+## Doubles
+
+- **Prefer the real thing.** In the API, use the in-memory adapters of the ports (ADR-0002), not library mocks of your own classes.
+- **Fake only at system boundaries:** time (`Clock`), IDs (`IdGenerator`), external services. Never mock code you own.
+- **Never assert on a double** ("was called with"), unless the call itself is the contract (an audit entry written, an e-mail sent). Assert the outcome a caller sees.
+- A fake that accepts anything verifies nothing: each branch (success, error) gets its own fixture.
+- Cleanup used only by tests lives in test utilities, never in production classes.
+
+## Levels
+
+Choose the level from ADR-0009; do not invent others.
+
+| Level | For | Notes |
+| --- | --- | --- |
+| unit | entities, value objects, domain services, use cases (with in-memory adapters), engine functions | milliseconds; no database |
+| integration | Prisma repositories, RLS, isolation between organizations, policy catalog | real PostgreSQL, one database per Vitest worker, user `takt_app` |
+| API | role × route matrix, validation, error format, canonical log line | response validated against the output Zod schema |
+| property | invariants over generated input (engine: Little's law, conservation of parts) | fast-check with a fixed seed |
+| end to end | demo story, login, import/export, multi-user rules | Playwright; the 3D scene is tested by the state it draws, never by pixels |
+
+## Example
+
+```ts
+describe('Plant.publishTo', () => {
+  it('RN-PLT-002: refuses to publish a real plant', () => {
+    const plant = makePlant({ kind: 'real' });
+    const group = makeGroup();
+
+    const result = plant.publishTo(group.id);
+
+    expect(result).toEqual(failure('FORBIDDEN'));
+  });
+});
+```
+
+The `failure(...)` shape only illustrates; the real error style depends on decision D3 in `docs/architecture/code-style.md`. Copy what is decided, never the example.

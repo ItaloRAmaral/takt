@@ -14,7 +14,7 @@ A step is done when the implementer can write exactly one reasonable thing from 
 
 | Kind of step | Carries |
 | --- | --- |
-| test | the test name (starting with the rule or use case ID) and its assertions, with the exact values from the docs |
+| test | the test name (starting with the rule or use case ID, in English like all code) and its assertions, with the exact values from the docs |
 | code | the exact signature (name, parameters, return type), the file, and the values the docs pin; a body only for an algorithm the signature and tests do not determine (for example, a formula from the literature, with its source) |
 | verification | the command and the output that means it passed; take commands from `CLAUDE.md` "Commands", and if a command is not there, ask |
 | reference to another task | point to that task's "Interfaces" block; do not repeat its code |
@@ -141,7 +141,7 @@ Posso seguir?
 - [ ] **Passo 1: escrever o teste que falha**
 
 ```ts
-it('RN-PLT-002: recusa publicar planta real em grupo', () => {
+it('RN-PLT-002: refuses to publish a real plant', () => {
   const plant = makePlant({ kind: 'real' });
 
   const result = plant.publishTo(makeGroup());
