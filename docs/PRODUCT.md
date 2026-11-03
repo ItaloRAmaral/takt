@@ -115,7 +115,7 @@ Detalhe: [milestones.md](product/milestones.md).
 | [product/glossary.md](product/glossary.md) | Termos pt ↔ en, com o nome usado no código | Criado |
 | [product/references.md](product/references.md) | Bibliografia e o que cada obra embasa | Criado |
 | [product/rules/](product/rules/README.md) | Regras de negócio com ID (`RN-...`) | Criado (39 regras) |
-| product/use-cases/ | Casos de uso com ID (`UC-...`) | No início de cada marco |
+| [product/use-cases/](product/use-cases/README.md) | Casos de uso com ID (`UC-...`) | Marco 1 escrito (UC-SIM-001 a 004) |
 | [pdr/](pdr/README.md) | Decisões de produto (PDR) e regras reservadas | Criado (21 PDRs) |
 | [adr/](adr/README.md) | Decisões de arquitetura (ADR) | Em andamento (13 ADRs) |
 | [architecture/](architecture/README.md) | Como o sistema funciona hoje (documentos vivos) e o guia de estilo de código | Em andamento (`code-style`, `takt-core-api`) |

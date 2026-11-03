@@ -2,7 +2,7 @@
 
 > **Resumo.** O motor é determinístico com semente fixa, e a cena 3D só reproduz o que ele calculou. Os indicadores vêm de replicações, com média e intervalo de confiança. O roteamento entre elementos segue regras definidas pelo usuário.
 
-Atualizado em 20/10/2026 · Origem: [PDR-0008](../../pdr/0008-simulacao-com-reproducao.md), [PDR-0014](../../pdr/0014-roteamento-definido-pelo-usuario.md), [PDR-0020](../../pdr/0020-modos-de-simulacao-e-aquecimento.md).
+Atualizado em 03/11/2026 · Origem: [PDR-0008](../../pdr/0008-simulacao-com-reproducao.md), [PDR-0014](../../pdr/0014-roteamento-definido-pelo-usuario.md), [PDR-0020](../../pdr/0020-modos-de-simulacao-e-aquecimento.md).
 
 ### RN-SIM-001: Determinismo
 
@@ -57,7 +57,7 @@ Origem: [PDR-0020](../../pdr/0020-modos-de-simulacao-e-aquecimento.md). Base: [p
 - **Enunciado:** o usuário escolhe o modo de cada execução: **turno** (começa vazio, sem aquecimento; padrão), **continuar do turno anterior** (começa com o estado final salvo de uma execução anterior da mesma planta) ou **regime estável** (começa vazio e descarta o aquecimento). A interface explica cada modo antes da escolha.
 - **Origem:** PDR-0020.
 - **Exemplo:** o professor roda o turno e depois o regime estável para mostrar a diferença entre os dois números.
-- **Quando violada:** `INVALID_PLANT` se "continuar do turno anterior" for escolhido sem estado salvo compatível.
+- **Quando violada:** `INVALID_PLANT` se "continuar do turno anterior" for escolhido sem estado salvo compatível, ou se o regime estável for escolhido sem aquecimento informado (aceito do assistente ou editado, RN-SIM-009).
 - **Em aberto:** quando um estado salvo deixa de ser compatível (por exemplo, se a planta mudou).
 
 ### RN-SIM-008: Fim do aquecimento

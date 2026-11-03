@@ -2,7 +2,7 @@
 
 > **Resumo.** Sem prazo final e sem cortes: o MVP é construído em seis marcos, e cada um termina em algo mostrável, com revisão e um post no LinkedIn. Os casos de uso de cada marco são escritos no início dele, antes do código.
 
-Atualizado em 20/10/2026 · Decisões: [PDR-0015](../pdr/0015-marcos-mostraveis.md).
+Atualizado em 03/11/2026 · Decisões: [PDR-0015](../pdr/0015-marcos-mostraveis.md).
 
 ## Como cada marco funciona
 
@@ -14,7 +14,7 @@ Atualizado em 20/10/2026 · Decisões: [PDR-0015](../pdr/0015-marcos-mostraveis.
 
 | # | Entrega | Mostrável | Status |
 | --- | --- | --- | --- |
-| 1 | Esquema da planta + motor + testes contra a literatura | Post técnico: "o motor reproduz Factory Physics e M/M/1" | Não iniciado |
+| 1 | Esquema da planta + motor + testes contra a literatura | Post técnico: "o motor reproduz Factory Physics e M/M/1" | Em andamento: casos de uso escritos |
 | 2 | Cena 3D reproduzindo uma planta pronta (play, pause, velocidade) | Vídeo: a fábrica viva e o gargalo destacado | Não iniciado |
 | 3 | Editor 3D em grade, salvar local, importar e exportar JSON | Vídeo: montar uma linha do zero | Não iniciado |
 | 4 | API: login, organizações, papéis, planos, RLS, contas demo | Post de arquitetura e segurança, com os ADRs | Não iniciado |
