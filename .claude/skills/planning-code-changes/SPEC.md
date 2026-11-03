@@ -77,6 +77,6 @@ Behavior tests (skill: criteria 2, 3 and 4 apply; reviewer: criterion 1 applies)
 
 ## Maintenance
 
-- Update `references/plan-template.md` when `code-style.md` decisions D1 to D5 are made (error style, transactions, commands).
+- Update `references/plan-template.md` when the pending decisions in `code-style.md` are made (error style, transactions, commands).
 - Fill `CLAUDE.md` "Commands" when the Nx workspace exists; plans read commands from there.
 - Review the reviewer with the user after 5 reviewed plans, using `docs/plans/README.md`.

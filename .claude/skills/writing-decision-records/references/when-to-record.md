@@ -29,10 +29,9 @@ Examples from Takt:
 
 ## Always a record
 
-These skip the three criteria, because Takt's rules already require a record:
+These skip the three criteria, because Takt's rules already require a record. A decision the docs only list as pending does not: check it against the three criteria with the facts known now.
 
 - The change contradicts or changes an **accepted PDR or ADR**: a superseding record (`CLAUDE.md`, "How we work").
-- The decision is listed as **pending a future ADR** in the docs, as in the pending table of `docs/architecture/code-style.md` (D1 to D5): the docs already judged it significant.
 - A **new business intent** with no PDR behind it, such as a rule proposed by the `writing-tests` skill whose "Origem" has no PDR (`docs/product/rules/README.md`: a change of intent needs a new PDR).
 
 ## Not a record: where it goes instead
@@ -45,6 +44,7 @@ These skip the three criteria, because Takt's rules already require a record:
 | a library or version easy to swap, a bug fix, a configuration | the plan or the commit message |
 | findings of a study, before any decision | `docs/research/` |
 | something an accepted record already decides | nothing new; cite that record |
+| a decision the docs list as pending (the pending table of `code-style.md`, an "Em aberto" item) that fails the three criteria with what is known now | the living doc that listed it, with the decision, its date and a review trigger; ask the user first, since the docs once expected a record (as with the TypeScript version, D5) |
 
 When unsure, show the user the three criteria with your reading of each and ask; do not create the file to find out.
 

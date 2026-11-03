@@ -206,7 +206,7 @@ Use when the request covers several parts that can each ship and be tested on th
 
 ## Riscos e decisões pendentes
 
-<Decisões em aberto que bloqueiam algum sub-plano (por exemplo, D4 e D5 do guia de estilo), com o sub-plano afetado.>
+<Decisões em aberto que bloqueiam algum sub-plano (por exemplo, as pendências do guia de estilo), com o sub-plano afetado.>
 ````
 
 Each sub-plan is then written with the detailed template, one at a time, after the roadmap is approved.

@@ -60,7 +60,7 @@ Para cada desvio, o plano registra **cinco coisas**:
 
 ## 4. TypeScript
 
-**Base:** o [Google TypeScript Style Guide](https://google.github.io/styleguide/tsguide.html), com as divergências desta seção. Versão do TypeScript: **pendente (D5)**.
+**Base:** o [Google TypeScript Style Guide](https://google.github.io/styleguide/tsguide.html), com as divergências desta seção. Versão do TypeScript: **6.0.3, fixada exata** no `package.json`, porque o `latest` do npm já é o 7 e o typescript-eslint (ADR-0010) só aceita versões abaixo de 6.1. Gatilho de revisão: migrar para o 7 quando o typescript-eslint lançar suporte estável ao 7.1 ([issue #10940](https://github.com/typescript-eslint/typescript-eslint/issues/10940)). Decisão do fundador em 03/11/2026 (era a D5).
 
 ### Configuração (ferramenta)
 
@@ -222,4 +222,3 @@ Estes pontos conflitam com registros aceitos ou fecham um "Em aberto" deles, e c
 | D1 | Versão do Prisma e transação do RLS (ADR-0003) | marco 4 |
 | D2 | Portas de leitura que devolvem tipo próprio (ADR-0002) | revisão do fim do marco 4 |
 | D4 | Precisão de `Math` entre navegadores (ADR-0011, RN-SIM-001) | marco 1 (medir) |
-| D5 | TypeScript 6 ou 7 | marco 1 |
