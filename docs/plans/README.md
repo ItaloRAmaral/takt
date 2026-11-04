@@ -19,6 +19,7 @@ Atualizado em 04/11/2026.
 | --- | --- | --- |
 | [Workspace Nx do marco 1](2026-11-03-workspace-nx.md) | Concluído (PR #1, 04/11/2026) | 03/11/2026 |
 | [Roteiro: esquema da planta e motor (marco 1)](2026-11-04-roteiro-motor.md) | Aprovado | 04/11/2026 |
+| [Fundamentos do motor (sub-plano 1)](2026-11-04-motor-fundamentos.md) | Aprovado | 04/11/2026 |
 
 ## Medição do revisor
 
@@ -28,3 +29,4 @@ O revisor fica só se achar o que a autorrevisão não acha. Depois de cinco pla
 | --- | --- | --- | --- | --- | --- |
 | [Workspace Nx do marco 1](2026-11-03-workspace-nx.md) | 03/11/2026 | 3 (segurança: segredos, dependências, token do CI) | 4 | 6 / 17 | 1 |
 | [Roteiro: esquema da planta e motor](2026-11-04-roteiro-motor.md) | 04/11/2026 | 1 e 5 (roteiro; determinismo do motor) | 5 | 9 / 11 | 0 |
+| [Fundamentos do motor](2026-11-04-motor-fundamentos.md) | 04/11/2026 | 5 (determinismo do motor) | 5 | 3 / 8 | 1 |
