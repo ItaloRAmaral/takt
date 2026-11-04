@@ -322,6 +322,8 @@ it.each([
 | 7 | O alvo `build` ainda não existe (bibliotecas sem *bundler*): `nx run-many -t build` responde "No tasks were run" | Mantido no `affected`, para as apps do marco 2 | 04/11/2026 |
 | 7 | Modelo de pull request: o plano não diz o idioma | Inglês, como as mensagens de commit | 04/11/2026 |
 | 7 | `pnpm audit --audit-level high` falhava: 6 alertas altos no `undici` 7.29.0, fixado exato pelo `nx` 24.0.2. O Nx 24.0.3 ("bump undici to 7.30.1 to patch security advisories") tinha 5 dias | Decisão do usuário: exceção para o Nx 24.0.3. O `minimumReleaseAgeExclude` não aceita padrão com versão ("Name patterns are not allowed with version unions"), então são 17 entradas exatas, com comentário e data de remoção (06/11/2026). Proveniência SLSA conferida nos 7 pacotes principais; o script de instalação do `nx` é o mesmo e continua negado. Depois: audit com saída 0 (5 moderadas), `nx report` 24.0.3, lint, tipos, testes com cobertura e mutação passando, `pnpm install --frozen-lockfile` em dia. As versões das restrições globais passam a ser Nx 24.0.3 | 04/11/2026 |
+| 8 | O índice de `docs/plans/README.md` já listava este plano desde a aprovação | Sem mudança; o status passa a "Concluído" quando o pull request for mesclado | 04/11/2026 |
+| 8 | Passo 4 | Cada comando do `CLAUDE.md` rodado num shell de login com ambiente limpo (`env -i`): todos com saída 0. `nx affected` sem `--base` usa `main` por padrão ("Affected criteria defaulted to --base=main") | 04/11/2026 |
 
 ---
 

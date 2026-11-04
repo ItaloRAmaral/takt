@@ -69,4 +69,17 @@ Style follows `docs/architecture/code-style.md`; its principles may be broken on
 
 ## Commands
 
-To be filled in when the Nx workspace is created.
+Node 24.22.2 and pnpm 12.16.0 (`.nvmrc`, `packageManager`); how the workspace works is in `docs/architecture/workspace.md`.
+
+| Task | Command |
+| --- | --- |
+| Install | `pnpm install` (CI: `pnpm install --frozen-lockfile`) |
+| Test one project | `pnpm nx test <project>` |
+| Test with the 90% coverage gates | `pnpm nx test <project> --coverage` (the gates only run with `--coverage`) |
+| Lint and types | `pnpm nx lint <project>`, `pnpm nx typecheck <project>` |
+| Everything the change affected | `pnpm nx affected -t lint typecheck test` |
+| Everything | `pnpm nx run-many -t lint typecheck test` |
+| Mutation (engine, slow) | `pnpm nx run sim-engine:mutate` |
+| Formatting | `pnpm exec prettier --check .` |
+
+Projects: `sim-engine`, `plant-schema`. Commit message body lines are at most 100 characters (commitlint).

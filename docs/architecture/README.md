@@ -2,7 +2,7 @@
 
 > **Resumo.** Documentos vivos que descrevem **como** o Takt é construído e funciona hoje. O **porquê** de cada escolha está nos ADRs, em [`../adr/`](../adr/README.md). Quando o código muda, estes documentos mudam junto; os ADRs, não.
 
-Atualizado em 20/10/2026.
+Atualizado em 04/11/2026.
 
 ## Convenções
 
@@ -43,6 +43,7 @@ Atualizado em 20/10/2026.
 | --- | --- | --- |
 | [code-style.md](code-style.md) | Guia de estilo: princípios de design, critérios de desvio, TypeScript, convenções por projeto, checklist de revisão | Criado |
 | [takt-core-api.md](takt-core-api.md) | API: estrutura, fluxo de uma requisição, erros, validação, banco, observabilidade, segurança | Criado |
+| [workspace.md](workspace.md) | Monorepo: projetos, versões fixadas e exceções, segurança da instalação, lint, testes, cobertura, mutação, hooks e CI | Criado |
 | `takt-web-app.md` | Front-end, cena 3D, estado, armazenamento local | Na implementação ([ADR-0012](../adr/0012-front-end.md)) |
 | `sim-engine.md` | Motor de simulação | Após o ADR do motor |
 | `plant-schema.md` | Esquema, validação e migrações da planta | Após o ADR do motor |
