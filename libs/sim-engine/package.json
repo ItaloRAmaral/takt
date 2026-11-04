@@ -18,7 +18,12 @@
     "tags": [
       "type:lib",
       "scope:shared"
-    ]
+    ],
+    "targets": {
+      "mutate": {
+        "command": "stryker run libs/sim-engine/stryker.config.mjs"
+      }
+    }
   },
   "dependencies": {
     "@takt/plant-schema": "workspace:*"

@@ -305,6 +305,11 @@ it.each([
 | 3 | Prettier com a largura padrão (80) reformatou os arquivos novos | `prettier --write` nos 5 arquivos; a tarefa 6 fixa a configuração | 04/11/2026 |
 | 4 | Foco 2, cobertura sem instruções | Passa nas duas bibliotecas: "Lines 100% (0/0)", "Branches 100% (0/0)", "1 empty file skipped". Prova do portão: `gate.proof.ts` (uma função com um `if`, sem teste) deu "Coverage for lines (0%) does not meet global threshold (90%)" e o mesmo para *branches*, com saída 1; arquivo apagado | 04/11/2026 |
 | 4 | As metas só valem com `--coverage`: `pnpm nx test <projeto>` sem a flag não mede | Sem mudança na configuração; a tarefa 7 roda o CI com `--coverage` e a tarefa 8 grava o comando no `CLAUDE.md` | 04/11/2026 |
+| 5 | Com pnpm, o padrão `plugins: ['@stryker-mutator/*']` só procura na pasta interna do pacote `core` ("no Checker plugins were loaded"; lido em `dist/src/di/plugin-loader.js`) | Os dois plugins listados pelo nome | 04/11/2026 |
+| 5 | Foco 3: com `cwd: {projectRoot}`, o sandbox copia só a pasta do motor e quebra `../../tsconfig.base.json` ("Tsconfig not found") | O alvo `mutate` roda da raiz (`stryker run libs/sim-engine/stryker.config.mjs`), com os caminhos da configuração relativos à raiz; o sandbox copia o repositório (216 arquivos, sem `node_modules`) | 04/11/2026 |
+| 5 | Foco 3: o modo `related` do Vitest só roda testes que importam o código mutado; o teste de conformidade não importa nada ("No tests were executed") | `vitest.related: false`; com a análise de cobertura por teste, cada mutante continua rodando só os testes que o cobrem | 04/11/2026 |
+| 5 | Saída com 0 mutantes | "Initial test run succeeded. Ran 26 tests"; "Final mutation score of NaN is greater than or equal to break threshold 80"; saída 0. Prova do portão: `gate.proof.ts` (uma função com `if`, sem teste) deu "Final mutation score 0.00 under breaking threshold 80, setting exit code to 1"; arquivo apagado | 04/11/2026 |
+| 5 | Relatório HTML na raiz, `reports/mutation/sim-engine.html` (ignorado pelo git), em vez de dentro do projeto | Consequência de rodar da raiz; o nome do projeto no arquivo evita colisão com a futura mutação do domínio da API | 04/11/2026 |
 
 ---
 
