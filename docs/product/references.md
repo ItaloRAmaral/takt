@@ -2,7 +2,7 @@
 
 > **Resumo.** Bibliografia que embasa o Takt e o que cada obra sustenta. A literatura valida a engenharia do motor e a didática; ela não valida a demanda.
 
-Atualizado em 20/10/2026.
+Atualizado em 04/11/2026.
 
 **Regra:** toda referência usada no produto, nos PDRs ou nos ADRs entra neste arquivo, com o que ela embasa. Pesquisas completas ficam em [`../research/`](../research/README.md).
 
@@ -210,6 +210,24 @@ Fonte: pesquisa [Guia de estilo de código](../research/guia-de-estilo-de-codigo
 | Anthropic. Claude Code Docs, [path-specific rules](https://code.claude.com/docs/en/memory#path-specific-rules) | Arquivos de `.claude/rules/` com `paths` |
 | Vitest. API, [`test.each`](https://vitest.dev/api/#test-each) (lido em 03/11/2026) | Tabela de casos permitida nos testes, com quatro condições |
 | `cliniccontrol` (projeto anterior do fundador, referência, não padrão) | Problemas a não repetir e itens de segurança da checklist de revisão |
+
+## Workspace e cadeia de suprimentos
+
+Usadas no plano [Workspace Nx do marco 1](../plans/2026-11-03-workspace-nx.md) e em [`workspace.md`](../architecture/workspace.md). Versões e datas conferidas no registro do npm, no GitHub e no Docker Hub entre 03/11 e 04/11/2026.
+
+| Fonte | O que embasa |
+| --- | --- |
+| pnpm. [Settings](https://pnpm.io/settings#allowbuilds) (`allowBuilds`, `strictDepBuilds`, `minimumReleaseAge`, `minimumReleaseAgeExclude`) e [Supply chain security](https://pnpm.io/supply-chain-security) (`trustPolicy`, `blockExoticSubdeps`) | Segurança da instalação; `allowBuilds` no lugar do `onlyBuiltDependencies` dos ADRs 0001 e 0010; idade mínima de 7 dias |
+| Nx. Código do pacote `nx` 24.0.2 (`create-nx-workspace`, daemon em `dist/src/daemon/server/latest-nx.js`); [notas do 24.0.3](https://github.com/nrwl/nx/releases/tag/24.0.3) | Geração fora do repositório; daemon desligado; Nx 24.0.3 pela correção do `undici` |
+| GitHub Advisory Database. `undici` 7.29.0: [GHSA-rfgv-xxqx-mfg5](https://github.com/advisories/GHSA-rfgv-xxqx-mfg5), [GHSA-w293-vg96-wgc3](https://github.com/advisories/GHSA-w293-vg96-wgc3), [GHSA-xjj6-f33q-929c](https://github.com/advisories/GHSA-xjj6-f33q-929c), [GHSA-4w7w-5xrc-9h26](https://github.com/advisories/GHSA-4w7w-5xrc-9h26), [GHSA-2m5v-pch6-74hx](https://github.com/advisories/GHSA-2m5v-pch6-74hx), [GHSA-qrxm-fqhp-jwvm](https://github.com/advisories/GHSA-qrxm-fqhp-jwvm) | As 6 vulnerabilidades altas que levaram à exceção do Nx 24.0.3 |
+| ESLint. Regras [`no-restricted-globals`](https://eslint.org/docs/latest/rules/no-restricted-globals), [`no-restricted-properties`](https://eslint.org/docs/latest/rules/no-restricted-properties), [`no-restricted-syntax`](https://eslint.org/docs/latest/rules/no-restricted-syntax), [`no-restricted-exports`](https://eslint.org/docs/latest/rules/no-restricted-exports) (opções conferidas no código do ESLint 10.13.0) | Proibições do motor e do esquema; sem `export default` |
+| dukeluo. [`eslint-plugin-check-file`](https://github.com/dukeluo/eslint-plugin-check-file) 3.3.2 (Apache-2.0) | Nomes de arquivo e pasta em *kebab-case* (guia, seção 4) |
+| Stryker. [stryker-js](https://github.com/stryker-mutator/stryker-js) 10.1.1: esquema de configuração de `@stryker-mutator/api` e carregador de plugins (`dist/src/di/plugin-loader.js`); [troubleshooting](https://stryker-mutator.io/docs/stryker-js/troubleshooting/) | Configuração da mutação; plugins pelo nome com pnpm; execução a partir da raiz |
+| Zod. [API, `.exactOptional()`](https://github.com/colinhacks/zod/blob/main/packages/docs/content/api.mdx) | `exactOptionalPropertyTypes` ligado |
+| [husky](https://github.com/typicode/husky) 9.1.7; [lint-staged](https://github.com/lint-staged/lint-staged) 17.6.0; [commitlint](https://commitlint.js.org/) 21.2.4 com `config-conventional` | Hooks locais; mensagens de commit, inclusive o limite de 100 caracteres por linha do corpo |
+| gitleaks. [Release 8.30.1](https://github.com/gitleaks/gitleaks/releases/tag/v8.30.1) e [gitleaks-action](https://github.com/gitleaks/gitleaks-action) v3.0.0 (README e `src/gitleaks.js`) | Busca de segredos no pre-commit e no CI; sem licença em conta pessoal; `pull-requests: read` num repositório privado |
+| Semgrep. [Semgrep CE](https://docs.semgrep.dev/deployment/oss-deployment); imagem `semgrep/semgrep` 1.182.1 no Docker Hub | Análise estática no CI sem conta, no lugar do CodeQL (ADR-0010) |
+| GitHub. Releases de [`actions/checkout`](https://github.com/actions/checkout/releases) v7.0.1, [`actions/setup-node`](https://github.com/actions/setup-node/releases) v7.1.0 e [`pnpm/action-setup`](https://github.com/pnpm/action-setup/releases) v6.1.0 (suporte ao pnpm 12) | Actions fixadas pelo hash do commit |
 
 ## Mercado
 

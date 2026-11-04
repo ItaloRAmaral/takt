@@ -1,0 +1,11 @@
+*.md
+.claude
+pnpm-lock.yaml
+dist
+out-tsc
+coverage
+test-output
+reports
+.stryker-tmp
+.nx/cache
+.nx/workspace-data

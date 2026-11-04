@@ -1,0 +1,14 @@
+{
+  "extends": "./tsconfig.base.json",
+  "compileOnSave": false,
+  "files": [],
+  "references": [
+    {
+      "path": "./libs/plant-schema"
+    },
+    {
+      "path": "./libs/sim-engine"
+    }
+  ],
+  "compilerOptions": {}
+}

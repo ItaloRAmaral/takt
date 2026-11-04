@@ -1,0 +1,7 @@
+if ! command -v gitleaks >/dev/null 2>&1; then
+  echo "gitleaks 8.30.1 is required; see docs/architecture/workspace.md" >&2
+  exit 1
+fi
+
+pnpm exec lint-staged
+gitleaks git --pre-commit --staged --redact --no-banner

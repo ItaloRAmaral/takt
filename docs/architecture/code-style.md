@@ -2,7 +2,7 @@
 
 > **Resumo.** Como escrever código no Takt: princípios de design, critérios para quebrar um princípio quando ele vira excesso de engenharia, convenções de TypeScript e convenções por projeto (API, motor, esquema, web, testes). O guia fica abaixo do `CLAUDE.md`, dos ADRs e PDRs aceitos e das regras `RN-...`. Cada regra diz se é imposta por **ferramenta** ou verificada na **revisão**.
 
-Atualizado em 03/11/2026 · Base: pesquisa [Guia de estilo de código](../research/guia-de-estilo-de-codigo.md) · Decisões: [ADR-0001](../adr/0001-monorepo-nx-e-nomes.md), [ADR-0002](../adr/0002-arquitetura-hexagonal-por-contexto.md), [ADR-0008](../adr/0008-validacao-de-dados.md) a [ADR-0013](../adr/0013-erros-esperados.md).
+Atualizado em 04/11/2026 · Base: pesquisa [Guia de estilo de código](../research/guia-de-estilo-de-codigo.md) · Decisões: [ADR-0001](../adr/0001-monorepo-nx-e-nomes.md), [ADR-0002](../adr/0002-arquitetura-hexagonal-por-contexto.md), [ADR-0008](../adr/0008-validacao-de-dados.md) a [ADR-0013](../adr/0013-erros-esperados.md).
 
 Este guia tem uma versão curta para o Claude Code em [`.claude/rules/`](../../.claude/rules/), um arquivo por área. **O guia é a fonte da verdade.** Quando os dois divergirem, vale o guia, e os dois mudam no mesmo pull request.
 
@@ -73,7 +73,7 @@ Para cada desvio, o plano registra **cinco coisas**:
 | Convenção | Ferramenta | Revisão |
 | --- | --- | --- |
 | Casos de nome: `UpperCamelCase` para tipos e classes, `lowerCamelCase` para valores e funções, `UPPER_SNAKE_CASE` para constantes globais e códigos de erro; sem prefixo `I`, sem `_` | `naming-convention` | Clareza, abreviações, unidade no nome |
-| Arquivos em *kebab-case*. A pasta diz o papel (`domain/entities/plant.ts`); sufixo só onde o Nest ou o adaptador pedem (`plants.module.ts`, `plants.controller.ts`, `plant.mapper.ts`). `*.service.ts` nunca no domínio | `unicorn/filename-case` ou `check-file` (plugin a escolher) | Sufixos |
+| Arquivos em *kebab-case*. A pasta diz o papel (`domain/entities/plant.ts`); sufixo só onde o Nest ou o adaptador pedem (`plants.module.ts`, `plants.controller.ts`, `plant.mapper.ts`). `*.service.ts` nunca no domínio | `check-file/filename-naming-convention` e `folder-naming-convention` (`eslint-plugin-check-file`, escolhido em 04/11/2026: só faz isso, enquanto o `unicorn` traria centenas de regras) | Sufixos |
 | Sem `any`; `unknown` e estreitamento | `no-explicit-any`, `no-unsafe-*` | `any` em dublê de teste, com supressão justificada |
 | Sem `!`; `as` só com comentário justificando | `no-non-null-assertion`, `consistent-type-assertions` | A justificativa |
 | `interface` para formato de objeto; `type` para união e tipos inferidos do Zod | `consistent-type-definitions` | — |
