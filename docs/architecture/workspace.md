@@ -32,6 +32,14 @@ Para atualizar uma dependência: um pull request só para isso, com a versão pu
 | `semver@6.3.2` | Exigido pelo Babel via Nx; o `trustPolicy` recusa a 6.3.1, anterior à publicação confiável | 09/11/2026 |
 | `nx` e 16 pacotes `@nx/*` na 24.0.3 | O Nx 24.0.2 fixa o `undici` 7.29.0, com 6 vulnerabilidades altas; a 24.0.3 fixa o 7.30.1 | 06/11/2026 |
 
+**Overrides em vigor** (`overrides`, aprovados pelo fundador):
+
+| Override | Motivo | Remover quando |
+| --- | --- | --- |
+| `qs: 6.16.1` | O `typed-rest-client` 2.3.1, via Stryker 10.1.1, fixa o `qs` 6.15.1, com 4 alertas moderados do Dependabot; o Stryker só o usa no `stryker init` e no reporter do *dashboard*, que o Takt não usa (04/11/2026) | O Stryker depender do `typed-rest-client` 3 (`qs ^6.16.0`) |
+
+Alerta aberto de propósito: `minimatch` 10.2.5, via ESLint. A única correção é a versão principal 11, que o ESLint ainda não aceita, e os padrões vêm só da nossa configuração. Fecha quando o ESLint aceitar o `minimatch` 11.
+
 ## Segurança da instalação (`pnpm-workspace.yaml`)
 
 - `strictDepBuilds: true` com `allowBuilds`: um pacote com script de instalação faz a instalação falhar até ser decidido. `allowBuilds` substitui o `onlyBuiltDependencies` citado nos ADRs 0001 e 0010, removido no pnpm 11. Hoje os dois scripts conhecidos estão **negados**, depois de lidos: o do `nx` (atualiza o cliente do Nx Cloud) e o do `@swc/core` (faria `npm install @swc/wasm` por fora da política). Liberar um exige ler o script e anotar o motivo no pull request.

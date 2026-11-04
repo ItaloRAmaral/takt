@@ -39,3 +39,8 @@ trustPolicy: no-downgrade
 blockExoticSubdeps: true
 engineStrict: true
 saveExact: true
+# typed-rest-client 2.3.1 (through @stryker-mutator/core 10.1.1) pins qs 6.15.1, with 4 moderate
+# advisories; 6.16.1 fixes them. Approved by the user on 2026-11-04; remove once Stryker
+# depends on typed-rest-client 3 (qs ^6.16.0).
+overrides:
+  qs: 6.16.1
