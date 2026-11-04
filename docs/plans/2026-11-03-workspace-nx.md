@@ -2,7 +2,7 @@
 
 | Campo | Valor |
 | --- | --- |
-| Status | Aprovado (03/11/2026) |
+| Status | Concluído (04/11/2026, PR #1); aprovado em 03/11/2026 |
 | Data | 03/11/2026 |
 | Pedido | "Plano do workspace Nx: monorepo, bibliotecas `@takt/sim-engine` e `@takt/plant-schema` vazias com as ferramentas, Vitest, ESLint, Stryker, TypeScript 6.0.3 fixado, flags do tsconfig, regras de fronteira, metas de cobertura e mutação, e a seção 'Commands' do `CLAUDE.md`." Escopo ampliado pelo usuário: inclui os hooks locais e o CI do ADR-0010. |
 | Contexto | [ADR-0001](../adr/0001-monorepo-nx-e-nomes.md), [ADR-0009](../adr/0009-estrategia-de-testes.md), [ADR-0010](../adr/0010-qualidade-e-ci.md), [ADR-0011](../adr/0011-motor-de-simulacao-e-esquema.md), [ADR-0012](../adr/0012-front-end.md), [ADR-0013](../adr/0013-erros-esperados.md), [code-style.md](../architecture/code-style.md) seções 4, 5, 7, 8, 10 e 11, [milestones.md](../product/milestones.md), [casos de uso do marco 1](../product/use-cases/README.md) |

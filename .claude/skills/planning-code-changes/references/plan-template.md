@@ -21,7 +21,7 @@ A step is done when the implementer can write exactly one reasonable thing from 
 
 Two failures to avoid: a plan longer than the code it describes has written the code instead; a line that decides nothing ("TBD", "handle edge cases", "add appropriate validation", "write tests for the above", a type no task defines) is a gap.
 
-Tasks: a task is the smallest unit with its own test cycle that a reviewer could approve or reject on its own. Fold setup, configuration and docs into the task whose deliverable needs them. Each task ends with something testable.
+Tasks: a task is the smallest unit with its own test cycle that a reviewer could approve or reject on its own. Fold setup, configuration and docs into the task whose deliverable needs them. Each task ends with something testable. The last task also sets the plan status to "Concluído" in its header and in the `docs/plans/README.md` index (and the roadmap status, in the last sub-plan of a roadmap): the pull request that delivers the code closes the plan, so nobody has to remember it after the merge.
 
 Files: one clear responsibility per file; files that change together live together (ADR-0002 groups by context, then by layer). In existing code, follow the established pattern.
 
