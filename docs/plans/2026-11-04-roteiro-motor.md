@@ -2,7 +2,7 @@
 
 | Campo | Valor |
 | --- | --- |
-| Status | Proposto |
+| Status | Aprovado (04/11/2026) |
 | Data | 04/11/2026 |
 | Pedido | "Roteiro do motor de simulação (`@takt/sim-engine`) do marco 1, a partir dos casos de uso UC-SIM-001 a UC-SIM-004, das regras RN-SIM e do ADR-0011; inclui o helper `catchError` e a conferência do ADR-0013 no primeiro sub-plano, e a medição da D4." Confirmado pelo usuário em 04/11/2026 ("Podemos seguir sim"). |
 | Contexto | [Casos de uso do marco 1](../product/use-cases/README.md) (UC-SIM-001 a 004), [regras de simulação](../product/rules/simulation.md), [RN-EDT-001, 003 e 004](../product/rules/editor.md), [RN-JSN-005](../product/rules/json.md), [simulation.md](../product/simulation.md), [plant-model.md](../product/plant-model.md), [mvp-scope.md](../product/mvp-scope.md), [milestones.md](../product/milestones.md), [ADR-0008](../adr/0008-validacao-de-dados.md), [ADR-0009](../adr/0009-estrategia-de-testes.md), [ADR-0011](../adr/0011-motor-de-simulacao-e-esquema.md), [ADR-0013](../adr/0013-erros-esperados.md), [code-style.md](../architecture/code-style.md) seções 5, 7, 8 e 10 e "Decisões pendentes", [pesquisa do guia de estilo](../research/guia-de-estilo-de-codigo.md) (D4), [pesquisa sobre aquecimento](../research/aquecimento-em-simulacao-didatica.md), [pesquisa da literatura do motor](../research/literatura-do-motor.md) (04/11/2026, corrige pontos da anterior), [workspace.md](../architecture/workspace.md) |
