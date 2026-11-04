@@ -34,6 +34,7 @@
 | Atualizar o Node e o pnpm da máquina | Sim; feito em 03/11/2026: Node 24.22.2 (padrão do nvm) e pnpm 12.16.0 pelo corepack | 03/11/2026 |
 | Nome de teste sem `RN-...` nem `UC-...` | Só a descrição do comportamento, sem ID; vale para todo o projeto (`CLAUDE.md`, guia seção 10, skill de testes) | 03/11/2026 |
 | Escopo do commit | Opcional; quando houver, só os da lista | 03/11/2026 |
+| `pnpm audit` com 6 vulnerabilidades altas no `undici` 7.29.0, fixado pelo Nx 24.0.2 (tarefa 7) | Exceção na idade mínima para o Nx 24.0.3 (30/10/2026), que fixa o `undici` 7.30.1; 17 pacotes `nx`/`@nx/*` em `minimumReleaseAgeExclude`, a remover depois de 06/11/2026 | 04/11/2026 |
 
 ## Decisões técnicas deste plano
 
@@ -314,6 +315,13 @@ it.each([
 | 6 | `.prettierignore` do plano sem as saídas de build e cobertura do Nx | Mantido o `.prettierrc` da tarefa 2; `.prettierignore` com a lista do plano mais `out-tsc`, `test-output`, `.nx/cache` e `.nx/workspace-data`. `prettier --file-info` conferido: `CLAUDE.md`, `docs/**/*.md`, `.claude/**` e `pnpm-lock.yaml` ignorados | 04/11/2026 |
 | 6 | Passo 5 é do usuário, mas parte dele se verifica sem commit nem push | Rodado pelo Claude Code: `commit-msg` com arquivos de mensagem (`feat(motor): x`, `update stuff` e `Feat(repo): x` recusados; `feat(sim-engine): x`, `docs: x` e `chore: add hooks` aceitos); `pre-push` com a entrada padrão simulada (`refs/heads/main` recusado com a mensagem; `main-fix` e `feature/main` aceitos); o comando do gitleaks num repositório descartável fora do projeto (chave falsa `AKIA...` recusada, arquivo limpo aceito); `pre-commit` com o PATH sem gitleaks (mensagem e saída 1) e completo sem nada preparado (saída 0) | 04/11/2026 |
 | 6 | `pnpm exec husky` grava `core.hooksPath = .husky/_` no `.git/config` local | Feito; o script `prepare` repete isso em cada `pnpm install`. `.husky/_/` tem o próprio `.gitignore` | 04/11/2026 |
+| 7 | Versões das actions e da imagem | `actions/checkout` v7.0.1 (20/07/2026), `actions/setup-node` v7.1.0 (08/10/2026), `pnpm/action-setup` v6.1.0 (05/09/2026; a v6.1.1 tem 1 dia; a v6.1.0 é a que traz suporte ao pnpm 12), `gitleaks/gitleaks-action` v3.0.0 (30/05/2026); hash do commit por `gh api .../git/ref/tags/<tag>`, abrindo a tag anotada do `pnpm/action-setup`. Semgrep 1.182.1 (22/10/2026; a 1.183.0 tem 6 dias), *digest* do Docker Hub | 04/11/2026 |
+| 7 | O `gitleaks-action` lê os commits do pull request (`GET /repos/{owner}/{repo}/pulls/{n}/commits`, em `src/gitleaks.js`), o que exige `pull-requests: read` num repositório privado; e usa o gitleaks 8.24.3 se nada for dito | Job `gitleaks` com `contents: read` e `pull-requests: read` (só leitura); `GITLEAKS_VERSION: 8.30.1`, a mesma do hook local | 04/11/2026 |
+| 7 | Não previsto: o `checkout` deixa o token gravado na configuração do git por padrão | `persist-credentials: false` em todo `checkout`; nenhum passo precisa de git autenticado | 04/11/2026 |
+| 7 | Uma execução manual do noturno em outra branch faria o `checkout` dessa branch | `ref: main` no job `full`; a execução em outra branch não entra no filtro `--branch main` (foco 13) | 04/11/2026 |
+| 7 | O alvo `build` ainda não existe (bibliotecas sem *bundler*): `nx run-many -t build` responde "No tasks were run" | Mantido no `affected`, para as apps do marco 2 | 04/11/2026 |
+| 7 | Modelo de pull request: o plano não diz o idioma | Inglês, como as mensagens de commit | 04/11/2026 |
+| 7 | `pnpm audit --audit-level high` falhava: 6 alertas altos no `undici` 7.29.0, fixado exato pelo `nx` 24.0.2. O Nx 24.0.3 ("bump undici to 7.30.1 to patch security advisories") tinha 5 dias | Decisão do usuário: exceção para o Nx 24.0.3. O `minimumReleaseAgeExclude` não aceita padrão com versão ("Name patterns are not allowed with version unions"), então são 17 entradas exatas, com comentário e data de remoção (06/11/2026). Proveniência SLSA conferida nos 7 pacotes principais; o script de instalação do `nx` é o mesmo e continua negado. Depois: audit com saída 0 (5 moderadas), `nx report` 24.0.3, lint, tipos, testes com cobertura e mutação passando, `pnpm install --frozen-lockfile` em dia. As versões das restrições globais passam a ser Nx 24.0.3 | 04/11/2026 |
 
 ---
 
