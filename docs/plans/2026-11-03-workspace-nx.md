@@ -291,6 +291,12 @@ it.each([
 | 1 | `trustPolicy: no-downgrade` recusa o `semver@6.3.1` (anterior ao *trusted publishing*), e o `semver@6.3.2`, exigido pelo Babel via Nx, tem 2 dias | Exceção só para `semver@6.3.2` em `minimumReleaseAgeExclude`, aprovada pelo usuário: versão com proveniência do `npm/node-semver`. Remover depois de 09/11/2026 | 04/11/2026 |
 | 1 | Foco 4: `nx` e `@swc/core` têm scripts de instalação | Lidos por inteiro e negados em `allowBuilds`: o do `nx` só atualiza o cliente do Nx Cloud; o do `@swc/core` faria `npm install @swc/wasm` por fora da política. Os binários nativos vêm por dependências opcionais; SWC e Nx conferidos funcionando | 04/11/2026 |
 | 1 | Nome do pacote raiz `@org/source` e licença MIT no template | `@takt/source` (também em `customConditions`) e `UNLICENSED`, porque o repositório é fechado (PDR-0017) | 04/11/2026 |
+| 2 | O gerador de bibliotecas não aceita `--dry-run` (instala os plugins) | Plugins e ferramentas instalados antes, nas versões exatas do plano; com a árvore limpa, o `git status` depois da geração serviu de lista do que ele criou e mudou | 04/11/2026 |
+| 2 | O gerador criou na raiz `eslint.config.mjs`, `vitest.config.mts` (lista de projetos), `.prettierrc`, `.prettierignore` e acrescentou `eslint-config-prettier` com `^` | Mantidos; `eslint-config-prettier` fixado em 10.1.8. A tarefa 6 ajusta o `.prettierrc` existente em vez de criar `.prettierrc.json` | 04/11/2026 |
+| 2 | O daemon do Nx 24 instala `nx@latest` numa pasta temporária, em segundo plano, para avisar sobre "configuração de agentes de IA" (lido em `dist/src/daemon/server/latest-nx.js`); é uma instalação fora do lockfile e da política do pnpm | `useDaemonProcess: false` e `neverConnectToCloud: true` no `nx.json`. Nada foi gravado no repositório pelo daemon | 04/11/2026 |
+| 2 | `@nx/vitest` com `testMode: watch` | `testMode: run` (comando `vitest run`), explícito em vez de depender do `watch: false` de cada configuração | 04/11/2026 |
+| 2 | O gerador criou um `README.md` genérico ("generated with Nx") em cada biblioteca, além dos arquivos de exemplo | Apagados; a documentação fica em `docs/architecture/` | 04/11/2026 |
+| 2 | A referência de projeto do motor para o esquema exige `nx sync` | Rodado; `libs/sim-engine/tsconfig.lib.json` referencia o esquema | 04/11/2026 |
 
 ---
 
