@@ -51,3 +51,4 @@
 | 2026-10-21 | User feedback: context docs are a required input; tests are always planned ("Plano de testes" section, self-review item 10, roadmap test column); `plan-gap-reviewer` checks the test plan. |
 | 2026-10-21 | `plan-gap-reviewer` and `plan-design-reviewer` merged into `plan-reviewer` by user decision, after a single generic reviewer matched both in the behavior test. |
 | 2026-10-21 | Sizes changed by user decision: short plan in the conversation for small changes; no plan only for prose docs, comments and formatting. |
+| 2026-11-04 | User feedback: a plan status stayed "Aprovado" after its PR was merged, because no step said who sets "Concluído". The last task of every plan now sets it, in the same pull request as the code. |
