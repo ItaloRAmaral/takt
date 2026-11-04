@@ -2,7 +2,7 @@
 
 > **Resumo.** A aplicação entrega uma planta válida e um cenário e recebe os indicadores com intervalo de confiança, as séries por intervalo, o log de eventos da replicação animada e o estado final. Com a mesma entrada, o resultado é sempre o mesmo. Este é o caso que os testes contra a literatura verificam.
 
-Atualizado em 03/11/2026 · Marco 1 · Decisões: [PDR-0008](../../pdr/0008-simulacao-com-reproducao.md), [PDR-0014](../../pdr/0014-roteamento-definido-pelo-usuario.md), [PDR-0020](../../pdr/0020-modos-de-simulacao-e-aquecimento.md), [ADR-0011](../../adr/0011-motor-de-simulacao-e-esquema.md), [ADR-0013](../../adr/0013-erros-esperados.md).
+Atualizado em 04/11/2026 · Marco 1 · Decisões: [PDR-0008](../../pdr/0008-simulacao-com-reproducao.md), [PDR-0014](../../pdr/0014-roteamento-definido-pelo-usuario.md), [PDR-0020](../../pdr/0020-modos-de-simulacao-e-aquecimento.md), [ADR-0011](../../adr/0011-motor-de-simulacao-e-esquema.md), [ADR-0013](../../adr/0013-erros-esperados.md).
 
 | Campo | Valor |
 | --- | --- |
@@ -30,7 +30,7 @@ Atualizado em 03/11/2026 · Marco 1 · Decisões: [PDR-0008](../../pdr/0008-simu
 ## Extensões
 
 - **1a.** A planta não foi aceita pelo UC-SIM-001: a execução não começa (RN-EDT-004), e quem chama mostra os problemas.
-- **1b.** Modo regime estável sem aquecimento informado: a validação do UC-SIM-001 recusa a planta, com `INVALID_PLANT` (RN-SIM-007); a interface roda o [UC-SIM-003](uc-sim-003-sugerir-aquecimento.md) antes.
+- **1b.** Modo regime estável sem aquecimento informado: a execução não começa, com `INVALID_PLANT` (RN-SIM-007). A validação do UC-SIM-001 aceita essa planta, para o assistente poder sugerir o aquecimento; a interface roda o [UC-SIM-003](uc-sim-003-sugerir-aquecimento.md) antes.
 - **2a.** A planta passa do teto de número de elementos: a execução não começa, com `SIMULATION_LIMIT_EXCEEDED` (ADR-0011, ADR-0013).
 - **3a.** Modo continuar sem estado salvo compatível com a planta: a execução não começa, com `INVALID_PLANT` (RN-SIM-007).
 - **4a.** A execução passa do teto de duração simulada ou de número de eventos: o motor para e lança `SIMULATION_LIMIT_EXCEEDED` (ADR-0011, ADR-0013).

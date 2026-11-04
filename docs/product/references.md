@@ -85,6 +85,25 @@ Pesquisa rápida de 20/10/2026, para a escolha do gerador do motor.
 | pure-rand (npm) ([README](https://cdn.jsdelivr.net/npm/pure-rand@8.4.0/README.md)) | Alternativa em JavaScript: xoroshiro128+, com saltos | Trecho |
 | stdlib (npm), `@stdlib/random-base-mt19937` ([README](https://github.com/stdlib-js/random-base-mt19937/blob/umd/README.md)) | Alternativa em JavaScript: Mersenne Twister | Trecho |
 
+## Literatura do motor (conferência do roteiro)
+
+Fonte: pesquisa [Literatura do motor](../research/literatura-do-motor.md) (04/11/2026), com a lista completa (cerca de 50 itens) e os rótulos de fato, estimativa e palpite. Abaixo, as fontes primárias que mudam o [roteiro do motor](../plans/2026-11-04-roteiro-motor.md).
+
+| Fonte | O que embasa |
+| --- | --- |
+| L'Ecuyer, P. RngStreams: [`RngStream.c`](https://www-labs.iro.umontreal.ca/~lecuyer/myftp/streams00/c/RngStream.c) e [`test2RngStream.res`](https://www-labs.iro.umontreal.ca/~lecuyer/myftp/streams00/c/test2RngStream.res) (uso não comercial); [versão no GitHub](https://github.com/umontreal-simul/RngStreams) (Apache 2.0) | Saída oficial para conferir o gerador; licença do código de partida |
+| L'Ecuyer, P.; Munger, D.; Oreshkin, B.; Simard, R. "Random numbers for parallel computers". *Math. Comput. Simul.* 135, 2017 ([preprint](https://www.gerad.ca/papers/G-2015-35.pdf)); ns-3, [Random Variables](https://www.nsnam.org/docs/manual/html/random-variables.html) | Sequência por fonte de aleatoriedade; número fixo de sequência por variável |
+| StatLib, [AS 241](https://lib.stat.cmu.edu/apstat/241); R, `qnorm.c`, `pnorm.c` e `qt.c` ([código](https://github.com/wch/r-source/tree/trunk/src/nmath)) | Inversa da normal; função de distribuição da normal (Cody); quantil da t |
+| Botev, Z. 2017, *JRSS-B* 79(1) ([arXiv](https://arxiv.org/abs/1603.04166)) e o pacote R TruncatedNormal | Normal truncada com o intervalo numa cauda |
+| NIST/SEMATECH. [Valores críticos da t](https://www.itl.nist.gov/div898/handbook/eda/section3/eda3672.htm) | Conferência da tabela do quantil da t |
+| ECMA-262, [funções do objeto Math](https://tc39.es/ecma262/multipage/numbers-and-dates.html); V8, commits [08be4445f6](https://github.com/v8/v8/commit/08be4445f60b3470b2b3130c97d41f09472bd076) (`log`) e [e5bb55463b](https://github.com/v8/v8/commit/e5bb55463b592ea0cb9480736146941c10e6bb62) (`exp`); SpiderMonkey, `jsmath.cpp`; JavaScriptCore, `MathCommon.h` | D4: só `sqrt` e as quatro operações são exatos; cada motor usa outra biblioteca matemática |
+| Little, J. D. C. 2011, *Operations Research* 59(3) ([DOI](https://pubsonline.informs.org/doi/10.1287/opre.1110.0940)) | LL.2 (janela com peças no início e no fim) no teste do turno |
+| Dieker, A. B.; Warren, J. 2010, *Math. Oper. Res.* 35 ([arXiv](https://arxiv.org/abs/0808.0513)) | Tempo de relaxação do M/M/1, τ = 1/(μ(1 − √ρ)²) |
+| AutoSimOA (Hoad, Robinson e Davies), relatórios do [projeto](https://warwick.ac.uk/fac/soc/wbs/projects/autosimoa/); Hoad e Robinson, [WSC 2011](https://www.informs-sim.org/wsc11papers/044.pdf); Pasupathy e Schmeiser, [WSC 2010](https://www.informs-sim.org/wsc10papers/017.pdf) | Valores do MSER-5 (5 piloto, lotes de 5, +10%, 10 tentativas); maior corte entre indicadores; corte pequeno quando o viés é menor que o ruído |
+| Law, A. M. [WSC 2004](https://www.informs-sim.org/wsc04papers/009.pdf) | Replicação/deleção e IC pela t |
+| Roser, C.; Nakano, M.; Tanaka, M. "A practical bottleneck detection method", WSC 2001 ([preprint](https://www.allaboutlean.com/wp-content/uploads/2014/05/2001_Roser_WSC-A-Practical-Bottleneck-Detection-Method_Preprint.pdf)) | Limites do gargalo pela maior utilização e pela fila; período ativo |
+| Universidade de Twente, [tutorial do Plant Simulation](https://www.utwente.nl/en/bms/iebis/staff/mes/plantsimulation/tutorialplantsimulation2404-v20250502.pdf) (2025); Simio, ["Anatomy of objects: Server"](https://textbook.simio.com/Workbook6/the-anatomy-of-objects-server.html); [ajuda do Simul8](https://support.minitab.com/en-us/simul8/help-and-how-to/build-a-simulation/conveyors/) | Fila na estação, bloqueio, esteira e relógio das falhas nas ferramentas |
+
 ## Explicações na interface e aprendizagem
 
 Fonte: pesquisa [Explicação em camadas na interface](../research/explicacao-em-camadas-na-interface.md) (20/10/2026), onde está a lista completa (68 itens). Abaixo, as obras que embasam decisões. "Prévio" = citado de conhecimento prévio do pesquisador, sem reabrir a fonte; conferir antes de uso público.

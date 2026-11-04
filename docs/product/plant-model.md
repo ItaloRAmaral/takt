@@ -57,7 +57,7 @@ Exemplo ilustrativo, não um esquema final. Nomes em inglês porque são código
     { "id": "c4", "from": "rw1", "to": "m1", "kind": "direct" },
     { "id": "c5", "from": "b1", "to": "snk1", "kind": "direct" }
   ],
-  "settings": { "reworkLimit": 3 },
+  "settings": { "reworkLimit": 2 },
   "scenarios": [
     { "id": "base", "name": "Atual", "run": { "durationH": 8, "replications": 30, "seed": 42 }, "overrides": {} }
   ]

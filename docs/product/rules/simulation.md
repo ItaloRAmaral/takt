@@ -2,7 +2,7 @@
 
 > **Resumo.** O motor é determinístico com semente fixa, e a cena 3D só reproduz o que ele calculou. Os indicadores vêm de replicações, com média e intervalo de confiança. O roteamento entre elementos segue regras definidas pelo usuário.
 
-Atualizado em 03/11/2026 · Origem: [PDR-0008](../../pdr/0008-simulacao-com-reproducao.md), [PDR-0014](../../pdr/0014-roteamento-definido-pelo-usuario.md), [PDR-0020](../../pdr/0020-modos-de-simulacao-e-aquecimento.md).
+Atualizado em 04/11/2026 · Origem: [PDR-0008](../../pdr/0008-simulacao-com-reproducao.md), [PDR-0014](../../pdr/0014-roteamento-definido-pelo-usuario.md), [PDR-0020](../../pdr/0020-modos-de-simulacao-e-aquecimento.md).
 
 ### RN-SIM-001: Determinismo
 
@@ -42,11 +42,11 @@ Atualizado em 03/11/2026 · Origem: [PDR-0008](../../pdr/0008-simulacao-com-repr
 
 ### RN-SIM-006: Limite de retrabalho
 
-- **Enunciado:** cada peça conta quantas vezes passou por retrabalho; ao atingir o limite, ela vai para o refugo.
+- **Enunciado:** cada peça tem um único contador de retrabalhos, somado em todas as estações por onde passa. O limite é o número de retrabalhos permitidos: uma peça que sai defeituosa depois de já ter usado todos eles vai para o refugo.
 - **Origem:** PDR-0014.
-- **Exemplo:** com limite 2, uma peça defeituosa pela terceira vez vira refugo.
+- **Exemplo:** com limite 2, uma peça defeituosa pela terceira vez vira refugo, mesmo que os defeitos tenham sido em estações diferentes (1 na M1 e 2 na M2). Com probabilidade de defeito p, a chance de refugo é p³ e a peça é processada no máximo 3 vezes.
 - **Quando violada:** é um invariante do motor.
-- **Padrão:** 3 passagens, definido por planta.
+- **Padrão:** 2 retrabalhos (até 3 passagens), definido por planta e editável. Decisão do fundador em 04/11/2026: conta retrabalhos, não passagens, com contador por peça. **Fonte:** a literatura não traz convenção para o limite; as fórmulas estão na [pesquisa da literatura do motor](../../research/literatura-do-motor.md).
 
 ## Modos de execução e aquecimento
 
@@ -57,7 +57,7 @@ Origem: [PDR-0020](../../pdr/0020-modos-de-simulacao-e-aquecimento.md). Base: [p
 - **Enunciado:** o usuário escolhe o modo de cada execução: **turno** (começa vazio, sem aquecimento; padrão), **continuar do turno anterior** (começa com o estado final salvo de uma execução anterior da mesma planta) ou **regime estável** (começa vazio e descarta o aquecimento). A interface explica cada modo antes da escolha.
 - **Origem:** PDR-0020.
 - **Exemplo:** o professor roda o turno e depois o regime estável para mostrar a diferença entre os dois números.
-- **Quando violada:** `INVALID_PLANT` se "continuar do turno anterior" for escolhido sem estado salvo compatível, ou se o regime estável for escolhido sem aquecimento informado (aceito do assistente ou editado, RN-SIM-009).
+- **Quando violada:** `INVALID_PLANT` se "continuar do turno anterior" for escolhido sem estado salvo compatível, ou se o regime estável for escolhido sem aquecimento informado (aceito do assistente ou editado, RN-SIM-009). As duas verificações acontecem ao executar, não na validação da planta, que aceita um regime estável ainda sem aquecimento (decisão do fundador em 04/11/2026).
 - **Em aberto:** quando um estado salvo deixa de ser compatível (por exemplo, se a planta mudou).
 
 ### RN-SIM-008: Fim do aquecimento
