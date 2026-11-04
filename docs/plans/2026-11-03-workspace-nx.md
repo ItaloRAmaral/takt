@@ -303,6 +303,8 @@ it.each([
 | 3 | `@nx/enforce-module-boundaries` gerado com `sourceTag: '*'` (libera tudo) | Trocado pelas três `depConstraints` do plano. Ignorados também `**/test-output` (pasta de cobertura do gerador; a tarefa 4 pode mudar) | 04/11/2026 |
 | 3 | O cache do alvo `test` do Nx só declara o `vitest` como dependência externa: atualizar o ESLint ou um plugin não invalida o cache local dos testes de conformidade | Sem mudança: o CI não tem cache remoto e toda atualização vem num pull request próprio; a mudança da configuração da raiz invalida o cache (foco 15, conferido) | 04/11/2026 |
 | 3 | Prettier com a largura padrão (80) reformatou os arquivos novos | `prettier --write` nos 5 arquivos; a tarefa 6 fixa a configuração | 04/11/2026 |
+| 4 | Foco 2, cobertura sem instruções | Passa nas duas bibliotecas: "Lines 100% (0/0)", "Branches 100% (0/0)", "1 empty file skipped". Prova do portão: `gate.proof.ts` (uma função com um `if`, sem teste) deu "Coverage for lines (0%) does not meet global threshold (90%)" e o mesmo para *branches*, com saída 1; arquivo apagado | 04/11/2026 |
+| 4 | As metas só valem com `--coverage`: `pnpm nx test <projeto>` sem a flag não mede | Sem mudança na configuração; a tarefa 7 roda o CI com `--coverage` e a tarefa 8 grava o comando no `CLAUDE.md` | 04/11/2026 |
 
 ---
 
