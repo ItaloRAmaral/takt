@@ -2,7 +2,7 @@
 
 | Campo | Valor |
 | --- | --- |
-| Status | Proposto |
+| Status | Aprovado (03/11/2026) |
 | Data | 03/11/2026 |
 | Pedido | "Plano do workspace Nx: monorepo, bibliotecas `@takt/sim-engine` e `@takt/plant-schema` vazias com as ferramentas, Vitest, ESLint, Stryker, TypeScript 6.0.3 fixado, flags do tsconfig, regras de fronteira, metas de cobertura e mutação, e a seção 'Commands' do `CLAUDE.md`." Escopo ampliado pelo usuário: inclui os hooks locais e o CI do ADR-0010. |
 | Contexto | [ADR-0001](../adr/0001-monorepo-nx-e-nomes.md), [ADR-0009](../adr/0009-estrategia-de-testes.md), [ADR-0010](../adr/0010-qualidade-e-ci.md), [ADR-0011](../adr/0011-motor-de-simulacao-e-esquema.md), [ADR-0012](../adr/0012-front-end.md), [ADR-0013](../adr/0013-erros-esperados.md), [code-style.md](../architecture/code-style.md) seções 4, 5, 7, 8, 10 e 11, [milestones.md](../product/milestones.md), [casos de uso do marco 1](../product/use-cases/README.md) |
@@ -279,6 +279,18 @@ it.each([
 - [ ] **Passo 4: verificar.** Cada comando do `CLAUDE.md` roda e passa num shell novo.
 
 **Commit sugerido:** `docs: workspace commands and living doc` · arquivos: os da lista.
+
+---
+
+## Notas de execução
+
+| Tarefa | O que divergiu do plano | O que foi feito | Data |
+| --- | --- | --- | --- |
+| 1 | O `create-nx-workspace` 24.0.2 trocou o preset `ts` pelo template `nrwl/empty-template` (baixado do GitHub): Nx 24.0.0, pasta `packages/`, sem ESLint nem Vitest, e ignorou `--aiAgents=none` (criou `CLAUDE.md`, `AGENTS.md`, `.claude/` e skills de outras ferramentas) | Nada disso foi copiado. O `eslint.config.mjs` da raiz passa a nascer na tarefa 2, pelo gerador de bibliotecas; `.editorconfig` não existe no template e não foi criado | 04/11/2026 |
+| 1 | O template trouxe dependências fora da lista: `@swc/core`, `@swc-node/register`, `@swc/helpers`, `tslib`, `@types/node` | Mantidas, com versão exata: as do template (`@swc/*`), `tslib` 2.8.1 e `@types/node` 24.19.2 (as mais novas com 7 dias) | 04/11/2026 |
+| 1 | `trustPolicy: no-downgrade` recusa o `semver@6.3.1` (anterior ao *trusted publishing*), e o `semver@6.3.2`, exigido pelo Babel via Nx, tem 2 dias | Exceção só para `semver@6.3.2` em `minimumReleaseAgeExclude`, aprovada pelo usuário: versão com proveniência do `npm/node-semver`. Remover depois de 09/11/2026 | 04/11/2026 |
+| 1 | Foco 4: `nx` e `@swc/core` têm scripts de instalação | Lidos por inteiro e negados em `allowBuilds`: o do `nx` só atualiza o cliente do Nx Cloud; o do `@swc/core` faria `npm install @swc/wasm` por fora da política. Os binários nativos vêm por dependências opcionais; SWC e Nx conferidos funcionando | 04/11/2026 |
+| 1 | Nome do pacote raiz `@org/source` e licença MIT no template | `@takt/source` (também em `customConditions`) e `UNLICENSED`, porque o repositório é fechado (PDR-0017) | 04/11/2026 |
 
 ---
 

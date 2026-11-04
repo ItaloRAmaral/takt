@@ -1,0 +1,21 @@
+packages:
+  - 'libs/*'
+  - 'apps/*'
+
+minimumReleaseAge: 10080
+# semver@6.3.2 (2026-11-02) is required by Babel through Nx: trustPolicy refuses
+# 6.3.1 because it predates trusted publishing. 6.3.2 has npm provenance from
+# npm/node-semver. Approved by the user on 2026-11-04; remove once it is 7 days old.
+minimumReleaseAgeExclude:
+  - 'semver@6.3.2'
+strictDepBuilds: true
+# Both scripts were read on 2026-11-04 and are not needed: the native binaries come
+# from optional dependencies. nx: only updates the Nx Cloud client, which Takt does
+# not use. @swc/core: falls back to `npm install @swc/wasm`, bypassing this policy.
+allowBuilds:
+  nx: false
+  '@swc/core': false
+trustPolicy: no-downgrade
+blockExoticSubdeps: true
+engineStrict: true
+saveExact: true

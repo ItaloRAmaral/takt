@@ -1,0 +1,23 @@
+{
+  "name": "@takt/source",
+  "version": "0.0.0",
+  "license": "UNLICENSED",
+  "private": true,
+  "scripts": {},
+  "engines": {
+    "node": "24.22.2"
+  },
+  "packageManager": "pnpm@12.16.0",
+  "dependencies": {},
+  "devDependencies": {
+    "@nx/js": "24.0.2",
+    "@swc-node/register": "1.11.1",
+    "@swc/core": "1.15.8",
+    "@swc/helpers": "0.5.18",
+    "@types/node": "24.19.2",
+    "nx": "24.0.2",
+    "prettier": "3.9.10",
+    "tslib": "2.8.1",
+    "typescript": "6.0.3"
+  }
+}

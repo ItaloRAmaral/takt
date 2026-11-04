@@ -17,7 +17,7 @@ Atualizado em 03/11/2026.
 
 | Plano | Status | Data |
 | --- | --- | --- |
-| [Workspace Nx do marco 1](2026-11-03-workspace-nx.md) | Proposto | 03/11/2026 |
+| [Workspace Nx do marco 1](2026-11-03-workspace-nx.md) | Aprovado | 03/11/2026 |
 
 ## Medição do revisor
 
