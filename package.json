@@ -3,13 +3,17 @@
   "version": "0.0.0",
   "license": "UNLICENSED",
   "private": true,
-  "scripts": {},
+  "scripts": {
+    "prepare": "husky"
+  },
   "engines": {
     "node": "24.22.2"
   },
   "packageManager": "pnpm@12.16.0",
   "dependencies": {},
   "devDependencies": {
+    "@commitlint/cli": "21.2.4",
+    "@commitlint/config-conventional": "21.2.4",
     "@eslint/js": "10.0.1",
     "@nx/eslint": "24.0.2",
     "@nx/eslint-plugin": "24.0.2",
@@ -26,6 +30,8 @@
     "eslint": "10.13.0",
     "eslint-config-prettier": "10.1.8",
     "eslint-plugin-check-file": "3.3.2",
+    "husky": "9.1.7",
+    "lint-staged": "17.6.0",
     "nx": "24.0.2",
     "prettier": "3.9.10",
     "tslib": "2.8.1",

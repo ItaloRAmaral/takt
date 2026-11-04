@@ -1,6 +1,11 @@
-# Add files here to ignore them from prettier formatting
-/dist
-/coverage
-/.nx/cache
-/.nx/workspace-data
+*.md
+.claude
 pnpm-lock.yaml
+dist
+out-tsc
+coverage
+test-output
+reports
+.stryker-tmp
+.nx/cache
+.nx/workspace-data
