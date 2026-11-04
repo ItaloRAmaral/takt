@@ -2,7 +2,7 @@
 
 > **Resumo.** O motor é o principal ativo técnico: simulação de eventos discretos, determinística com semente fixa, com replicações e intervalo de confiança. A cena 3D só reproduz o log de eventos. Antes de aparecer em aula, o motor precisa reproduzir resultados conhecidos da literatura.
 
-Atualizado em 20/10/2026 · Decisões: [PDR-0008](../pdr/0008-simulacao-com-reproducao.md), [PDR-0014](../pdr/0014-roteamento-definido-pelo-usuario.md) · Regras: [rules/simulation.md](rules/simulation.md).
+Atualizado em 04/11/2026 · Decisões: [PDR-0008](../pdr/0008-simulacao-com-reproducao.md), [PDR-0014](../pdr/0014-roteamento-definido-pelo-usuario.md) · Regras: [rules/simulation.md](rules/simulation.md).
 
 ## Como funciona
 
@@ -53,11 +53,11 @@ Testes automáticos escritos **antes** do motor. O motor está pronto para a sal
 | Qualquer rodada estável | WIP = vazão × lead time | Lei de Little |
 | Falhas com MTBF 240 min e MTTR 15 min | Disponibilidade ≈ 94,1% (240 / 255) | Definição de disponibilidade |
 | Retrabalho com probabilidade p, sem limite | Passagens esperadas por peça = 1 / (1 − p) | Distribuição geométrica |
-| Turno vazio, M/M/1 com ρ = 0,8, T = 480 | Média de L ≈ 3,79 (viés de começar vazio) | [Pesquisa sobre aquecimento](../research/aquecimento-em-simulacao-didatica.md) |
+| Turno vazio, M/M/1 com ρ = 0,8, T = 480 | Média de L ≈ 3,79 (viés de começar vazio); separar de 4 exige cerca de 1.000 replicações | [Pesquisa sobre aquecimento](../research/aquecimento-em-simulacao-didatica.md) |
 | Lei de Little em janela finita, contando o WIP inicial | Igualdade exata, sem estatística (teste unitário) | Little (2011), LL.1 e LL.2 |
-| MSER-5 no M/M/1 com ρ = 0,8 | Corte da ordem de algumas centenas de unidades de tempo | Pesquisa sobre aquecimento |
-
-Os casos de regime estável (M/M/1, Little em regime, Hopp e Spearman) rodam no modo regime estável. **Estimativa:** ±5% em L com ρ = 0,8 exige cerca de 1,7×10⁵ unidades de tempo somadas entre replicações; testes rápidos de regressão podem usar ρ = 0,5.
+| MSER-5 no M/M/1 com ρ = 0,8 | Corte válido, e o IC da média truncada cobre L = 4. O corte típico é pequeno (mediana de 10 a 15 unidades de tempo, em simulação própria da pesquisa), não "algumas centenas" | [Literatura do motor](../research/literatura-do-motor.md) |
 | k estações paralelas idênticas, tempo c | Capacidade = k / c | Hopp e Spearman |
+
+Os casos de regime estável (M/M/1, Little em regime, Hopp e Spearman) rodam no modo regime estável. Cada caso só fecha com condições do modelo (fila ilimitada e fonte nunca bloqueada no M/M/1; bloqueio depois do serviço na linha em série; falhas no relógio de calendário e MTBF contado do fim do reparo na disponibilidade; LL.2, não LL.1, num turno que termina com peças), listadas na [pesquisa da literatura do motor](../research/literatura-do-motor.md). **Estimativa:** ±5% em L com ρ = 0,8 exige cerca de 1,7×10⁵ unidades de tempo somadas entre replicações; testes rápidos de regressão podem usar ρ = 0,5.
 
 Referências completas: [references.md](references.md).
