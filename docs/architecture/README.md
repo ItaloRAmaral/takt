@@ -45,5 +45,5 @@ Atualizado em 04/11/2026.
 | [takt-core-api.md](takt-core-api.md) | API: estrutura, fluxo de uma requisição, erros, validação, banco, observabilidade, segurança | Criado |
 | [workspace.md](workspace.md) | Monorepo: projetos, versões fixadas e exceções, segurança da instalação, lint, testes, cobertura, mutação, hooks e CI | Criado |
 | `takt-web-app.md` | Front-end, cena 3D, estado, armazenamento local | Na implementação ([ADR-0012](../adr/0012-front-end.md)) |
-| `sim-engine.md` | Motor de simulação | Após o ADR do motor |
+| [sim-engine.md](sim-engine.md) | Motor de simulação: estrutura, erros, gerador e distribuições (cresce a cada sub-plano do roteiro) | Em construção |
 | `plant-schema.md` | Esquema, validação e migrações da planta | Após o ADR do motor |
