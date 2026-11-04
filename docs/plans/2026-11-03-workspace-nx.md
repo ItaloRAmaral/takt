@@ -297,6 +297,12 @@ it.each([
 | 2 | `@nx/vitest` com `testMode: watch` | `testMode: run` (comando `vitest run`), explícito em vez de depender do `watch: false` de cada configuração | 04/11/2026 |
 | 2 | O gerador criou um `README.md` genérico ("generated with Nx") em cada biblioteca, além dos arquivos de exemplo | Apagados; a documentação fica em `docs/architecture/` | 04/11/2026 |
 | 2 | A referência de projeto do motor para o esquema exige `nx sync` | Rodado; `libs/sim-engine/tsconfig.lib.json` referencia o esquema | 04/11/2026 |
+| 3 | O plano pedia `disableTypeChecked` nos `.mjs` | Os presets com tipos (`strictTypeChecked`, `stylisticTypeChecked`) e as regras só de TypeScript valem só para arquivos `.ts`/`.mts`/`.cts` (`defineConfig` com `extends`); os `.mjs` nunca recebem regras com tipos. Mesmo efeito, sem um bloco de exceção | 04/11/2026 |
+| 3 | No *flat config*, uma regra redefinida num projeto substitui as opções da raiz: o `no-restricted-syntax` do motor apagaria a proibição de `enum` | A raiz exporta `noEnum` e `browserGlobals` (exports nomeados, permitidos), e o motor repete `noEnum` na própria lista; o teste `rejects enum declarations` nas duas bibliotecas segura isso | 04/11/2026 |
+| 3 | O plano não dizia em qual biblioteca ficam os testes de nome de arquivo e os controles positivos | Nas duas, porque cada uma tem a própria configuração; 26 testes no motor, 14 no esquema | 04/11/2026 |
+| 3 | `@nx/enforce-module-boundaries` gerado com `sourceTag: '*'` (libera tudo) | Trocado pelas três `depConstraints` do plano. Ignorados também `**/test-output` (pasta de cobertura do gerador; a tarefa 4 pode mudar) | 04/11/2026 |
+| 3 | O cache do alvo `test` do Nx só declara o `vitest` como dependência externa: atualizar o ESLint ou um plugin não invalida o cache local dos testes de conformidade | Sem mudança: o CI não tem cache remoto e toda atualização vem num pull request próprio; a mudança da configuração da raiz invalida o cache (foco 15, conferido) | 04/11/2026 |
+| 3 | Prettier com a largura padrão (80) reformatou os arquivos novos | `prettier --write` nos 5 arquivos; a tarefa 6 fixa a configuração | 04/11/2026 |
 
 ---
 
