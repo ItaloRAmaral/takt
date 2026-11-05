@@ -1,6 +1,6 @@
 import { catchError } from '../tests/helpers/catch-error.js';
 import { drawUniforms } from '../tests/helpers/draw-uniforms.js';
-import { sumUniforms } from '../tests/helpers/sum-uniforms.js';
+import { summarizeUniforms } from '../tests/helpers/summarize-uniforms.js';
 import { createRandomStream, nextUniform, streamStart } from './mrg32k3a.js';
 
 describe('MRG32k3a', () => {
@@ -107,19 +107,19 @@ describe('MRG32k3a', () => {
   it('uniforms stay strictly between 0 and 1', () => {
     const stream = createRandomStream(streamStart(0n), 0);
 
-    const values = drawUniforms(stream, 100_000);
+    const summary = summarizeUniforms(stream, 100_000);
 
-    expect(Math.min(...values)).toBeGreaterThan(0);
-    expect(Math.max(...values)).toBeLessThan(1);
+    expect(summary.min).toBeGreaterThan(0);
+    expect(summary.max).toBeLessThan(1);
   });
 
   it('stream 2 sums the 100 values after its first to the reference sum', () => {
     const stream = createRandomStream(streamStart(2n), 0);
     nextUniform(stream);
 
-    const total = sumUniforms(stream, 100);
+    const summary = summarizeUniforms(stream, 100);
 
-    expect(total).toBe(53.98590159231507);
+    expect(summary.sum).toBe(53.98590159231507);
   });
 
   it('rejects a negative replication', () => {

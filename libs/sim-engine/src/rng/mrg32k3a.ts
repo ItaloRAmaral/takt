@@ -137,6 +137,8 @@ function jump(
  * @returns A number strictly between 0 and 1.
  */
 export function nextUniform(stream: RandomStream): number {
+  // Every product stays below 2^53 (A12 · s is at most about 6.0e15), so
+  // this arithmetic on numbers is exact.
   let p1 = (A12 * stream.s11 - A13N * stream.s10) % M1;
   if (p1 < 0) {
     p1 += M1;

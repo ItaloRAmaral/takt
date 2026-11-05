@@ -139,8 +139,8 @@ Nenhuma.
 ## Tarefa 2: gerador MRG32k3a com sequências e subsequências
 
 **Arquivos:**
-- Criar: `libs/sim-engine/src/rng/mrg32k3a.ts`, `libs/sim-engine/src/rng/jump.ts`, `libs/sim-engine/src/tests/helpers/draw-uniforms.ts`, `libs/sim-engine/src/tests/helpers/sum-uniforms.ts`
-- Testar: `libs/sim-engine/src/rng/mrg32k3a.spec.ts`, `libs/sim-engine/src/rng/jump.spec.ts`, `libs/sim-engine/src/tests/helpers/draw-uniforms.spec.ts`, `libs/sim-engine/src/tests/helpers/sum-uniforms.spec.ts`
+- Criar: `libs/sim-engine/src/rng/mrg32k3a.ts`, `libs/sim-engine/src/rng/jump.ts`, `libs/sim-engine/src/tests/helpers/draw-uniforms.ts`, `libs/sim-engine/src/tests/helpers/summarize-uniforms.ts`
+- Testar: `libs/sim-engine/src/rng/mrg32k3a.spec.ts`, `libs/sim-engine/src/rng/jump.spec.ts`, `libs/sim-engine/src/tests/helpers/draw-uniforms.spec.ts`, `libs/sim-engine/src/tests/helpers/summarize-uniforms.spec.ts`
 
 **Interfaces:**
 - Produz: `interface StreamStart` (os seis valores do início da sequência, `readonly`); `streamStart(streamIndex: bigint): StreamStart`, que salta `streamIndex · 2¹²⁷` passos a partir do estado inicial do pacote; `interface RandomStream` com os seis valores do estado (mutáveis; só `nextUniform` os altera); `createRandomStream(start: StreamStart, replication: number): RandomStream`, que salta `replication · 2⁷⁶` passos; `nextUniform(stream: RandomStream): number`. Auxiliar de teste: `drawUniforms(stream: RandomStream, count: number): number[]`.

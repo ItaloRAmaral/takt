@@ -41,6 +41,38 @@ describe('stream index', () => {
     expect(result).toBe(4846866088661209389n);
   });
 
+  it('RN-SIM-001: the same seed and key give the same stream index', () => {
+    const first = streamIndex(42, 'm1:cycle');
+
+    const second = streamIndex(42, 'm1:cycle');
+
+    expect(second).toBe(first);
+  });
+
+  it('different seeds give different stream indices', () => {
+    const first = streamIndex(42, 'm1:cycle');
+
+    const second = streamIndex(43, 'm1:cycle');
+
+    expect(second).not.toBe(first);
+  });
+
+  it('RN-SIM-010: a key keeps its stream index when other keys change', () => {
+    const before = assignStreamIndices(42, ['m1:cycle', 'm2:cycle']);
+
+    const after = assignStreamIndices(42, ['m1:cycle', 'm3:failure']);
+
+    expect(after.get('m1:cycle')).toBe(before.get('m1:cycle'));
+  });
+
+  it('RN-SIM-010: a key keeps its stream index when the key order changes', () => {
+    const before = assignStreamIndices(42, ['m1:cycle', 'm2:cycle']);
+
+    const after = assignStreamIndices(42, ['m2:cycle', 'm1:cycle']);
+
+    expect(after.get('m1:cycle')).toBe(before.get('m1:cycle'));
+  });
+
   it('assigns each key its stream index', () => {
     const indices = assignStreamIndices(42, ['m1:cycle', 'm1:failure']);
 
