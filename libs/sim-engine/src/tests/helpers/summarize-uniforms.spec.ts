@@ -1,9 +1,9 @@
-import { createRandomStream, streamStart } from '../../rng/mrg32k3a.js';
+import { createRandomStream, findStreamStart } from '../../rng/mrg32k3a.js';
 import { summarizeUniforms } from './summarize-uniforms.js';
 
 describe('summarizeUniforms', () => {
   it('gives the smallest, the largest and the sum in the order drawn', () => {
-    const stream = createRandomStream(streamStart(2n), 0);
+    const stream = createRandomStream(findStreamStart(2n), 0);
 
     const summary = summarizeUniforms(stream, 3);
 

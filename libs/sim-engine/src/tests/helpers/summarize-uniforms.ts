@@ -15,18 +15,18 @@ export interface UniformSummary {
  * without keeping them all.
  *
  * @param stream - The stream to draw from; its state advances.
- * @param count - How many numbers to draw.
+ * @param uniformCount - How many numbers to draw.
  * @returns The smallest, the largest and the sum of the numbers drawn.
  */
 export function summarizeUniforms(
   stream: RandomStream,
-  count: number,
+  uniformCount: number,
 ): UniformSummary {
   let min = Infinity;
   let max = -Infinity;
   let sum = 0;
 
-  for (let drawn = 0; drawn < count; drawn += 1) {
+  for (let drawn = 0; drawn < uniformCount; drawn += 1) {
     const value = nextUniform(stream);
 
     min = Math.min(min, value);

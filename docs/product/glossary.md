@@ -2,7 +2,7 @@
 
 > **Resumo.** Termos do Takt em português, o equivalente em inglês (interface) e o nome usado no código. O código é sempre em inglês; esta tabela é a ponte e a fonte para a internacionalização.
 
-Atualizado em 20/10/2026.
+Atualizado em 05/11/2026.
 
 ## Produto e acesso
 
@@ -48,6 +48,11 @@ Atualizado em 20/10/2026.
 | Cenário | Scenario | `scenario` |
 | Replicação | Replication | `replication` |
 | Semente | Seed | `seed` |
+| Sequência de números aleatórios | Random stream | `RandomStream` (estado); número da sequência: `streamIndex` |
+| Início da sequência | Stream start | `StreamStart` |
+| Subsequência (uma por replicação) | Substream | *substream* (só em comentários e docs; no código é a replicação) |
+| Chave da sequência | Stream key | `key`, no formato `<id do elemento>:<propósito>` |
+| Variabilidade (tempo fixo ou distribuição) | Variability | `Variability` (tipo interno do motor; `kind`) |
 | Log de eventos | Event log | `eventLog` |
 | Módulo | Module | `module` (`production`, `inventory`, `planning`, `maintenance`, `quality`) |
 

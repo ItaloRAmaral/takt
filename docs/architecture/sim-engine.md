@@ -2,7 +2,7 @@
 
 > **Resumo.** Como o motor é construído hoje. O motor é um núcleo funcional em TypeScript puro, sem React, Three.js nem DOM, que roda num Web Worker do `takt-web-app`. O porquê está no [ADR-0011](../adr/0011-motor-de-simulacao-e-esquema.md) e no [ADR-0013](../adr/0013-erros-esperados.md); o plano que o constrói é o [roteiro do motor](../plans/2026-11-04-roteiro-motor.md). Este documento cresce a cada sub-plano.
 
-Atualizado em 05/11/2026 (sub-plano 1, tarefa 3).
+Atualizado em 05/11/2026 (sub-plano 1, tarefa 4).
 
 ## Estrutura
 
@@ -11,9 +11,9 @@ Pastas por conceito ([guia de estilo](code-style.md), seção 7), dentro de `lib
 | Pasta | O que tem | Sub-plano |
 | --- | --- | --- |
 | `errors/` | `SimulationError`, o erro esperado do motor | 1 |
-| `tests/helpers/` | Auxiliares só de teste (`catchError`, `drawUniforms`, `summarizeUniforms`), cada um com o spec ao lado; não saem pelo `index.ts`, não entram no *build* (`exclude` do `tsconfig.lib.json`) nem na mutação (`mutate` da Stryker), mas contam na cobertura | 1 |
+| `tests/helpers/` | Auxiliares só de teste (`catchError`, `drawUniforms`, `summarizeUniforms`, `drawTimesSec`, `sampleMean`, `sampleVariance`), cada um com o spec ao lado; não saem pelo `index.ts`, não entram no *build* (`exclude` do `tsconfig.lib.json`) nem na mutação (`mutate` da Stryker), mas contam na cobertura | 1 |
 | `rng/` | Gerador MRG32k3a (`mrg32k3a.ts`), saltos por potência de matriz (`jump.ts`), índice da sequência por chave (`stream-index.ts`) | 1 |
-| `distributions/` | Distribuições por inversão | 1 (a preencher) |
+| `distributions/` | `Variability` e `drawTimeSec` (`variability.ts`), quantis da exponencial (`exponentialQuantile`, em `exponential.ts`) e da triangular (`triangularQuantile`, em `triangular.ts`); normal truncada a seguir | 1 |
 
 O `src/index.ts` é a API pública: hoje só `SimulationError` e `SimulationErrorCode`. O resto é interno e usado pelos sub-planos seguintes.
 
@@ -29,7 +29,7 @@ O `src/index.ts` é a API pública: hoje só `SimulationError` e `SimulationErro
 **MRG32k3a** (L'Ecuyer 1999; L'Ecuyer et al. 2002), escrito a partir do artigo, sem código copiado do RngStreams.
 
 - **Constantes:** m1 = 4294967087, m2 = 4294944443, a12 = 1403580, a13n = 810728, a21 = 527612, a23n = 1370589, norm = 1 / (m1 + 1). Estado inicial do pacote: 12345 nos seis valores.
-- **Sequências e subsequências:** `streamStart(índice)` salta `índice · 2¹²⁷` passos a partir do estado do pacote, uma vez por chave; `createRandomStream(início, replicação)` salta `replicação · 2⁷⁶` passos e lança `RangeError` (defeito) com replicação negativa, que daria em silêncio a mesma subsequência da replicação 0. Os saltos usam potência de matriz 3 × 3 módulo m em `bigint` (`jump.ts`), só na preparação. O `jump.spec.ts` testa a potência e o produto com módulo 7 e entradas entre 2 e 6: com 0 ou 1 nos dados, trocar `*` por `/` não muda o resultado e o mutante sobrevive.
+- **Sequências e subsequências:** `findStreamStart(índice)` salta `índice · 2¹²⁷` passos a partir do estado do pacote, uma vez por chave; `createRandomStream(início, replicação)` salta `replicação · 2⁷⁶` passos e lança `RangeError` (defeito) com replicação negativa, que daria em silêncio a mesma subsequência da replicação 0, ou a partir de 2⁵¹ (2¹²⁷ / 2⁷⁶ subsequências por sequência), que cairia em silêncio na sequência seguinte. Os saltos usam potência de matriz 3 × 3 módulo m em `bigint` (`jump.ts`), só na preparação. O `jump.spec.ts` testa a potência e o produto com módulo 7 e entradas entre 2 e 6: com 0 ou 1 nos dados, trocar `*` por `/` não muda o resultado e o mutante sobrevive.
 - **Geração:** `nextUniform` usa `number`; o invariante abaixo de 2⁵³ é o único comentário além da fonte, por decisão do usuário de 05/11/2026. Todos os produtos ficam abaixo de 2⁵³ (o maior, a12 · s, é cerca de 6,0×10¹⁵), por isso a conta é exata e igual em qualquer motor JavaScript; só a multiplicação final por `norm` é arredondada, e é a mesma operação do pacote de referência. A saída fica estritamente em (0, 1): com p₁ ≤ p₂ soma-se m1, então p₁ = p₂ dá m1 · norm, não 0.
 - **Mutantes equivalentes conhecidos:** a mensagem do `RangeError` da replicação negativa trocada por texto vazio sobrevive, porque os testes nunca verificam mensagens; e trocar `p1 < 0` por `p1 <= 0` grava m1 em vez de 0 no estado, mas toda conta seguinte é módulo m1, onde os dois valem o mesmo; nenhum número sorteado muda.
 
@@ -97,10 +97,10 @@ print("sum of values 2..101 of stream 2", repr(total))
 
 ## Índice da sequência
 
-- **Regra:** a sequência de uma chave é a de número **FNV-1a de 64 bits de `<semente>:<chave>`**, com a chave no formato `<id do elemento>:<propósito>` (decisão do usuário de 04/11/2026; o porquê está no plano do sub-plano 1). `streamIndex(semente, chave)` dá o número; `assignStreamIndices(semente, chaves)` dá o de cada chave de uma execução. Renomear o ID de um elemento muda os sorteios dele.
+- **Regra:** a sequência de uma chave é a de número **FNV-1a de 64 bits de `<semente>:<chave>`**, com a chave no formato `<id do elemento>:<propósito>` (decisão do usuário de 04/11/2026; o porquê está no plano do sub-plano 1). `findStreamIndex(semente, chave)` dá o número; `assignStreamIndices(semente, chaves)` dá o de cada chave de uma execução. Renomear o ID de um elemento muda os sorteios dele.
 - **FNV-1a:** `fnv1a64(texto)`, um byte por caractere, multiplicação módulo 2⁶⁴ em `bigint` (`BigInt.asUintN`). Constantes da [RFC 9923](https://www.rfc-editor.org/rfc/rfc9923) (fev. 2026, o *draft* do IETF citado no plano virou RFC): base de deslocamento `0xCBF29CE484222325` e primo `0x100000001B3`.
 - **Só ASCII:** cada caractere vira exatamente um byte, sem `TextEncoder` (ausente no `lib` do motor). Um caractere fora do ASCII lança `RangeError`: é defeito, porque o esquema (sub-plano 3) define o formato dos IDs.
-- **Colisões:** **estimativa:** com 10⁴ chaves sem intenção, a chance de duas coincidirem é da ordem de (10⁴)² / 2⁶⁵ ≈ 3×10⁻¹². O FNV-1a não resiste a colisões fabricadas, e plantas podem ser importadas; por isso dois índices iguais, chave repetida inclusive, lançam `SimulationError('INVALID_PLANT')`, um erro da entrada e não defeito.
+- **Colisões:** **estimativa:** com 10⁴ chaves sem intenção, a chance de duas coincidirem é da ordem de (10⁴)² / 2⁶⁵ ≈ 3×10⁻¹². O FNV-1a não resiste a colisões fabricadas, e plantas podem ser importadas; por isso dois índices iguais, chave repetida inclusive, lançam `SimulationError('INVALID_PLANT')`, um erro da entrada e não defeito; a mensagem do log cita as duas chaves.
 - **Dados de teste:** os seis vetores de 64 bits da seção 8.3 da RFC (`""`, `"a"` e `"foobar"`, com e sem o byte NUL final, de `FNV64svalues` e `FNV64bvalues`); o vetor com bytes fora do ASCII (`"Hello!\x01\xFF\xED"`) fica de fora, porque a função os recusa. Os demais literais (o caractere `\x7f` e as chaves `42:m1:cycle` e `42:m1:failure`) vêm do script abaixo, que reproduz antes os seis vetores da RFC. Para rodar: `python3 -I fnv_reference.py`.
 - **Mutantes equivalentes conhecidos:** as mensagens do `RangeError` e do `SimulationError` trocadas por texto vazio sobrevivem, porque os testes nunca verificam mensagens.
 
@@ -126,4 +126,81 @@ for text in ["\x7f", "42:m1:cycle", "42:m1:failure"]:
 
 ## Distribuições
 
-A preencher nas tarefas 4 e 5 do sub-plano 1.
+Método da inversão: cada amostra é a inversa da função de distribuição aplicada a **um único** número uniforme (ADR-0011, item 6), o que mantém o pareamento dos números aleatórios comuns entre cenários (RN-SIM-010).
+
+- **Tipo interno:** `Variability`, com `kind` e tempos em segundos: `fixed` (`valueSec`), `exponential` (`meanSec`), `triangular` (`minSec`, `modeSec`, `maxSec`). O esquema da planta (sub-plano 3) tem outro formato; a compilação (sub-plano 4) converte um no outro.
+- **`drawTimeSec(variabilidade, sequência)`:** `switch` exaustivo sobre `kind`, sem `default`. A fixa **não consome** número aleatório; as demais consomem exatamente um. Os testes conferem o estado da sequência depois do sorteio.
+- **Exponencial:** `−média · ln(1 − u)`. Usa `Math.log`, que a especificação do JavaScript não obriga a ser igual entre motores (D4, sub-plano 2); por isso os testes da inversa usam `toBeCloseTo` com 12 casas.
+- **Triangular:** fórmula fechada por partes, `mín + √(u · (máx − mín) · (moda − mín))` até u = (moda − mín) / (máx − mín), e `máx − √((1 − u) · (máx − mín) · (máx − moda))` acima. Só usa `Math.sqrt`, que a especificação manda arredondar corretamente: o resultado é igual em todo motor, e os testes da inversa comparam com igualdade exata, com valores de u e parâmetros escolhidos para dar raízes exatas, inclusive a moda nos dois extremos.
+- **Mutante equivalente na prática:** trocar `u <=` por `u <` na triangular. Na fronteira os dois ramos dão a moda em aritmética exata; só o arredondamento poderia separá-los, e só com u exatamente igual à fração da moda.
+
+### Momentos
+
+Com a sequência 0, replicação 0 e 10⁵ amostras, a média e a variância amostrais (divisor n − 1) ficam dentro do intervalo de confiança de 95% dos valores teóricos ([simulation.md](../product/simulation.md); ADR-0009). Os limites estão nos testes como literais: valor teórico ± 1,96 erros-padrão, arredondados para fora.
+
+| Distribuição | Média teórica | Limites da média | Variância teórica | Limites da variância | Média e variância obtidas (z) |
+| --- | --- | --- | --- | --- | --- |
+| Exponencial, média 30 | 30 | 29,814 a 30,186 | 900 | 884,22 a 915,78 | 29,9346 (−0,69); 896,40 (−0,45) |
+| Triangular (20, 25, 35) | 80/3 | 26,6473 a 26,686 | 175/18 | 9,6509 a 9,7936 | 26,6624 (−0,43); 9,6689 (−1,47) |
+
+- **Erro-padrão da média:** √(σ² / n).
+- **Erro-padrão da variância:** √((μ₄ − σ⁴) / n), a aproximação de amostra grande; μ₄ é o 4º momento central. **Cálculo próprio:** exponencial, μ₄ = 9θ⁴ (conferido por integração numérica: 8,9999999998·θ⁴); triangular (20, 25, 35), μ₄ = 6125/27, isto é 12/5·σ⁴ (curtose em excesso −3/5), por integração exata da densidade por partes com frações.
+- **Script:** acrescentado ao script do gerador (seção "Gerador"), no lugar do laço final; reproduz a tabela acima.
+
+```python
+import math
+from fractions import Fraction as F
+
+
+def poly_int(coeffs, lo, hi):
+    return sum(c * (hi ** (k + 1) - lo ** (k + 1)) / (k + 1) for k, c in enumerate(coeffs))
+
+
+def poly_mul(p, q):
+    r = [F(0)] * (len(p) + len(q) - 1)
+    for i, x in enumerate(p):
+        for j, y in enumerate(q):
+            r[i + j] += x * y
+    return r
+
+
+def tri_central(a, b, c, k, mean):
+    a, b, c = F(a), F(b), F(c)
+    left = [-2 * a / ((c - a) * (b - a)), 2 / ((c - a) * (b - a))]
+    right = [2 * c / ((c - a) * (c - b)), -2 / ((c - a) * (c - b))]
+    dev = [F(1)]
+    for _ in range(k):
+        dev = poly_mul(dev, [-mean, F(1)])
+    return poly_int(poly_mul(dev, left), a, b) + poly_int(poly_mul(dev, right), b, c)
+
+
+a, b, c = 20, 25, 35
+mean = tri_central(a, b, c, 1, F(0))
+var = tri_central(a, b, c, 2, mean)
+mu4 = tri_central(a, b, c, 4, mean)
+print("triangular", mean, var, mu4, mu4 / var**2)
+
+
+def inv_exp(u):
+    return -30.0 * math.log(1.0 - u)
+
+
+def inv_tri(u):
+    if u <= (b - a) / (c - a):
+        return a + math.sqrt(u * (c - a) * (b - a))
+    return c - math.sqrt((1 - u) * (c - a) * (c - b))
+
+
+n = 100_000
+us = uniforms(state(0, 0), n)
+for name, f, m, v, m4 in [("exp", inv_exp, 30.0, 900.0, 9 * 30.0**4),
+                          ("tri", inv_tri, float(mean), float(var), float(mu4))]:
+    xs = [f(u) for u in us]
+    sm = sum(xs) / n
+    sv = sum((x - sm) ** 2 for x in xs) / (n - 1)
+    se_m, se_v = math.sqrt(v / n), math.sqrt((m4 - v * v) / n)
+    print(name, sm, (sm - m) / se_m, m - 1.96 * se_m, m + 1.96 * se_m,
+          sv, (sv - v) / se_v, v - 1.96 * se_v, v + 1.96 * se_v)
+```
+
+A normal truncada entra na tarefa 5.

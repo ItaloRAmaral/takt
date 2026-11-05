@@ -9,6 +9,7 @@ const A21 = 527612;
 const A23N = 1370589;
 const NORM = 1 / (M1 + 1);
 const PACKAGE_SEED = 12345;
+const SUBSTREAMS_PER_STREAM = 2 ** 51;
 
 const M1_BIG = BigInt(M1);
 const M2_BIG = BigInt(M2);
@@ -78,7 +79,7 @@ export interface RandomStream {
  * @param streamIndex - The stream number, from 0 to 2^64 − 1.
  * @returns The state at the start of that stream.
  */
-export function streamStart(streamIndex: bigint): StreamStart {
+export function findStreamStart(streamIndex: bigint): StreamStart {
   return jump(PACKAGE_STATE, A1_STREAM_JUMP, A2_STREAM_JUMP, streamIndex);
 }
 
@@ -86,17 +87,19 @@ export function streamStart(streamIndex: bigint): StreamStart {
  * Creates the stream a replication draws from: the substream number
  * `replication` of the stream that starts at `start`, 2^76 steps apart.
  *
- * @param start - Where the stream starts, from {@link streamStart}.
- * @param replication - The replication number, zero or positive.
+ * @param start - Where the stream starts, from {@link findStreamStart}.
+ * @param replication - The replication number, from 0 to 2^51 − 1 (the
+ *   substreams of a stream).
  * @returns A stream ready for {@link nextUniform}.
- * @throws {RangeError} When `replication` is negative.
+ * @throws {RangeError} When `replication` is negative or reaches 2^51, where
+ *   it would silently fall into the next stream.
  */
 export function createRandomStream(
   start: StreamStart,
   replication: number,
 ): RandomStream {
-  if (replication < 0) {
-    throw new RangeError('The replication number must be zero or positive.');
+  if (replication < 0 || replication >= SUBSTREAMS_PER_STREAM) {
+    throw new RangeError('The replication number must be from 0 to 2^51 - 1.');
   }
 
   return jump(start, A1_SUBSTREAM_JUMP, A2_SUBSTREAM_JUMP, BigInt(replication));
@@ -104,29 +107,29 @@ export function createRandomStream(
 
 function jump(
   state: StreamStart,
-  firstJump: Matrix3,
-  secondJump: Matrix3,
-  times: bigint,
+  component1Jump: Matrix3,
+  component2Jump: Matrix3,
+  jumpCount: bigint,
 ): RandomStream {
-  const first = applyMatrix(
-    powerMatrix(firstJump, times, M1_BIG),
+  const component1 = applyMatrix(
+    powerMatrix(component1Jump, jumpCount, M1_BIG),
     { x0: BigInt(state.s10), x1: BigInt(state.s11), x2: BigInt(state.s12) },
     M1_BIG,
   );
 
-  const second = applyMatrix(
-    powerMatrix(secondJump, times, M2_BIG),
+  const component2 = applyMatrix(
+    powerMatrix(component2Jump, jumpCount, M2_BIG),
     { x0: BigInt(state.s20), x1: BigInt(state.s21), x2: BigInt(state.s22) },
     M2_BIG,
   );
 
   return {
-    s10: Number(first.x0),
-    s11: Number(first.x1),
-    s12: Number(first.x2),
-    s20: Number(second.x0),
-    s21: Number(second.x1),
-    s22: Number(second.x2),
+    s10: Number(component1.x0),
+    s11: Number(component1.x1),
+    s12: Number(component1.x2),
+    s20: Number(component2.x0),
+    s21: Number(component2.x1),
+    s22: Number(component2.x2),
   };
 }
 

@@ -1,7 +1,11 @@
 import { catchError } from '../tests/helpers/catch-error.js';
 import { drawUniforms } from '../tests/helpers/draw-uniforms.js';
 import { summarizeUniforms } from '../tests/helpers/summarize-uniforms.js';
-import { createRandomStream, nextUniform, streamStart } from './mrg32k3a.js';
+import {
+  createRandomStream,
+  nextUniform,
+  findStreamStart,
+} from './mrg32k3a.js';
 
 describe('MRG32k3a', () => {
   it.each([
@@ -39,7 +43,7 @@ describe('MRG32k3a', () => {
       },
     },
   ])('stream $index starts at the reference state', ({ index, state }) => {
-    const start = streamStart(index);
+    const start = findStreamStart(index);
 
     expect(start).toEqual(state);
   });
@@ -62,7 +66,7 @@ describe('MRG32k3a', () => {
   ])(
     'stream 2, replication $replication gives the reference uniforms',
     ({ replication, uniforms }) => {
-      const stream = createRandomStream(streamStart(2n), replication);
+      const stream = createRandomStream(findStreamStart(2n), replication);
 
       const values = drawUniforms(stream, 5);
 
@@ -96,7 +100,7 @@ describe('MRG32k3a', () => {
   ])(
     'stream 2^63 + 5, replication $replication starts at the independently computed state',
     ({ replication, state }) => {
-      const start = streamStart(2n ** 63n + 5n);
+      const start = findStreamStart(2n ** 63n + 5n);
 
       const stream = createRandomStream(start, replication);
 
@@ -105,7 +109,7 @@ describe('MRG32k3a', () => {
   );
 
   it('uniforms stay strictly between 0 and 1', () => {
-    const stream = createRandomStream(streamStart(0n), 0);
+    const stream = createRandomStream(findStreamStart(0n), 0);
 
     const summary = summarizeUniforms(stream, 100_000);
 
@@ -114,7 +118,7 @@ describe('MRG32k3a', () => {
   });
 
   it('stream 2 sums the 100 values after its first to the reference sum', () => {
-    const stream = createRandomStream(streamStart(2n), 0);
+    const stream = createRandomStream(findStreamStart(2n), 0);
     nextUniform(stream);
 
     const summary = summarizeUniforms(stream, 100);
@@ -123,9 +127,17 @@ describe('MRG32k3a', () => {
   });
 
   it('rejects a negative replication', () => {
-    const start = streamStart(0n);
+    const start = findStreamStart(0n);
 
     const error = catchError(() => createRandomStream(start, -1));
+
+    expect(error).toBeInstanceOf(RangeError);
+  });
+
+  it('rejects a replication beyond the substreams of a stream', () => {
+    const start = findStreamStart(0n);
+
+    const error = catchError(() => createRandomStream(start, 2 ** 51));
 
     expect(error).toBeInstanceOf(RangeError);
   });

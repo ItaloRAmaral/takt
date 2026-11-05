@@ -34,13 +34,13 @@ export function fnv1a64(text: string): bigint {
  *
  * @param seed - The seed of the run.
  * @param key - What draws from the stream, as `<element id>:<purpose>`.
- * @returns The stream number, for `streamStart`.
+ * @returns The stream number, for `findStreamStart`.
  * @throws {RangeError} When `key` has a character outside ASCII.
  *
  * @example
- * streamIndex(42, 'm1:cycle'); // 4846866088661209389n
+ * findStreamIndex(42, 'm1:cycle'); // 4846866088661209389n
  */
-export function streamIndex(seed: number, key: string): bigint {
+export function findStreamIndex(seed: number, key: string): bigint {
   return fnv1a64(`${String(seed)}:${key}`);
 }
 
@@ -60,19 +60,20 @@ export function assignStreamIndices(
   keys: readonly string[],
 ): ReadonlyMap<string, bigint> {
   const indices = new Map<string, bigint>();
-  const taken = new Set<bigint>();
+  const keyByIndex = new Map<bigint, string>();
 
   for (const key of keys) {
-    const index = streamIndex(seed, key);
+    const index = findStreamIndex(seed, key);
+    const otherKey = keyByIndex.get(index);
 
-    if (taken.has(index)) {
+    if (otherKey !== undefined) {
       throw new SimulationError(
         'INVALID_PLANT',
-        `Stream key ${key} shares its stream with another key.`,
+        `Stream keys ${otherKey} and ${key} share a stream.`,
       );
     }
 
-    taken.add(index);
+    keyByIndex.set(index, key);
     indices.set(key, index);
   }
 

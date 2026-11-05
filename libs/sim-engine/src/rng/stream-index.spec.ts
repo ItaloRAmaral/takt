@@ -1,5 +1,9 @@
 import { catchError } from '../tests/helpers/catch-error.js';
-import { assignStreamIndices, fnv1a64, streamIndex } from './stream-index.js';
+import {
+  assignStreamIndices,
+  findStreamIndex,
+  fnv1a64,
+} from './stream-index.js';
 
 describe('stream index', () => {
   it.each([
@@ -30,29 +34,29 @@ describe('stream index', () => {
   });
 
   it('rejects a key with a non-ASCII character', () => {
-    const error = catchError(() => streamIndex(42, 'máquina:cycle'));
+    const error = catchError(() => findStreamIndex(42, 'máquina:cycle'));
 
     expect(error).toBeInstanceOf(RangeError);
   });
 
-  it('streamIndex hashes the seed, a colon and the key', () => {
-    const result = streamIndex(42, 'm1:cycle');
+  it('findStreamIndex hashes the seed, a colon and the key', () => {
+    const result = findStreamIndex(42, 'm1:cycle');
 
     expect(result).toBe(4846866088661209389n);
   });
 
   it('RN-SIM-001: the same seed and key give the same stream index', () => {
-    const first = streamIndex(42, 'm1:cycle');
+    const first = findStreamIndex(42, 'm1:cycle');
 
-    const second = streamIndex(42, 'm1:cycle');
+    const second = findStreamIndex(42, 'm1:cycle');
 
     expect(second).toBe(first);
   });
 
   it('different seeds give different stream indices', () => {
-    const first = streamIndex(42, 'm1:cycle');
+    const first = findStreamIndex(42, 'm1:cycle');
 
-    const second = streamIndex(43, 'm1:cycle');
+    const second = findStreamIndex(43, 'm1:cycle');
 
     expect(second).not.toBe(first);
   });
