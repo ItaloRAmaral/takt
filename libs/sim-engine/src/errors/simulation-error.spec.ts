@@ -1,4 +1,4 @@
-import { catchError } from '../testing/catch-error.js';
+import { catchError } from '../tests/helpers/catch-error.js';
 import { SimulationError } from './simulation-error.js';
 
 describe('SimulationError', () => {

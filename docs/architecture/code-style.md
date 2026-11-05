@@ -194,7 +194,7 @@ O [ADR-0009](../adr/0009-estrategia-de-testes.md) decide a estratégia; aqui fic
 - **Dados:** fábricas `makePlant(overrides)` com dados fixos; nada de dado aleatório sem semente.
 - **Casos de uso** testados com os adaptadores em memória, sem *mocks* de biblioteca.
 - **Resposta da API** validada contra o esquema Zod de saída.
-- **Arquivos:** unitário ao lado do código (`*.spec.ts`); API em `*.e2e-spec.ts`.
+- **Arquivos:** unitário ao lado do código (`*.spec.ts`); API em `*.e2e-spec.ts`. Auxiliares só de teste ficam em `src/tests/helpers/`, cada um com o spec ao lado, fora do *build* da lib. Decisão do fundador em 05/11/2026.
 
 ## 11. Checklist de revisão
 

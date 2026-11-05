@@ -10,7 +10,7 @@
 
 **Objetivo:** o motor ganha a classe de erro esperado, o helper de teste `catchError`, um gerador MRG32k3a reproduzível com uma sequência por chave e uma subsequência por replicação, e as quatro distribuições por inversão, tudo conferido contra referências externas ou de alta precisão.
 
-**Arquitetura:** código puro em `libs/sim-engine/src`, com pastas por conceito (guia, seção 7): `errors/`, `testing/`, `rng/` e `distributions/`. O laço de geração usa `number`, cujos produtos ficam todos abaixo de 2⁵³ e por isso são exatos; os saltos entre sequências e subsequências usam `bigint`, só na preparação. O início de cada sequência é calculado uma vez por chave, e cada replicação só salta para a sua subsequência. Só `SimulationError` sai pelo `src/index.ts`; o resto é interno, usado pelos sub-planos 4 e 5.
+**Arquitetura:** código puro em `libs/sim-engine/src`, com pastas por conceito (guia, seção 7): `errors/`, `tests/helpers/`, `rng/` e `distributions/`. O laço de geração usa `number`, cujos produtos ficam todos abaixo de 2⁵³ e por isso são exatos; os saltos entre sequências e subsequências usam `bigint`, só na preparação. O início de cada sequência é calculado uma vez por chave, e cada replicação só salta para a sua subsequência. Só `SimulationError` sai pelo `src/index.ts`; o resto é interno, usado pelos sub-planos 4 e 5.
 
 **Regras e registros:** RN-SIM-001 (determinismo), RN-SIM-010 (números aleatórios comuns); ADR-0011 itens 5 e 6; ADR-0013 itens 1 e 5 e "Em aberto" (conferência do `toMatchObject`); ADR-0009 (TDD, metas). Nenhum `UC-...` é entregue aqui: estas peças servem o UC-SIM-002 a partir do sub-plano 4.
 
@@ -33,6 +33,7 @@
 | Semente → estado e chave → sequência, sem padrão na literatura | Uma regra só: a sequência de uma chave é a sequência número **FNV-1a de 64 bits de `<semente>:<chave>`** do RngStreams, a partir do estado inicial padrão do pacote. Renomear o ID de um elemento muda os sorteios dele (aceito) | 04/11/2026 |
 | Licença das funções numéricas | Mesma regra do gerador: AS 241 a partir de Wichura (1988); função de distribuição da normal pelo algoritmo de Hart (1968) descrito em West (2005), artigo acessível, no lugar de Cody (1969), inacessível e só disponível em código GPL ou SPECFUN | 04/11/2026 |
 | Parâmetros da normal truncada | Média e desvio-padrão obrigatórios; mínimo opcional, padrão 0; máximo opcional, sem limite superior quando ausente. O esquema (sub-plano 3) exige mínimo ≥ 0 e mínimo < máximo | 04/11/2026 |
+| Onde ficam os auxiliares de teste e se o `jump.ts` tem teste próprio | Em `src/tests/helpers/`, fora do *build* da lib (`exclude` do `tsconfig.lib.json`, `include` do `tsconfig.spec.json`) e da mutação, cada um com o spec ao lado; `rng/` mantido; `jump.spec.ts` com módulo 7 e literais conferidos por multiplicação repetida em Python | 05/11/2026 |
 
 ## Decisões técnicas deste plano
 
@@ -42,7 +43,7 @@
 | Índices repetidos numa planta → `SimulationError('INVALID_PLANT')` | O FNV-1a não resiste a colisões fabricadas, e os IDs vêm de plantas importadas: é um problema da entrada, não um defeito (ADR-0013). A mesma verificação cobre a chave repetida, que é como o teste a exercita |
 | Início da sequência e subsequência separados: `streamStart(index)` uma vez por chave; `createRandomStream(start, replication)` por replicação | **Fato:** cerca de 0,08 ms por salto de sequência com exponenciação binária (nota do gerador, seção 2); repetir o salto em cada replicação multiplicaria o custo pelo número de replicações |
 | Potências de matriz por quadrados sucessivos de A₁ e A₂ (127 e 76 quadrados), em `bigint`, calculadas uma vez | Evita copiar as matrizes publicadas no código do pacote; o `.res` e um índice alto conferido por cálculo independente provam o resultado |
-| `catchError` e os auxiliares de teste (`drawUniforms`, `sampleMean`, `sampleVariance`) em `src/testing/`, cada um com o próprio teste | Os testes de faixa, de somas e de momentos não podem ter laço (ADR-0009); as estatísticas de produção do motor só chegam no sub-plano 6, e estes auxiliares servem só aos testes |
+| `catchError` e os auxiliares de teste (`drawUniforms`, `sampleMean`, `sampleVariance`) em `src/tests/helpers/`, cada um com o próprio teste | Os testes de faixa, de somas e de momentos não podem ter laço (ADR-0009); as estatísticas de produção do motor só chegam no sub-plano 6, e estes auxiliares servem só aos testes |
 | Referências: AS 241 contra `statistics.NormalDist().inv_cdf` do Python 3.10.12 da máquina (a função implementa o AS 241 e cita Wichura 1988 no código); Φ e Q contra um cálculo próprio de alta precisão com `decimal` de 50 algarismos (série para \|x\| pequeno e fração contínua na cauda); índice alto contra potência de matriz em inteiros do Python, a partir das matrizes A₁ e A₂ do artigo | R, Octave e `mpmath` não estão instalados. `0.5 * math.erfc(-x / math.sqrt(2))` perde cerca de 2·(x/√2)²·ε na cauda (≈ 2×10⁻¹⁴ em \|x\| = 10) e não serve de referência ali. Scripts e comandos registrados em `docs/architecture/sim-engine.md` |
 | Normal truncada devolve um valor limitado a [mínimo, máximo] | A pesquisa sugere limitar (palpite, nota de distribuições, seção 3): o arredondamento não pode pôr um tempo fora do intervalo. Um intervalo com probabilidade zero em dupla precisão (por exemplo [40, 41] desvios) é recusado antes, na compilação (sub-plano 4, `INVALID_PLANT`) |
 | Triangular conferida com casos calculados à mão | O `triinv` do Octave é GPL e mudou a ordem dos parâmetros depois da versão 1.6.3 ([pesquisa](../research/literatura-do-motor.md)) |
@@ -120,9 +121,9 @@ Nenhuma.
 ## Tarefa 1: erro do motor e `catchError`
 
 **Arquivos:**
-- Criar: `libs/sim-engine/src/errors/simulation-error.ts`, `libs/sim-engine/src/testing/catch-error.ts`, `docs/architecture/sim-engine.md`
+- Criar: `libs/sim-engine/src/errors/simulation-error.ts`, `libs/sim-engine/src/tests/helpers/catch-error.ts`, `docs/architecture/sim-engine.md`
 - Modificar: `libs/sim-engine/src/index.ts`, `docs/architecture/README.md` (índice)
-- Testar: `libs/sim-engine/src/errors/simulation-error.spec.ts`, `libs/sim-engine/src/testing/catch-error.spec.ts`
+- Testar: `libs/sim-engine/src/errors/simulation-error.spec.ts`, `libs/sim-engine/src/tests/helpers/catch-error.spec.ts`
 
 **Interfaces:**
 - Produz: `type SimulationErrorCode = 'SIMULATION_LIMIT_EXCEEDED' | 'INVALID_PLANT'`; `class SimulationError extends Error` com `readonly code: SimulationErrorCode`, `override readonly name = 'SimulationError'` e construtor `(code: SimulationErrorCode, message: string)`, que atribui `this.code`; `catchError(act: () => unknown): unknown`.
@@ -138,8 +139,8 @@ Nenhuma.
 ## Tarefa 2: gerador MRG32k3a com sequências e subsequências
 
 **Arquivos:**
-- Criar: `libs/sim-engine/src/rng/mrg32k3a.ts`, `libs/sim-engine/src/rng/jump.ts`, `libs/sim-engine/src/testing/draw-uniforms.ts`
-- Testar: `libs/sim-engine/src/rng/mrg32k3a.spec.ts`, `libs/sim-engine/src/testing/draw-uniforms.spec.ts`
+- Criar: `libs/sim-engine/src/rng/mrg32k3a.ts`, `libs/sim-engine/src/rng/jump.ts`, `libs/sim-engine/src/tests/helpers/draw-uniforms.ts`, `libs/sim-engine/src/tests/helpers/sum-uniforms.ts`
+- Testar: `libs/sim-engine/src/rng/mrg32k3a.spec.ts`, `libs/sim-engine/src/rng/jump.spec.ts`, `libs/sim-engine/src/tests/helpers/draw-uniforms.spec.ts`, `libs/sim-engine/src/tests/helpers/sum-uniforms.spec.ts`
 
 **Interfaces:**
 - Produz: `interface StreamStart` (os seis valores do início da sequência, `readonly`); `streamStart(streamIndex: bigint): StreamStart`, que salta `streamIndex · 2¹²⁷` passos a partir do estado inicial do pacote; `interface RandomStream` com os seis valores do estado (mutáveis; só `nextUniform` os altera); `createRandomStream(start: StreamStart, replication: number): RandomStream`, que salta `replication · 2⁷⁶` passos; `nextUniform(stream: RandomStream): number`. Auxiliar de teste: `drawUniforms(stream: RandomStream, count: number): number[]`.
@@ -173,8 +174,8 @@ Nenhuma.
 ## Tarefa 4: distribuições fixa, exponencial e triangular
 
 **Arquivos:**
-- Criar: `libs/sim-engine/src/distributions/variability.ts`, `libs/sim-engine/src/distributions/exponential.ts`, `libs/sim-engine/src/distributions/triangular.ts`, `libs/sim-engine/src/testing/sample-moments.ts`
-- Testar: `libs/sim-engine/src/distributions/variability.spec.ts`, `exponential.spec.ts`, `triangular.spec.ts`, `libs/sim-engine/src/testing/sample-moments.spec.ts`
+- Criar: `libs/sim-engine/src/distributions/variability.ts`, `libs/sim-engine/src/distributions/exponential.ts`, `libs/sim-engine/src/distributions/triangular.ts`, `libs/sim-engine/src/tests/helpers/sample-moments.ts`
+- Testar: `libs/sim-engine/src/distributions/variability.spec.ts`, `exponential.spec.ts`, `triangular.spec.ts`, `libs/sim-engine/src/tests/helpers/sample-moments.spec.ts`
 
 **Interfaces:**
 - Consome: `RandomStream`, `nextUniform`, `drawUniforms` (tarefa 2).
@@ -223,7 +224,7 @@ Nenhuma.
 | 4 | Mutabilidade do estado descrita como "só dentro do módulo" | autorrevisão | Sim | Só `nextUniform` altera o estado |
 | 5 | Referências do Cody e do FNV tiradas da memória | autorrevisão | Sim | Conferidas na tarefa; o Cody saiu (decisão do usuário) |
 | 6 | Parâmetros que geram NaN ou infinito sem dono | plan-reviewer | Sim | Limite ao intervalo; recusa no sub-plano 4; faixas no sub-plano 3 |
-| 7 | Testes que exigiriam laço no corpo | plan-reviewer | Sim | Auxiliares em `src/testing/` com testes próprios; erros-padrão como literais |
+| 7 | Testes que exigiriam laço no corpo | plan-reviewer | Sim | Auxiliares em `src/tests/helpers/` com testes próprios; erros-padrão como literais |
 | 8 | Φ, referência e tolerância incompatíveis na cauda | plan-reviewer | Sim | Hart/West, referência de alta precisão em `decimal`, tolerância por faixa |
 | 9 | Código planejado violaria lint e `tsconfig` (número em *template*, `override`, *parameter property*, índice com `!`) | plan-reviewer | Sim | Conferido no `strict-type-checked` 8.72.1 (`allowNumber: false`); restrições globais |
 | 10 | Salto de sequência repetido em cada replicação | plan-reviewer | Sim | `streamStart` separado de `createRandomStream` |

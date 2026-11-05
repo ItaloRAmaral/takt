@@ -17,5 +17,6 @@ export function catchError(act: () => unknown): unknown {
   } catch (error: unknown) {
     return error;
   }
+
   throw new Error('Expected the call to throw, but it returned normally.');
 }

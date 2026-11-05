@@ -17,4 +17,4 @@ Source of truth: `docs/architecture/code-style.md`, section 10, and ADR-0009.
 - Factories such as `makePlant(overrides)` with fixed data; no random data without a seed.
 - Use cases are tested with the in-memory adapters, not library mocks.
 - API responses are validated against the output Zod schema.
-- Unit tests sit next to the code (`*.spec.ts`); API tests are `*.e2e-spec.ts`.
+- Unit tests sit next to the code (`*.spec.ts`); API tests are `*.e2e-spec.ts`. Test-only helpers live in `src/tests/helpers/`, each with its spec beside it, excluded from the library build.

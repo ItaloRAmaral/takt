@@ -92,6 +92,7 @@ Fonte: pesquisa [Literatura do motor](../research/literatura-do-motor.md) (04/11
 | Fonte | O que embasa |
 | --- | --- |
 | L'Ecuyer, P. RngStreams: [`RngStream.c`](https://www-labs.iro.umontreal.ca/~lecuyer/myftp/streams00/c/RngStream.c) e [`test2RngStream.res`](https://www-labs.iro.umontreal.ca/~lecuyer/myftp/streams00/c/test2RngStream.res) (uso não comercial); [versão no GitHub](https://github.com/umontreal-simul/RngStreams) (Apache 2.0) | Saída oficial para conferir o gerador; licença do código de partida |
+| L'Ecuyer, P. RngStreams, [`tests/test2RngStream.res`](https://github.com/umontreal-simul/RngStreams/blob/b47f576/tests/test2RngStream.res) da versão Apache 2.0 (commit `b47f576`, lido em 04/11/2026) | Dados de teste do gerador do motor (`libs/sim-engine/src/rng/mrg32k3a.spec.ts`) |
 | L'Ecuyer, P.; Munger, D.; Oreshkin, B.; Simard, R. "Random numbers for parallel computers". *Math. Comput. Simul.* 135, 2017 ([preprint](https://www.gerad.ca/papers/G-2015-35.pdf)); ns-3, [Random Variables](https://www.nsnam.org/docs/manual/html/random-variables.html) | Sequência por fonte de aleatoriedade; número fixo de sequência por variável |
 | StatLib, [AS 241](https://lib.stat.cmu.edu/apstat/241); R, `qnorm.c`, `pnorm.c` e `qt.c` ([código](https://github.com/wch/r-source/tree/trunk/src/nmath)) | Inversa da normal; função de distribuição da normal (Cody); quantil da t |
 | Botev, Z. 2017, *JRSS-B* 79(1) ([arXiv](https://arxiv.org/abs/1603.04166)) e o pacote R TruncatedNormal | Normal truncada com o intervalo numa cauda |
