@@ -82,13 +82,16 @@ export function powerMatrix(
   let result = identity;
   let base = matrix;
   let remaining = exponent;
+
   while (remaining > 0n) {
     if (remaining % 2n === 1n) {
       result = multiplyMatrices(result, base, modulus);
     }
+
     base = multiplyMatrices(base, base, modulus);
     remaining /= 2n;
   }
+
   return result;
 }
 

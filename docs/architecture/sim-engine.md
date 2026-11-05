@@ -2,7 +2,7 @@
 
 > **Resumo.** Como o motor é construído hoje. O motor é um núcleo funcional em TypeScript puro, sem React, Three.js nem DOM, que roda num Web Worker do `takt-web-app`. O porquê está no [ADR-0011](../adr/0011-motor-de-simulacao-e-esquema.md) e no [ADR-0013](../adr/0013-erros-esperados.md); o plano que o constrói é o [roteiro do motor](../plans/2026-11-04-roteiro-motor.md). Este documento cresce a cada sub-plano.
 
-Atualizado em 05/11/2026 (sub-plano 1, tarefa 2).
+Atualizado em 05/11/2026 (sub-plano 1, tarefa 3).
 
 ## Estrutura
 
@@ -12,7 +12,7 @@ Pastas por conceito ([guia de estilo](code-style.md), seção 7), dentro de `lib
 | --- | --- | --- |
 | `errors/` | `SimulationError`, o erro esperado do motor | 1 |
 | `tests/helpers/` | Auxiliares só de teste (`catchError`, `drawUniforms`, `sumUniforms`), cada um com o spec ao lado; não saem pelo `index.ts`, não entram no *build* (`exclude` do `tsconfig.lib.json`) nem na mutação (`mutate` da Stryker), mas contam na cobertura | 1 |
-| `rng/` | Gerador MRG32k3a (`mrg32k3a.ts`), saltos por potência de matriz (`jump.ts`); índice da sequência por chave a seguir | 1 |
+| `rng/` | Gerador MRG32k3a (`mrg32k3a.ts`), saltos por potência de matriz (`jump.ts`), índice da sequência por chave (`stream-index.ts`) | 1 |
 | `distributions/` | Distribuições por inversão | 1 (a preencher) |
 
 O `src/index.ts` é a API pública: hoje só `SimulationError` e `SimulationErrorCode`. O resto é interno e usado pelos sub-planos seguintes.
@@ -93,6 +93,35 @@ total = 0.0
 for u in uniforms(state(2, 0), 101)[1:]:
     total += u
 print("sum of values 2..101 of stream 2", repr(total))
+```
+
+## Índice da sequência
+
+- **Regra:** a sequência de uma chave é a de número **FNV-1a de 64 bits de `<semente>:<chave>`**, com a chave no formato `<id do elemento>:<propósito>` (decisão do usuário de 04/11/2026; o porquê está no plano do sub-plano 1). `streamIndex(semente, chave)` dá o número; `assignStreamIndices(semente, chaves)` dá o de cada chave de uma execução. Renomear o ID de um elemento muda os sorteios dele.
+- **FNV-1a:** `fnv1a64(texto)`, um byte por caractere, multiplicação módulo 2⁶⁴ em `bigint` (`BigInt.asUintN`). Constantes da [RFC 9923](https://www.rfc-editor.org/rfc/rfc9923) (fev. 2026, o *draft* do IETF citado no plano virou RFC): base de deslocamento `0xCBF29CE484222325` e primo `0x100000001B3`.
+- **Só ASCII:** cada caractere vira exatamente um byte, sem `TextEncoder` (ausente no `lib` do motor). Um caractere fora do ASCII lança `RangeError`: é defeito, porque o esquema (sub-plano 3) define o formato dos IDs.
+- **Colisões:** **estimativa:** com 10⁴ chaves sem intenção, a chance de duas coincidirem é da ordem de (10⁴)² / 2⁶⁵ ≈ 3×10⁻¹². O FNV-1a não resiste a colisões fabricadas, e plantas podem ser importadas; por isso dois índices iguais, chave repetida inclusive, lançam `SimulationError('INVALID_PLANT')`, um erro da entrada e não defeito.
+- **Dados de teste:** os seis vetores de 64 bits da seção 8.3 da RFC (`""`, `"a"` e `"foobar"`, com e sem o byte NUL final, de `FNV64svalues` e `FNV64bvalues`); o vetor com bytes fora do ASCII (`"Hello!\x01\xFF\xED"`) fica de fora, porque a função os recusa. Os demais literais (o caractere `\x7f` e as chaves `42:m1:cycle` e `42:m1:failure`) vêm do script abaixo, que reproduz antes os seis vetores da RFC. Para rodar: `python3 -I fnv_reference.py`.
+- **Mutantes equivalentes conhecidos:** as mensagens do `RangeError` e do `SimulationError` trocadas por texto vazio sobrevivem, porque os testes nunca verificam mensagens.
+
+```python
+OFFSET_BASIS = 0xCBF29CE484222325
+PRIME = 0x00000100000001B3
+
+
+def fnv1a64(data: bytes) -> int:
+    h = OFFSET_BASIS
+    for octet in data:
+        h ^= octet
+        h = (h * PRIME) % 2**64
+    return h
+
+
+rfc = {b"": 0xcbf29ce484222325, b"a": 0xaf63dc4c8601ec8c, b"foobar": 0x85944171f73967e8,
+       b"\0": 0xaf63bd4c8601b7df, b"a\0": 0x089be207b544f1e4, b"foobar\0": 0x34531ca7168b8f38}
+assert all(fnv1a64(k) == v for k, v in rfc.items()), "RFC 9923 vectors"
+for text in ["\x7f", "42:m1:cycle", "42:m1:failure"]:
+    print(repr(text), fnv1a64(text.encode("ascii")))
 ```
 
 ## Distribuições

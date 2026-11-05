@@ -161,7 +161,7 @@ Nenhuma.
 
 **Interfaces:**
 - Consome: `SimulationError` (tarefa 1).
-- Produz: `streamIndex(seed: number, key: string): bigint`, o FNV-1a de 64 bits dos bytes de `String(seed) + ':' + key`; `assignStreamIndices(seed: number, keys: readonly string[]): ReadonlyMap<string, bigint>`, que lança `SimulationError('INVALID_PLANT')` quando dois índices coincidem (inclusive por chave repetida) e `Error` (defeito) quando uma chave tem caractere fora do ASCII. As chaves seguem o formato do roteiro, `<id do elemento>:<propósito>`.
+- Produz: `fnv1a64(text: string): bigint`, exportado para os testes receberem os vetores da especificação diretamente (a especificação virou a RFC 9923, fev. 2026); `streamIndex(seed: number, key: string): bigint`, o FNV-1a de 64 bits dos bytes de `String(seed) + ':' + key`; `assignStreamIndices(seed: number, keys: readonly string[]): ReadonlyMap<string, bigint>`, que lança `SimulationError('INVALID_PLANT')` quando dois índices coincidem (inclusive por chave repetida) e `Error` (defeito) quando uma chave tem caractere fora do ASCII. As chaves seguem o formato do roteiro, `<id do elemento>:<propósito>`.
 
 - [ ] **Passo 1: testes que falham** (linhas da tarefa 3). Vetores do FNV-1a de 64 bits copiados da especificação (página oficial do FNV ou o *draft* do IETF), com a origem anotada em `sim-engine.md`.
 - [ ] **Passo 2:** `pnpm nx test sim-engine` · Esperado: FALHA porque o módulo não existe.
