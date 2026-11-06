@@ -69,7 +69,7 @@ describe('truncated normal', () => {
     { meanSec: 0, deviationSec: 1, minSec: 40, maxSec: Infinity, edge: 40 },
     { meanSec: 30, deviationSec: 5, minSec: 220, maxSec: Infinity, edge: 220 },
   ])(
-    'puts a zero-mass truncation of mean $meanSec on [$minSec, $maxSec] at its edge $edge, the nearest to the mean',
+    'puts a zero-mass truncation of mean $meanSec and deviation $deviationSec on [$minSec, $maxSec] at its edge $edge, the nearest to the mean',
     ({ meanSec, deviationSec, minSec, maxSec, edge }) => {
       const value = truncatedNormalQuantile(
         0.5,

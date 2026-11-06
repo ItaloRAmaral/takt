@@ -15,16 +15,19 @@ import { truncatedNormalQuantile } from './truncated-normal.js';
  */
 export type Variability =
   | {
+      /** A time that never varies. */
       readonly kind: 'fixed';
       /** The time, in seconds. */
       readonly valueSec: number;
     }
   | {
+      /** An exponential distribution. */
       readonly kind: 'exponential';
       /** The mean time, in seconds, above 0. */
       readonly meanSec: number;
     }
   | {
+      /** A triangular distribution. */
       readonly kind: 'triangular';
       /** The shortest time, in seconds. */
       readonly minSec: number;
@@ -34,6 +37,7 @@ export type Variability =
       readonly maxSec: number;
     }
   | {
+      /** A normal distribution truncated to an interval. */
       readonly kind: 'truncatedNormal';
       /** The mean before truncation, in seconds. */
       readonly meanSec: number;

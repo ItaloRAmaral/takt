@@ -14,6 +14,7 @@ export type SimulationErrorCode = 'SIMULATION_LIMIT_EXCEEDED' | 'INVALID_PLANT';
  * throw new SimulationError('INVALID_PLANT', 'steady-state scenario without warm-up');
  */
 export class SimulationError extends Error {
+  /** Always `SimulationError`, so logs and stack traces name the class. */
   override readonly name = 'SimulationError';
 
   /** What went wrong, as a stable code for callers and the interface. */

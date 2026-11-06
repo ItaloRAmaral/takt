@@ -49,7 +49,7 @@ Alerta aberto de propósito: `minimatch` 10.2.5, via ESLint. A única correção
 
 ## Lint
 
-A raiz aplica os presets `strictTypeChecked` e `stylisticTypeChecked` do typescript-eslint, só em arquivos TypeScript, mais as regras da [seção 4 do guia](code-style.md#4-typescript): sem `enum`, sem `export default` (exceto em `*.config.*`), sem `console`, nomes de arquivo e pasta em *kebab-case* (`eslint-plugin-check-file`) e as fronteiras do Nx por tag. Cada biblioteca acrescenta as proibições dela no próprio `eslint.config.mjs`: o motor proíbe `Math.random`, `Date.now`, `new Date()`, `Date()`, `performance.now`, os acessos por `globalThis`, globais do navegador, React, Three.js e imports de valor do esquema; o esquema proíbe importar o motor e os globais do navegador.
+A raiz aplica os presets `strictTypeChecked` e `stylisticTypeChecked` do typescript-eslint, só em arquivos TypeScript, mais as regras da [seção 4 do guia](code-style.md#4-typescript): sem `enum`, sem `export default` (exceto em `*.config.*`), sem `console`, nomes de arquivo e pasta em *kebab-case* (`eslint-plugin-check-file`) e as fronteiras do Nx por tag. Cada biblioteca acrescenta as proibições dela no próprio `eslint.config.mjs`: o motor proíbe `Math.random`, `Date.now`, `new Date()`, `Date()`, `performance.now`, os acessos por `globalThis`, globais do navegador, React, Three.js, imports de valor do esquema e, fora dos specs, imports de `src/tests/` (os auxiliares de teste ficam fora do *build* e da mutação); o esquema proíbe importar o motor e os globais do navegador.
 
 **Uma regra redefinida num projeto substitui as opções da raiz.** Por isso a raiz exporta `noEnum` e `browserGlobals`, e o motor repete `noEnum` na própria lista de `no-restricted-syntax`.
 

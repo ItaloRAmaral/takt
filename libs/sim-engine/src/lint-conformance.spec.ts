@@ -93,6 +93,31 @@ describe('engine lint rules', { timeout: 30_000 }, () => {
     ]);
   });
 
+  it('rejects importing a test helper from engine code', async () => {
+    const code = `import { catchError } from '../tests/helpers/catch-error.js';\n\nexport const value = catchError;\n`;
+
+    const messages = await lintEngineFile('rng/value.ts', code);
+
+    expect(messages).toContainEqual(
+      expect.objectContaining({
+        ruleId: '@typescript-eslint/no-restricted-imports',
+        line: 1,
+      }),
+    );
+  });
+
+  it('allows a spec to import a test helper', async () => {
+    const code = `import { catchError } from '../tests/helpers/catch-error.js';\n\nexport const value = catchError;\n`;
+
+    const messages = await lintEngineFile('rng/value.spec.ts', code);
+
+    expect(messages).not.toContainEqual(
+      expect.objectContaining({
+        ruleId: '@typescript-eslint/no-restricted-imports',
+      }),
+    );
+  });
+
   it('rejects enum declarations', async () => {
     const code = `export enum Mode {\n  Run,\n}\n`;
 
