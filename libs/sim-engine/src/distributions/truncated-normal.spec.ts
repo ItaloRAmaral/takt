@@ -64,15 +64,22 @@ describe('truncated normal', () => {
   );
 
   it.each([
-    { lower: 40, upper: 41 },
-    { lower: -41, upper: -40 },
+    { meanSec: 0, deviationSec: 1, minSec: 40, maxSec: 41, edge: 40 },
+    { meanSec: 0, deviationSec: 1, minSec: -41, maxSec: -40, edge: -40 },
+    { meanSec: 0, deviationSec: 1, minSec: 40, maxSec: Infinity, edge: 40 },
+    { meanSec: 30, deviationSec: 5, minSec: 220, maxSec: Infinity, edge: 220 },
   ])(
-    'keeps a zero-mass truncation on [$lower, $upper] inside its bounds',
-    ({ lower, upper }) => {
-      const value = truncatedNormalQuantile(0.5, 0, 1, lower, upper);
+    'puts a zero-mass truncation of mean $meanSec on [$minSec, $maxSec] at its edge $edge, the nearest to the mean',
+    ({ meanSec, deviationSec, minSec, maxSec, edge }) => {
+      const value = truncatedNormalQuantile(
+        0.5,
+        meanSec,
+        deviationSec,
+        minSec,
+        maxSec,
+      );
 
-      expect(value).toBeGreaterThanOrEqual(lower);
-      expect(value).toBeLessThanOrEqual(upper);
+      expect(value).toBe(edge);
     },
   );
 

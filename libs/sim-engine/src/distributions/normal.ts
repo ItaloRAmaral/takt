@@ -150,7 +150,7 @@ export function normalCdf(x: number): number {
  * @returns Q(x), from 0 to 1.
  *
  * @example
- * normalSurvival(1); // 0.15865525393145705
+ * normalSurvival(1); // 0.15865525393145702
  */
 export function normalSurvival(x: number): number {
   return normalCdf(-x);

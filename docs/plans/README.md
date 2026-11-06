@@ -2,7 +2,7 @@
 
 > **Resumo.** Planos de implementação: o que vai ser construído, em quais arquivos, com quais testes, quais ameaças são tratadas e quais princípios de estilo são quebrados e por quê. Toda mudança de código ou configuração começa por um plano aprovado: curto, na conversa, para mudanças pequenas e locais; completo, nesta pasta, para o resto. Só texto de documentação, comentários e formatação dispensam plano. Os planos são escritos com a skill `planning-code-changes` (`.claude/skills/planning-code-changes/`).
 
-Atualizado em 04/11/2026.
+Atualizado em 06/11/2026.
 
 ## Como funciona
 

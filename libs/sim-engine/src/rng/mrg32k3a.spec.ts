@@ -126,18 +126,15 @@ describe('MRG32k3a', () => {
     expect(summary.sum).toBe(53.98590159231507);
   });
 
-  it('rejects a negative replication', () => {
+  it.each([
+    { replication: -1 },
+    { replication: 2 ** 51 },
+    { replication: 1.5 },
+    { replication: Number.NaN },
+  ])('rejects replication $replication', ({ replication }) => {
     const start = findStreamStart(0n);
 
-    const error = catchError(() => createRandomStream(start, -1));
-
-    expect(error).toBeInstanceOf(RangeError);
-  });
-
-  it('rejects a replication beyond the substreams of a stream', () => {
-    const start = findStreamStart(0n);
-
-    const error = catchError(() => createRandomStream(start, 2 ** 51));
+    const error = catchError(() => createRandomStream(start, replication));
 
     expect(error).toBeInstanceOf(RangeError);
   });

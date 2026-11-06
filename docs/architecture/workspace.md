@@ -2,7 +2,7 @@
 
 > **Resumo.** Como o monorepo é montado hoje: projetos, versões fixadas, segurança da instalação, lint, testes, cobertura, mutação, hooks locais e CI. O porquê está nos ADRs [0001](../adr/0001-monorepo-nx-e-nomes.md), [0009](../adr/0009-estrategia-de-testes.md), [0010](../adr/0010-qualidade-e-ci.md) e [0011](../adr/0011-motor-de-simulacao-e-esquema.md); os comandos, no `CLAUDE.md`, seção "Commands".
 
-Atualizado em 04/11/2026. Criado pelo plano [Workspace Nx do marco 1](../plans/2026-11-03-workspace-nx.md), cujas notas de execução registram cada desvio.
+Atualizado em 06/11/2026. Criado pelo plano [Workspace Nx do marco 1](../plans/2026-11-03-workspace-nx.md), cujas notas de execução registram cada desvio.
 
 ## Estrutura
 

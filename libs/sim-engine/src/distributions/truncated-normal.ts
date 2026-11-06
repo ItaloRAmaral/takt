@@ -4,8 +4,10 @@ import { normalCdf, normalQuantile, normalSurvival } from './normal.js';
  * Gives the time of a normal distribution truncated to [`minSec`, `maxSec`]
  * at a uniform number: the quantile function. When the whole interval lies at
  * or above the mean it works with upper tail areas, so an interval far in the
- * tail keeps its precision. The result is clamped to the interval, so rounding
- * never puts it outside.
+ * tail keeps its precision. When the interval holds no probability in double
+ * precision, every draw is the edge nearest the mean, where the mass of such a
+ * truncation piles up. The result is clamped to the interval, so rounding never
+ * puts it outside.
  *
  * @param uniform - A uniform number in (0, 1).
  * @param meanSec - The mean of the normal before truncation, in seconds.
@@ -31,16 +33,23 @@ export function truncatedNormalQuantile(
 
   if (lower >= 0) {
     const lowerSurvival = normalSurvival(lower);
+    const upperTailArea =
+      lowerSurvival - uniform * (lowerSurvival - normalSurvival(upper));
 
-    deviate = -normalQuantile(
-      lowerSurvival - uniform * (lowerSurvival - normalSurvival(upper)),
-    );
+    if (upperTailArea <= 0) {
+      return minSec;
+    }
+
+    deviate = -normalQuantile(upperTailArea);
   } else {
     const lowerCdf = normalCdf(lower);
+    const lowerTailArea = lowerCdf + uniform * (normalCdf(upper) - lowerCdf);
 
-    deviate = normalQuantile(
-      lowerCdf + uniform * (normalCdf(upper) - lowerCdf),
-    );
+    if (lowerTailArea <= 0) {
+      return maxSec;
+    }
+
+    deviate = normalQuantile(lowerTailArea);
   }
 
   const timeSec = meanSec + standardDeviationSec * deviate;

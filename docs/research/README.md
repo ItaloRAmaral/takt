@@ -2,7 +2,7 @@
 
 > **Resumo.** Pesquisas na literatura que embasam decisões do Takt. Cada pesquisa tem um relatório (conclusões, com fato, estimativa e palpite separados) e as notas brutas por subtema. As referências usadas ficam também em [`../product/references.md`](../product/references.md).
 
-Atualizado em 04/11/2026.
+Atualizado em 06/11/2026.
 
 | Pesquisa | Pergunta | Data | Usada em |
 | --- | --- | --- | --- |

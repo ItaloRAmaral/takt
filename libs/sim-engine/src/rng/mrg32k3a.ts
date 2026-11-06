@@ -103,8 +103,9 @@ export function findStreamStart(streamIndex: bigint): StreamStart {
  * @param replication - The replication number, from 0 to 2^51 − 1 (the
  *   substreams of a stream).
  * @returns A stream ready for {@link nextUniform}.
- * @throws {RangeError} When `replication` is negative or reaches 2^51, where
- *   it would silently fall into the next stream.
+ * @throws {RangeError} When `replication` is not an integer from 0 to
+ *   2^51 − 1: a negative one or one from 2^51 up would silently reuse another
+ *   substream; a fraction or `NaN` is refused by the conversion to `bigint`.
  */
 export function createRandomStream(
   start: StreamStart,

@@ -38,6 +38,7 @@
 | Φ e Q: Hart mediu erro relativo de até 8,7×10⁻⁹ na cauda, longe da estimativa de 10⁻¹² do plano | Manter Hart, publicado e simples; tolerâncias dos testes pelas medições; a alternativa estudada (Marsaglia 2004 + fração contínua de Laplace, ≤ 3,7×10⁻¹⁴) fica em [`docs/research/precisao-da-normal.md`](../research/precisao-da-normal.md) | 05/11/2026 |
 | Tolerância dos testes de média e variância: o plano dizia 4 erros-padrão; a tarefa 4 usou 1,96 (o IC de 95% de `simulation.md`) | Manter 1,96 erros-padrão (mais rigoroso) e corrigir o plano | 05/11/2026 |
 | Nomes de funções (segundo *code review*) | Procedimento leva verbo (`findStreamStart`, `drawTimeSec`, `evaluatePolynomial`); função matemática leva o nome do objeto, como `Math.sqrt` (`normalQuantile`, `normalCdf`, `normalSurvival`, `relativeError`, `lowerTail`) | 05/11/2026 |
+| Revisão final: normal truncada devolvia `Infinity` com o intervalo inteiro além do corte de Hart e a borda errada com probabilidade zero | Devolver a borda mais próxima da média quando a área calculada é 0, com teste; JSDoc da replicação descreve todo valor recusado (−1, 2⁵¹, 1,5, `NaN`); textos alinhados ao código | 06/11/2026 |
 
 ## Decisões técnicas deste plano
 
@@ -47,7 +48,7 @@
 | Índices repetidos numa planta → `SimulationError('INVALID_PLANT')` | O FNV-1a não resiste a colisões fabricadas, e os IDs vêm de plantas importadas: é um problema da entrada, não um defeito (ADR-0013). A mesma verificação cobre a chave repetida, que é como o teste a exercita |
 | Início da sequência e subsequência separados: `findStreamStart(index)` uma vez por chave; `createRandomStream(start, replication)` por replicação | **Fato:** cerca de 0,08 ms por salto de sequência com exponenciação binária (nota do gerador, seção 2); repetir o salto em cada replicação multiplicaria o custo pelo número de replicações |
 | Potências de matriz por quadrados sucessivos de A₁ e A₂ (127 e 76 quadrados), em `bigint`, calculadas uma vez | Evita copiar as matrizes publicadas no código do pacote; o `.res` e um índice alto conferido por cálculo independente provam o resultado |
-| `catchError` e os auxiliares de teste (`drawUniforms`, `sampleMean`, `sampleVariance`) em `src/tests/helpers/`, cada um com o próprio teste | Os testes de faixa, de somas e de momentos não podem ter laço (ADR-0009); as estatísticas de produção do motor só chegam no sub-plano 6, e estes auxiliares servem só aos testes |
+| `catchError` e os auxiliares de teste (`drawUniforms`, `summarizeUniforms`, `drawTimesSec`, `sampleMean`, `sampleVariance`, `relativeError`) em `src/tests/helpers/`, cada um com o próprio teste | Os testes de faixa, de somas e de momentos não podem ter laço (ADR-0009); as estatísticas de produção do motor só chegam no sub-plano 6, e estes auxiliares servem só aos testes |
 | Referências: AS 241 contra `statistics.NormalDist().inv_cdf` do Python 3.10.12 da máquina (a função implementa o AS 241 e cita Wichura 1988 no código); Φ e Q contra um cálculo próprio de alta precisão com `decimal` de 100 algarismos (série para \|x\| pequeno e fração contínua na cauda); índice alto contra potência de matriz em inteiros do Python, a partir das matrizes A₁ e A₂ do artigo | R, Octave e `mpmath` não estão instalados. `0.5 * math.erfc(-x / math.sqrt(2))` perde cerca de 2·(x/√2)²·ε na cauda (≈ 2×10⁻¹⁴ em \|x\| = 10) e não serve de referência ali. Scripts e comandos registrados em `docs/architecture/sim-engine.md` |
 | Normal truncada devolve um valor limitado a [mínimo, máximo] | A pesquisa sugere limitar (palpite, nota de distribuições, seção 3): o arredondamento não pode pôr um tempo fora do intervalo. Um intervalo com probabilidade zero em dupla precisão (por exemplo [40, 41] desvios) é recusado antes, na compilação (sub-plano 4, `INVALID_PLANT`) |
 | Triangular conferida com casos calculados à mão | O `triinv` do Octave é GPL e mudou a ordem dos parâmetros depois da versão 1.6.3 ([pesquisa](../research/literatura-do-motor.md)) |
@@ -74,7 +75,7 @@ Parâmetros fora da faixa (tempos negativos, desvio ≤ 0, mínimo ≥ máximo, 
 | Ameaça (ADR de origem) | Como este plano trata | Tarefa e teste |
 | --- | --- | --- |
 | Planta desenhada para travar o motor (ADR-0011) | O custo de preparação é um salto de sequência por chave (cerca de 0,08 ms), limitado pelo teto de elementos do sub-plano 4. Uma planta com IDs fabricados para colidir no FNV-1a é recusada com `INVALID_PLANT`, não trava nem vira defeito | 3: `rejects repeated stream indices as an invalid plant` |
-| Parâmetros que geram tempos infinitos ou NaN (ADR-0011) | Normal truncada limitada ao intervalo; intervalo de probabilidade zero recusado na compilação (sub-plano 4); faixas no esquema (sub-plano 3) | 5: `keeps a zero-mass truncation inside its bounds` |
+| Parâmetros que geram tempos infinitos ou NaN (ADR-0011) | Normal truncada limitada ao intervalo; intervalo de probabilidade zero em dupla precisão devolve a borda mais próxima da média (nunca `Infinity`, corrigido na revisão final) e é recusado na compilação (sub-plano 4); faixas no esquema (sub-plano 3) | 5: `puts a zero-mass truncation of mean $meanSec on [$minSec, $maxSec] at its edge $edge, the nearest to the mean` |
 | Código do motor acessando o DOM ou a rede (ADR-0011) | Já bloqueado pelo `tsc` e pelo lint | — |
 | Log de eventos muito grande (ADR-0011) | Não se aplica: não há log neste sub-plano | — |
 | Itens da seção 11 do guia | Sem segredo, sem `console`, sem log | — |
@@ -83,14 +84,16 @@ Parâmetros fora da faixa (tempos negativos, desvio ≤ 0, mínimo ≥ máximo, 
 
 | Requisito, regra ou linha do foco de revisão | Nível | Teste | Tarefa |
 | --- | --- | --- | --- |
-| ADR-0013, item 1 | unitário | `a simulation error carries its code` | 1 |
+| ADR-0013, item 1 | unitário | `a simulation error carries its code`; `a simulation error is named SimulationError in logs and stack traces` | 1 |
 | ADR-0013, item 5 | unitário | `catchError returns the thrown error`; `catchError fails when nothing is thrown` | 1 |
 | ADR-0013, "Em aberto" | unitário | `toMatchObject checks the code of a simulation error`; `toMatchObject fails on a different code`; `rejects.toMatchObject checks the code of a rejected simulation error` | 1 |
-| Auxiliares de teste | unitário | `drawUniforms returns the requested count`; `sampleMean of $values is $expected`; `sampleVariance of $values is $expected` | 2 e 4 |
+| Auxiliares de teste | unitário | `drawUniforms returns the requested count`; `gives the smallest, the largest and the sum in the order drawn` (`summarizeUniforms`); `drawTimesSec returns the requested count of samples`; `sampleMean of $values is $expected`; `sampleVariance of $values is $expected`; `relativeError of $actual against $expected is $error` | 2, 4 e 5 |
+| Saltos por potência de matriz (`jump.ts`) | unitário | `returns the identity for exponent 0`; `returns the matrix itself for exponent 1`; `raises the matrix to an odd power of several bits modulo the modulus`; `multiplies the matrix by the vector modulo the modulus` | 2 |
 | ADR-0011 item 5 (gerador igual à referência) | unitário, `it.each` | `stream $index starts at the reference state`; `stream 2, replication $replication gives the reference uniforms`; `stream 2 sums the 100 values after its first to the reference sum` (valores e a soma do `.res` que a API alcança) | 2 |
 | Foco 1 | unitário | `uniforms stay strictly between 0 and 1`; `equal components give m1 times norm, not zero` | 2 |
 | Foco 7 | unitário | `stream 2^63 + 5, replication $replication starts at the independently computed state` (replicações 0 e 7) | 2 |
-| FNV-1a conforme a especificação | unitário, `it.each` | `hashes $label to the reference value` | 3 |
+| Replicação fora de 0 a 2⁵¹ − 1 (defeito) | unitário, `it.each` | `rejects replication $replication` (−1, 2⁵¹, 1,5 e `NaN`) | 2 |
+| FNV-1a conforme a especificação | unitário, `it.each` | `hashes $label to the reference value`; `hashes the last ASCII character`; `findStreamIndex hashes the seed, a colon and the key`; `assigns each key its stream index` | 3 |
 | RN-SIM-001 | unitário | `RN-SIM-001: the same seed and key give the same stream index` | 3 |
 | RN-SIM-010 | unitário | `RN-SIM-010: a key keeps its stream index when other keys change`; `RN-SIM-010: a key keeps its stream index when the key order changes` (a chamada de base fica no Arrange) | 3 |
 | Semente muda o sorteio | unitário | `different seeds give different stream indices` | 3 |
@@ -98,9 +101,9 @@ Parâmetros fora da faixa (tempos negativos, desvio ≤ 0, mínimo ≥ máximo, 
 | ADR-0011 item 6 (fixa, exponencial, triangular) | unitário, `it.each` | `exponential quantile of $uniform is $expected`; `triangular quantile of $uniform on ($minSec, $modeSec, $maxSec) is $expected`, inclusive moda nos extremos (foco 6) | 4 |
 | Foco 10 | unitário | `RN-SIM-010: a fixed variability draws no random number` (e o mesmo, com "exactly one", para as demais) | 4 |
 | Média e variância teóricas | unitário | `exponential samples match the theoretical mean`, `... variance`; o mesmo para a triangular e a normal truncada | 4 e 5 |
-| AS 241 igual à referência (foco 5) | unitário, `it.each` | `normal quantile of $p matches the reference` | 5 |
-| Φ e Q iguais à referência de alta precisão | unitário, `it.each` | `normal cdf of $x matches the reference`; `normal survival of $x matches the reference` | 5 |
-| Focos 2, 3 e 4 | unitário, `it.each` | `truncated normal on [$lower, $upper] matches the reference at u = $uniform`; `keeps a zero-mass truncation on [$lower, $upper] inside its bounds` | 5 |
+| AS 241 igual à referência (foco 5) | unitário, `it.each` | `normal quantile of $p matches the reference`; `normal quantile of $p is $expected` (p = 0 e 1) | 5 |
+| Φ e Q iguais à referência de alta precisão | unitário, `it.each` | `normal cdf of $x matches the reference`; `normal survival of $x matches the reference`; `normal cdf is 0 below -37, where the Hart approximation stops` | 5 |
+| Focos 2, 3 e 4 | unitário, `it.each` | `truncated normal on [$lower, $upper] matches the reference at u = $uniform`; `puts a zero-mass truncation of mean $meanSec on [$minSec, $maxSec] at its edge $edge, the nearest to the mean` | 5 |
 
 - **Níveis usados e por quê:** só unitário, com tabelas `it.each`. Propriedade com fast-check entra no sub-plano 4 (roteiro); aqui, momentos usam uma sequência fixa com 10⁵ amostras. Integração, API e ponta a ponta não se aplicam: não há banco, rota nem tela.
 - **Dados de teste:** literais. Estados, valores e somas do gerador vêm do `tests/test2RngStream.res` da [versão Apache 2.0](https://github.com/umontreal-simul/RngStreams); o índice alto, do cálculo independente em Python; os do FNV, dos vetores da especificação; a AS 241, do Python; Φ e Q, do cálculo de alta precisão; a triangular e os momentos teóricos, calculados à mão (exponencial com média 30: média 30, variância 900; triangular (20, 25, 35): média 80/3, variância 175/18). A origem de cada tabela e os scripts ficam em `sim-engine.md`, não em comentário no teste.

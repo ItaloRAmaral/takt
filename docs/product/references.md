@@ -2,7 +2,7 @@
 
 > **Resumo.** Bibliografia que embasa o Takt e o que cada obra sustenta. A literatura valida a engenharia do motor e a didática; ela não valida a demanda.
 
-Atualizado em 04/11/2026.
+Atualizado em 06/11/2026.
 
 **Regra:** toda referência usada no produto, nos PDRs ou nos ADRs entra neste arquivo, com o que ela embasa. Pesquisas completas ficam em [`../research/`](../research/README.md).
 
