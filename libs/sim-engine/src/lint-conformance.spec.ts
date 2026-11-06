@@ -19,7 +19,7 @@ async function lintEngineFile(
   return results.flatMap((result) => result.messages);
 }
 
-describe('engine lint rules', () => {
+describe('engine lint rules', { timeout: 30_000 }, () => {
   it.each([
     { api: 'Math.random()', ruleId: 'no-restricted-properties' },
     { api: 'globalThis.Math.random()', ruleId: 'no-restricted-syntax' },

@@ -53,7 +53,7 @@ A raiz aplica os presets `strictTypeChecked` e `stylisticTypeChecked` do typescr
 
 **Uma regra redefinida num projeto substitui as opções da raiz.** Por isso a raiz exporta `noEnum` e `browserGlobals`, e o motor repete `noEnum` na própria lista de `no-restricted-syntax`.
 
-**Testes de conformidade** (`libs/*/src/lint-conformance.spec.ts`): rodam o ESLint de verdade, com a configuração real, sobre trechos de código, e verificam a regra e a linha de cada erro, com controles positivos para a configuração não bloquear tudo. Desligam a informação de tipos (`disableTypeChecked`) porque o arquivo verificado não existe no disco e nenhuma regra testada precisa de tipos. Mudar o `eslint.config.mjs` da raiz invalida o cache desses testes; atualizar só o ESLint ou um plugin, não (o CI não usa cache remoto).
+**Testes de conformidade** (`libs/*/src/lint-conformance.spec.ts`): rodam o ESLint de verdade, com a configuração real, sobre trechos de código, e verificam a regra e a linha de cada erro, com controles positivos para a configuração não bloquear tudo. Desligam a informação de tipos (`disableTypeChecked`) porque o arquivo verificado não existe no disco e nenhuma regra testada precisa de tipos. Mudar o `eslint.config.mjs` da raiz invalida o cache desses testes; atualizar só o ESLint ou um plugin, não (o CI não usa cache remoto). O `describe` de cada um tem tempo-limite de 30 s, e não os 5 s padrão do Vitest: o primeiro teste carrega o ESLint, o que leva ~1,7 s com a máquina livre e passou de 5 s quatro vezes em 05/11/2026, com a máquina ocupada (testes junto com lint e tipos, e no teste inicial da Stryker).
 
 ## Testes, cobertura e mutação
 

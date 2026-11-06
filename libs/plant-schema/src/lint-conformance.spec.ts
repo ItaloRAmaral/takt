@@ -19,7 +19,7 @@ async function lintSchemaFile(
   return results.flatMap((result) => result.messages);
 }
 
-describe('plant schema lint rules', () => {
+describe('plant schema lint rules', { timeout: 30_000 }, () => {
   it('rejects importing the engine in the plant schema', async () => {
     const code = `import { run } from '@takt/sim-engine';\n\nexport const value = run;\n`;
 
