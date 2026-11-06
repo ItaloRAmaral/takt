@@ -2,7 +2,7 @@
 
 > **Resumo.** Bibliografia que embasa o Takt e o que cada obra sustenta. A literatura valida a engenharia do motor e a didática; ela não valida a demanda.
 
-Atualizado em 04/11/2026.
+Atualizado em 06/11/2026.
 
 **Regra:** toda referência usada no produto, nos PDRs ou nos ADRs entra neste arquivo, com o que ela embasa. Pesquisas completas ficam em [`../research/`](../research/README.md).
 
@@ -91,8 +91,13 @@ Fonte: pesquisa [Literatura do motor](../research/literatura-do-motor.md) (04/11
 
 | Fonte | O que embasa |
 | --- | --- |
-| L'Ecuyer, P. RngStreams: [`RngStream.c`](https://www-labs.iro.umontreal.ca/~lecuyer/myftp/streams00/c/RngStream.c) e [`test2RngStream.res`](https://www-labs.iro.umontreal.ca/~lecuyer/myftp/streams00/c/test2RngStream.res) (uso não comercial); [versão no GitHub](https://github.com/umontreal-simul/RngStreams) (Apache 2.0) | Saída oficial para conferir o gerador; licença do código de partida |
+| L'Ecuyer, P. RngStreams: [`RngStream.c`](https://www-labs.iro.umontreal.ca/~lecuyer/myftp/streams00/c/RngStream.c) e [`test2RngStream.res`](https://www-labs.iro.umontreal.ca/~lecuyer/myftp/streams00/c/test2RngStream.res) (uso não comercial); [versão no GitHub](https://github.com/umontreal-simul/RngStreams) (Apache 2.0), com o [`tests/test2RngStream.res`](https://github.com/umontreal-simul/RngStreams/blob/b47f576/tests/test2RngStream.res) no commit `b47f576` (lido em 04/11/2026) | Saída oficial para conferir o gerador; licença do código de partida; dados de teste do gerador do motor (`libs/sim-engine/src/rng/mrg32k3a.spec.ts`) |
+| Noll, L.; Vo, K.; Eastlake 3rd, D.; Hansen, T. [RFC 9923: The FNV Non-Cryptographic Hash Algorithm](https://www.rfc-editor.org/rfc/rfc9923). Independent Submission, fev. 2026 (o *draft* `draft-eastlake-fnv` publicado como RFC) | Constantes do FNV-1a de 64 bits (seção 2) e vetores de teste (`FNV64svalues` e `FNV64bvalues`, seção 8.3), usados só como dado no índice da sequência do motor (`libs/sim-engine/src/rng/stream-index.spec.ts`) |
 | L'Ecuyer, P.; Munger, D.; Oreshkin, B.; Simard, R. "Random numbers for parallel computers". *Math. Comput. Simul.* 135, 2017 ([preprint](https://www.gerad.ca/papers/G-2015-35.pdf)); ns-3, [Random Variables](https://www.nsnam.org/docs/manual/html/random-variables.html) | Sequência por fonte de aleatoriedade; número fixo de sequência por variável |
+| West, G. "Better approximations to cumulative normal functions". *Wilmott Magazine*, 2005 ([PDF](https://s2.smu.edu/~aleskovs/emis/sqc2/accuratecumnorm.pdf)), Figura 2: o algoritmo de Hart, J. F. et al. *Computer Approximations*, Wiley, 1968 | Φ e Q do motor (`libs/sim-engine/src/distributions/normal.ts`); precisão relativa medida em [Precisão da normal](../research/precisao-da-normal.md) |
+| Marsaglia, G. "Evaluating the Normal Distribution". *J. Stat. Software* 11(4), 2004 ([artigo](https://www.jstatsoft.org/article/view/v011i04)), CC-BY 3.0 | Alternativa estudada para Φ na cauda; confirma a perda de precisão relativa de Hart |
+| Abramowitz, M.; Stegun, I. A. *Handbook of Mathematical Functions*, 26.2.14 ([p. 932](https://personal.math.ubc.ca/~cbm/aands/page_932.htm)) | Fração contínua de Laplace para Q: referência de alta precisão dos testes e alternativa estudada |
+| Python 3.10.12, [`statistics.NormalDist`](https://docs.python.org/3.10/library/statistics.html#statistics.NormalDist) e [`decimal`](https://docs.python.org/3.10/library/decimal.html) | Gerador das referências da normal: `inv_cdf` (o mesmo AS 241) e Φ, Q e a normal truncada com 100 algarismos |
 | StatLib, [AS 241](https://lib.stat.cmu.edu/apstat/241); R, `qnorm.c`, `pnorm.c` e `qt.c` ([código](https://github.com/wch/r-source/tree/trunk/src/nmath)) | Inversa da normal; função de distribuição da normal (Cody); quantil da t |
 | Botev, Z. 2017, *JRSS-B* 79(1) ([arXiv](https://arxiv.org/abs/1603.04166)) e o pacote R TruncatedNormal | Normal truncada com o intervalo numa cauda |
 | NIST/SEMATECH. [Valores críticos da t](https://www.itl.nist.gov/div898/handbook/eda/section3/eda3672.htm) | Conferência da tabela do quantil da t |

@@ -2,7 +2,7 @@
 
 > **Resumo.** Planos de implementação: o que vai ser construído, em quais arquivos, com quais testes, quais ameaças são tratadas e quais princípios de estilo são quebrados e por quê. Toda mudança de código ou configuração começa por um plano aprovado: curto, na conversa, para mudanças pequenas e locais; completo, nesta pasta, para o resto. Só texto de documentação, comentários e formatação dispensam plano. Os planos são escritos com a skill `planning-code-changes` (`.claude/skills/planning-code-changes/`).
 
-Atualizado em 04/11/2026.
+Atualizado em 06/11/2026.
 
 ## Como funciona
 
@@ -18,7 +18,8 @@ Atualizado em 04/11/2026.
 | Plano | Status | Data |
 | --- | --- | --- |
 | [Workspace Nx do marco 1](2026-11-03-workspace-nx.md) | Concluído (PR #1, 04/11/2026) | 03/11/2026 |
-| [Roteiro: esquema da planta e motor (marco 1)](2026-11-04-roteiro-motor.md) | Aprovado | 04/11/2026 |
+| [Roteiro: esquema da planta e motor (marco 1)](2026-11-04-roteiro-motor.md) | Aprovado; sub-plano 1 concluído | 04/11/2026 |
+| [Fundamentos do motor (sub-plano 1)](2026-11-04-motor-fundamentos.md) | Concluído (05/11/2026) | 04/11/2026 |
 
 ## Medição do revisor
 
@@ -28,3 +29,4 @@ O revisor fica só se achar o que a autorrevisão não acha. Depois de cinco pla
 | --- | --- | --- | --- | --- | --- |
 | [Workspace Nx do marco 1](2026-11-03-workspace-nx.md) | 03/11/2026 | 3 (segurança: segredos, dependências, token do CI) | 4 | 6 / 17 | 1 |
 | [Roteiro: esquema da planta e motor](2026-11-04-roteiro-motor.md) | 04/11/2026 | 1 e 5 (roteiro; determinismo do motor) | 5 | 9 / 11 | 0 |
+| [Fundamentos do motor](2026-11-04-motor-fundamentos.md) | 04/11/2026 | 5 (determinismo do motor) | 5 | 3 / 8 | 1 |

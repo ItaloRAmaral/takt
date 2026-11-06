@@ -2,7 +2,7 @@
 
 > **Resumo.** Como escrever código no Takt: princípios de design, critérios para quebrar um princípio quando ele vira excesso de engenharia, convenções de TypeScript e convenções por projeto (API, motor, esquema, web, testes). O guia fica abaixo do `CLAUDE.md`, dos ADRs e PDRs aceitos e das regras `RN-...`. Cada regra diz se é imposta por **ferramenta** ou verificada na **revisão**.
 
-Atualizado em 04/11/2026 · Base: pesquisa [Guia de estilo de código](../research/guia-de-estilo-de-codigo.md) · Decisões: [ADR-0001](../adr/0001-monorepo-nx-e-nomes.md), [ADR-0002](../adr/0002-arquitetura-hexagonal-por-contexto.md), [ADR-0008](../adr/0008-validacao-de-dados.md) a [ADR-0013](../adr/0013-erros-esperados.md).
+Atualizado em 05/11/2026 · Base: pesquisa [Guia de estilo de código](../research/guia-de-estilo-de-codigo.md) · Decisões: [ADR-0001](../adr/0001-monorepo-nx-e-nomes.md), [ADR-0002](../adr/0002-arquitetura-hexagonal-por-contexto.md), [ADR-0008](../adr/0008-validacao-de-dados.md) a [ADR-0013](../adr/0013-erros-esperados.md).
 
 Este guia tem uma versão curta para o Claude Code em [`.claude/rules/`](../../.claude/rules/), um arquivo por área. **O guia é a fonte da verdade.** Quando os dois divergirem, vale o guia, e os dois mudam no mesmo pull request.
 
@@ -194,7 +194,7 @@ O [ADR-0009](../adr/0009-estrategia-de-testes.md) decide a estratégia; aqui fic
 - **Dados:** fábricas `makePlant(overrides)` com dados fixos; nada de dado aleatório sem semente.
 - **Casos de uso** testados com os adaptadores em memória, sem *mocks* de biblioteca.
 - **Resposta da API** validada contra o esquema Zod de saída.
-- **Arquivos:** unitário ao lado do código (`*.spec.ts`); API em `*.e2e-spec.ts`.
+- **Arquivos:** unitário ao lado do código (`*.spec.ts`); API em `*.e2e-spec.ts`. Auxiliares só de teste ficam em `src/tests/helpers/`, cada um com o spec ao lado, fora do *build* da lib. Decisão do fundador em 05/11/2026.
 
 ## 11. Checklist de revisão
 

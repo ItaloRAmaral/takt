@@ -2,7 +2,7 @@
 
 > **Resumo.** Como o monorepo é montado hoje: projetos, versões fixadas, segurança da instalação, lint, testes, cobertura, mutação, hooks locais e CI. O porquê está nos ADRs [0001](../adr/0001-monorepo-nx-e-nomes.md), [0009](../adr/0009-estrategia-de-testes.md), [0010](../adr/0010-qualidade-e-ci.md) e [0011](../adr/0011-motor-de-simulacao-e-esquema.md); os comandos, no `CLAUDE.md`, seção "Commands".
 
-Atualizado em 04/11/2026. Criado pelo plano [Workspace Nx do marco 1](../plans/2026-11-03-workspace-nx.md), cujas notas de execução registram cada desvio.
+Atualizado em 06/11/2026. Criado pelo plano [Workspace Nx do marco 1](../plans/2026-11-03-workspace-nx.md), cujas notas de execução registram cada desvio.
 
 ## Estrutura
 
@@ -49,11 +49,11 @@ Alerta aberto de propósito: `minimatch` 10.2.5, via ESLint. A única correção
 
 ## Lint
 
-A raiz aplica os presets `strictTypeChecked` e `stylisticTypeChecked` do typescript-eslint, só em arquivos TypeScript, mais as regras da [seção 4 do guia](code-style.md#4-typescript): sem `enum`, sem `export default` (exceto em `*.config.*`), sem `console`, nomes de arquivo e pasta em *kebab-case* (`eslint-plugin-check-file`) e as fronteiras do Nx por tag. Cada biblioteca acrescenta as proibições dela no próprio `eslint.config.mjs`: o motor proíbe `Math.random`, `Date.now`, `new Date()`, `Date()`, `performance.now`, os acessos por `globalThis`, globais do navegador, React, Three.js e imports de valor do esquema; o esquema proíbe importar o motor e os globais do navegador.
+A raiz aplica os presets `strictTypeChecked` e `stylisticTypeChecked` do typescript-eslint, só em arquivos TypeScript, mais as regras da [seção 4 do guia](code-style.md#4-typescript): sem `enum`, sem `export default` (exceto em `*.config.*`), sem `console`, nomes de arquivo e pasta em *kebab-case* (`eslint-plugin-check-file`) e as fronteiras do Nx por tag. Cada biblioteca acrescenta as proibições dela no próprio `eslint.config.mjs`: o motor proíbe `Math.random`, `Date.now`, `new Date()`, `Date()`, `performance.now`, os acessos por `globalThis`, globais do navegador, React, Three.js, imports de valor do esquema e, fora dos specs, imports de `src/tests/` (os auxiliares de teste ficam fora do *build* e da mutação); o esquema proíbe importar o motor e os globais do navegador.
 
 **Uma regra redefinida num projeto substitui as opções da raiz.** Por isso a raiz exporta `noEnum` e `browserGlobals`, e o motor repete `noEnum` na própria lista de `no-restricted-syntax`.
 
-**Testes de conformidade** (`libs/*/src/lint-conformance.spec.ts`): rodam o ESLint de verdade, com a configuração real, sobre trechos de código, e verificam a regra e a linha de cada erro, com controles positivos para a configuração não bloquear tudo. Desligam a informação de tipos (`disableTypeChecked`) porque o arquivo verificado não existe no disco e nenhuma regra testada precisa de tipos. Mudar o `eslint.config.mjs` da raiz invalida o cache desses testes; atualizar só o ESLint ou um plugin, não (o CI não usa cache remoto).
+**Testes de conformidade** (`libs/*/src/lint-conformance.spec.ts`): rodam o ESLint de verdade, com a configuração real, sobre trechos de código, e verificam a regra e a linha de cada erro, com controles positivos para a configuração não bloquear tudo. Desligam a informação de tipos (`disableTypeChecked`) porque o arquivo verificado não existe no disco e nenhuma regra testada precisa de tipos. Mudar o `eslint.config.mjs` da raiz invalida o cache desses testes; atualizar só o ESLint ou um plugin, não (o CI não usa cache remoto). O `describe` de cada um tem tempo-limite de 30 s, e não os 5 s padrão do Vitest: o primeiro teste carrega o ESLint, o que leva ~1,7 s com a máquina livre e passou de 5 s quatro vezes em 05/11/2026, com a máquina ocupada (testes junto com lint e tipos, e no teste inicial da Stryker).
 
 ## Testes, cobertura e mutação
 

@@ -15,7 +15,12 @@ export default {
   vitest: { configFile: 'libs/sim-engine/vitest.config.mts', related: false },
   checkers: ['typescript'],
   tsconfigFile: 'libs/sim-engine/tsconfig.lib.json',
-  mutate: ['libs/sim-engine/src/**/*.ts', '!libs/sim-engine/src/**/*.spec.ts'],
+  // Test helpers are not engine code: no mutants there.
+  mutate: [
+    'libs/sim-engine/src/**/*.ts',
+    '!libs/sim-engine/src/**/*.spec.ts',
+    '!libs/sim-engine/src/tests/**',
+  ],
   thresholds: { high: 90, low: 80, break: 80 },
   reporters: ['clear-text', 'progress', 'html'],
   htmlReporter: { fileName: 'reports/mutation/sim-engine.html' },
