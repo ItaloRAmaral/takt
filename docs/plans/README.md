@@ -18,8 +18,8 @@ Atualizado em 04/11/2026.
 | Plano | Status | Data |
 | --- | --- | --- |
 | [Workspace Nx do marco 1](2026-11-03-workspace-nx.md) | Concluído (PR #1, 04/11/2026) | 03/11/2026 |
-| [Roteiro: esquema da planta e motor (marco 1)](2026-11-04-roteiro-motor.md) | Aprovado | 04/11/2026 |
-| [Fundamentos do motor (sub-plano 1)](2026-11-04-motor-fundamentos.md) | Aprovado | 04/11/2026 |
+| [Roteiro: esquema da planta e motor (marco 1)](2026-11-04-roteiro-motor.md) | Aprovado; sub-plano 1 concluído | 04/11/2026 |
+| [Fundamentos do motor (sub-plano 1)](2026-11-04-motor-fundamentos.md) | Concluído (05/11/2026) | 04/11/2026 |
 
 ## Medição do revisor
 

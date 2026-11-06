@@ -47,4 +47,22 @@ describe('drawTimeSec', () => {
     expect(value).toBe(28.618500797577347);
     expect(stream).toEqual(stateAfterOneDraw);
   });
+
+  it('RN-SIM-010: a truncated normal variability inverts exactly one random number', () => {
+    const stream = createRandomStream(findStreamStart(2n), 0);
+
+    const value = drawTimeSec(
+      {
+        kind: 'truncatedNormal',
+        meanSec: 30,
+        standardDeviationSec: 5,
+        minSec: 0,
+        maxSec: 40,
+      },
+      stream,
+    );
+
+    expect(value).toBeCloseTo(32.79524840575249, 12);
+    expect(stream).toEqual(stateAfterOneDraw);
+  });
 });

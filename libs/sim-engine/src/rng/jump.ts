@@ -1,20 +1,32 @@
 /** A 3 × 3 matrix of non-negative integers, with entries named by row and column. */
 export interface Matrix3 {
+  /** Row 0, column 0. */
   readonly a00: bigint;
+  /** Row 0, column 1. */
   readonly a01: bigint;
+  /** Row 0, column 2. */
   readonly a02: bigint;
+  /** Row 1, column 0. */
   readonly a10: bigint;
+  /** Row 1, column 1. */
   readonly a11: bigint;
+  /** Row 1, column 2. */
   readonly a12: bigint;
+  /** Row 2, column 0. */
   readonly a20: bigint;
+  /** Row 2, column 1. */
   readonly a21: bigint;
+  /** Row 2, column 2. */
   readonly a22: bigint;
 }
 
 /** A column vector of three non-negative integers. */
 export interface Vector3 {
+  /** Entry 0. */
   readonly x0: bigint;
+  /** Entry 1. */
   readonly x1: bigint;
+  /** Entry 2. */
   readonly x2: bigint;
 }
 

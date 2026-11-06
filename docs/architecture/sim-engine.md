@@ -2,7 +2,7 @@
 
 > **Resumo.** Como o motor é construído hoje. O motor é um núcleo funcional em TypeScript puro, sem React, Three.js nem DOM, que roda num Web Worker do `takt-web-app`. O porquê está no [ADR-0011](../adr/0011-motor-de-simulacao-e-esquema.md) e no [ADR-0013](../adr/0013-erros-esperados.md); o plano que o constrói é o [roteiro do motor](../plans/2026-11-04-roteiro-motor.md). Este documento cresce a cada sub-plano.
 
-Atualizado em 05/11/2026 (sub-plano 1, tarefa 4).
+Atualizado em 05/11/2026 (sub-plano 1 concluído).
 
 ## Estrutura
 
@@ -11,9 +11,9 @@ Pastas por conceito ([guia de estilo](code-style.md), seção 7), dentro de `lib
 | Pasta | O que tem | Sub-plano |
 | --- | --- | --- |
 | `errors/` | `SimulationError`, o erro esperado do motor | 1 |
-| `tests/helpers/` | Auxiliares só de teste (`catchError`, `drawUniforms`, `summarizeUniforms`, `drawTimesSec`, `sampleMean`, `sampleVariance`), cada um com o spec ao lado; não saem pelo `index.ts`, não entram no *build* (`exclude` do `tsconfig.lib.json`) nem na mutação (`mutate` da Stryker), mas contam na cobertura | 1 |
+| `tests/helpers/` | Auxiliares só de teste (`catchError`, `drawUniforms`, `summarizeUniforms`, `drawTimesSec`, `sampleMean`, `sampleVariance`, `relativeError`), cada um com o spec ao lado; não saem pelo `index.ts`, não entram no *build* (`exclude` do `tsconfig.lib.json`) nem na mutação (`mutate` da Stryker), mas contam na cobertura | 1 |
 | `rng/` | Gerador MRG32k3a (`mrg32k3a.ts`), saltos por potência de matriz (`jump.ts`), índice da sequência por chave (`stream-index.ts`) | 1 |
-| `distributions/` | `Variability` e `drawTimeSec` (`variability.ts`), quantis da exponencial (`exponentialQuantile`, em `exponential.ts`) e da triangular (`triangularQuantile`, em `triangular.ts`); normal truncada a seguir | 1 |
+| `distributions/` | `Variability` e `drawTimeSec` (`variability.ts`); quantis da exponencial (`exponential.ts`), da triangular (`triangular.ts`) e da normal truncada (`truncated-normal.ts`); quantil, função de distribuição e cauda superior da normal padrão (`normal.ts`) | 1 |
 
 O `src/index.ts` é a API pública: hoje só `SimulationError` e `SimulationErrorCode`. O resto é interno e usado pelos sub-planos seguintes.
 
@@ -128,7 +128,7 @@ for text in ["\x7f", "42:m1:cycle", "42:m1:failure"]:
 
 Método da inversão: cada amostra é a inversa da função de distribuição aplicada a **um único** número uniforme (ADR-0011, item 6), o que mantém o pareamento dos números aleatórios comuns entre cenários (RN-SIM-010).
 
-- **Tipo interno:** `Variability`, com `kind` e tempos em segundos: `fixed` (`valueSec`), `exponential` (`meanSec`), `triangular` (`minSec`, `modeSec`, `maxSec`). O esquema da planta (sub-plano 3) tem outro formato; a compilação (sub-plano 4) converte um no outro.
+- **Tipo interno:** `Variability`, com `kind` e tempos em segundos: `fixed` (`valueSec`), `exponential` (`meanSec`), `triangular` (`minSec`, `modeSec`, `maxSec`), `truncatedNormal` (`meanSec`, `standardDeviationSec`, `minSec`, `maxSec`, com `maxSec` podendo ser `Infinity`). O esquema da planta (sub-plano 3) tem outro formato; a compilação (sub-plano 4) converte um no outro.
 - **`drawTimeSec(variabilidade, sequência)`:** `switch` exaustivo sobre `kind`, sem `default`. A fixa **não consome** número aleatório; as demais consomem exatamente um. Os testes conferem o estado da sequência depois do sorteio.
 - **Exponencial:** `−média · ln(1 − u)`. Usa `Math.log`, que a especificação do JavaScript não obriga a ser igual entre motores (D4, sub-plano 2); por isso os testes da inversa usam `toBeCloseTo` com 12 casas.
 - **Triangular:** fórmula fechada por partes, `mín + √(u · (máx − mín) · (moda − mín))` até u = (moda − mín) / (máx − mín), e `máx − √((1 − u) · (máx − mín) · (máx − moda))` acima. Só usa `Math.sqrt`, que a especificação manda arredondar corretamente: o resultado é igual em todo motor, e os testes da inversa comparam com igualdade exata, com valores de u e parâmetros escolhidos para dar raízes exatas, inclusive a moda nos dois extremos.
@@ -203,4 +203,137 @@ for name, f, m, v, m4 in [("exp", inv_exp, 30.0, 900.0, 9 * 30.0**4),
           sv, (sv - v) / se_v, v - 1.96 * se_v, v + 1.96 * se_v)
 ```
 
-A normal truncada entra na tarefa 5.
+### Normal truncada
+
+`truncatedNormalQuantile(u, média, desvio, mínimo, máximo)`, com `maxSec` podendo ser `Infinity`. Com o intervalo padronizado [a, b], a = (mínimo − média)/desvio:
+
+- **a ≥ 0** (o intervalo inteiro na média ou acima dela): trabalha com a cauda superior, p = Q(a) − u·(Q(a) − Q(b)) e z = −Φ⁻¹(p). Assim, um intervalo longe na cauda não perde os algarismos que 1 − Φ perderia. O plano dizia "acima de 0"; a = 0 entrou no mesmo ramo sem custo (o teste com u = 0,999999999 cobre o caso).
+- **Limite de precisão conhecido (medido):** no outro ramo, com u perto de 1, p fica perto de 1 e 1 − p perde algarismos. Com o maior uniforme do gerador (1 − 2,3×10⁻¹⁰), o erro é de 1,5×10⁻¹⁰ desvios-padrão no caso realista (média 30, desvio 5, mínimo 0) e chega a 7,3×10⁻⁸ quando o intervalo começa logo abaixo da média (a = −10⁻⁹). Invisível no produto, pelo mesmo critério da decisão sobre Hart; o sub-plano 4 reavalia, junto com guardar Φ(a) e Φ(b) na compilação, se um terceiro ramo (escolher a cauda pelo lado em que p < 0,5) vale o código.
+- **Senão:** p = Φ(a) + u·(Φ(b) − Φ(a)) e z = Φ⁻¹(p). Os dois ramos são crescentes em u.
+- **Resultado** = média + desvio·z, **limitado a [mínimo, máximo]**: o arredondamento nunca põe um tempo fora do intervalo. Com probabilidade zero em dupla precisão ([40, 41] desvios), p = 0, Φ⁻¹ dá ±∞ e o limite devolve a borda do intervalo; a recusa da planta nesse caso é do sub-plano 4.
+
+### Φ⁻¹: AS 241 (Wichura 1988)
+
+- `normalQuantile(p)`, o PPND16, com as três regiões do artigo (|q| ≤ 0,425; r ≤ 5; r > 5). Escrito a partir do artigo ([PDF](https://csg.sph.umich.edu/abecasis/gas_power_calculator/algorithm-as-241-the-percentage-points-of-the-normal-distribution.pdf)).
+- **Coeficientes:** os 52 do artigo, conferidos pelas três somas de conferência (*hash sums*) que o próprio artigo imprime. No código, cada coeficiente é o menor decimal que dá o mesmo `double` que o valor de 20 algarismos do artigo, porque o lint (`no-loss-of-precision`) recusa literais com mais algarismos do que um `double` guarda; a equivalência foi conferida coeficiente a coeficiente por script.
+- **Fora de (0, 1):** p ≤ 0 dá −∞ e p ≥ 1 dá +∞, os limites matemáticos. O artigo devolve 0 com um indicador de falha; aqui o ±∞ é o que faz a normal truncada com probabilidade zero cair na borda certa.
+- **Testes:** os três dados de teste do artigo (z₀,₂₅, z₀,₀₀₁ e z₁₀⁻²⁰; o literal de z₁₀⁻²⁰ é −9,262340089798409, o mesmo `double` que o −9,262 340 089 798 408 impresso) e pontos nas três regiões e perto de 0 e de 1 (10⁻¹⁰ e 1 − 10⁻¹⁰), contra o `statistics.NormalDist().inv_cdf` do Python 3.10.12, que implementa o mesmo AS 241: as duas implementações deram resultados bit a bit iguais em ~1300 pontos de 10⁻²⁹⁹ a 1 − 10⁻¹⁵. Tolerância: 13 casas.
+- Dois dos três dados do artigo diferem do resultado em `double` no último algarismo (≈ 3×10⁻¹⁶): o artigo foi calculado num IBM 3081, em base 16. Fica dentro dos "about 16 figures" que ele declara.
+
+### Φ e Q: Hart (1968), na forma de West (2005)
+
+- `normalCdf(x)` e `normalSurvival(x)` = Φ(−x), pelo algoritmo da Figura 2 de West, ["Better approximations to cumulative normal functions"](https://s2.smu.edu/~aleskovs/emis/sqc2/accuratecumnorm.pdf): função racional para |x| < 7,07106781186547, fração contínua com 4 termos acima, e 0 para |x| > 37. A cauda é sempre calculada direto (Φ para x ≤ 0, Q para x ≥ 0), sem 1 − Φ.
+- **Precisão medida (fato):** West afirma "accurate to double precision throughout the real line", mas isso só vale para o erro **absoluto**. O erro **relativo**, medido em `double` contra Q com 100 algarismos (conferido contra Φ(−1) conhecido e contra o `erfc` da glibc), é:
+
+| \|x\| | Erro relativo de Φ(−\|x\|) |
+| --- | --- |
+| até 3 | ≤ 1,5×10⁻¹⁴ |
+| 4 | 1,2×10⁻¹³ |
+| 5 | 4,6×10⁻¹¹ |
+| 7 | 2,6×10⁻⁹ |
+| 8 | 8,7×10⁻⁹ (o pior) |
+| 10 | 3,2×10⁻⁹ |
+| 37 | 9,2×10⁻¹⁴ |
+
+  Marsaglia (2004) chega à mesma conclusão sobre Hart ("would taper off to about 9 digits at x = 12").
+- **Efeito no produto: nenhum visível.** Numa normal truncada com o intervalo inteiro em [8, 9] desvios, o tempo sorteado erra ~10⁻⁹ desvios-padrão (medido); perto da média, ~10⁻¹⁶. Com o caso realista (por exemplo, média 30 s, desvio 1 s, mínimo 0), o corte fica em −30 desvios e o erro some.
+- **Decisão do usuário (05/11/2026):** manter Hart, publicado e simples, em vez de uma combinação própria mais precisa. A alternativa estudada (Marsaglia 2004 para |x| < 5 e a fração contínua de Laplace com 40 termos acima, erro relativo ≤ 3,7×10⁻¹⁴ medido) está em [Precisão da função de distribuição da normal](../research/precisao-da-normal.md), para o dia em que o motor precisar de Φ na cauda com erro relativo pequeno (por exemplo, um p-valor extremo).
+- **Tolerâncias dos testes** (das medições, com folga): 10⁻¹³ até |x| = 3, 10⁻¹² em 4, 10⁻¹⁰ em 5 e 2×10⁻⁸ de 8 a 10 (erro relativo, pelo auxiliar `relativeError`); 10⁻¹² em 37; Φ(−37,5) = 0, o corte publicado (o valor verdadeiro é 4,6×10⁻³⁰⁸). Normal truncada: 14 casas perto da média e 8 casas nas caudas ([8, 9], [9, 10], [−9, −8]).
+
+### Momentos da normal truncada
+
+Normal com média 10 e desvio 1, truncada em [9, 11] (a padrão em [−1, 1]), sequência 0, replicação 0, 10⁵ amostras: média 9,99951 (z = −0,29) e variância 0,28984 (z = −1,44), dentro do IC de 95%. **Cálculo próprio:** variância 1 − 2φ(1)/(Φ(1) − Φ(−1)) = 0,291125094772793 e 4º momento central 3·variância − 2φ(1)/(Φ(1) − Φ(−1)) = 0,164500379091173 (por integração por partes; conferido por integração numérica, 0,164500379091170). Limites nos testes: média de 9,99665 a 10,00335; variância de 0,28937 a 0,29288.
+
+### Funções do `Math` usadas (insumo da D4, sub-plano 2)
+
+| Função | Onde | Igual em todo motor? |
+| --- | --- | --- |
+| `Math.sqrt` | triangular; AS 241 (caudas) | Sim: a especificação exige arredondamento correto |
+| `Math.log` | exponencial; AS 241 (caudas) | Não garantido |
+| `Math.exp` | Hart (Φ e Q) | Não garantido |
+
+### Mutantes equivalentes da normal
+
+- No `evaluatePolynomial`, trocar `+ coefficient` por `- coefficient` inverte o sinal de todo polinômio; numerador e denominador passam pela mesma função, e a razão não muda.
+- Fronteiras em que os dois lados dão o mesmo resultado ou valem igualmente: |q| = 0,425 e r = 5 no AS 241; x = 7,07106781186547 no Hart; `x >= 0` em Φ (em 0 os dois lados dão 0,5).
+- `q <= 0` nos dois lugares do ramo das caudas do AS 241: ali |q| > 0,425, então q nunca é 0.
+
+### Script de referência da normal
+
+Gera todos os literais dos testes da normal, inclusive Q (pela simetria Q(x) = Φ(−x)) e a linha [−9, −8] da truncada (Python 3.10.12, `decimal` com 100 algarismos; Q por série até |x| = 5 e pela fração contínua de Laplace, Abramowitz e Stegun 26.2.14, acima). Para rodar: `python3 -I normal_reference.py`.
+
+```python
+import math
+from decimal import Decimal as D, getcontext
+from statistics import NormalDist
+
+getcontext().prec = 100
+PI = D("3.141592653589793238462643383279502884197169399375105820974944592307816406286208998628034825342117068")
+
+# Wichura (1988): the article's hash sums check the transcription of the coefficients in normal.ts
+AB = "3.3871328727963666080 1.3314166789178437745 1.9715909503065514427 1.3731693765509461125 4.5921953931549871457 6.7265770927008700853 3.3430575583588128105 2.5090809287301226727 4.2313330701600911252 6.8718700749205790830 5.3941960214247511077 2.1213794301586595867 3.9307895800092710610 2.8729085735721942674 5.2264952788528545610"
+CD = "1.42343711074968357734 4.63033784615654529590 5.76949722146069140550 3.64784832476320460504 1.27045825245236838258 2.41780725177450611770 2.27238449892691845833 7.74545014278341407640 2.05319162663775882187 1.67638483018380384940 6.89767334985100004550 1.48103976427480074590 1.51986665636164571966 5.47593808499534494600 1.05075007164441684324"
+EF = "6.65790464350110377720 5.46378491116411436990 1.78482653991729133580 2.96560571828504891230 2.65321895265761230930 1.24266094738807843860 2.71155556874348757815 2.01033439929228813265 5.99832206555887937690 1.36929880922735805310 1.48753612908506148525 7.86869131145613259100 1.84631831751005468180 1.42151175831644588870 2.04426310338993978564"
+for name, mantissas, printed in [("AB", AB, "55.8831928806149014439"), ("CD", CD, "49.33206503301610289036"), ("EF", EF, "47.52583317549289671629")]:
+    print("hash", name, sum(D(m) for m in mantissas.split()) == D(printed))
+
+
+def density(x):
+    return (-(x * x) / 2).exp() / (2 * PI).sqrt()
+
+
+def upper(x):  # Q(x) at 100 digits: erf series for |x| < 5, Laplace continued fraction (A&S 26.2.14) beyond
+    x = D(x)
+    if x <= -5:
+        return 1 - upper(-x)
+    if x >= 5:
+        acc = x
+        for k in range(3000, 0, -1):
+            acc = x + D(k) / acc
+        return density(x) / acc
+    z, term, total, n = x / D(2).sqrt(), None, None, 0
+    term = total = z
+    while abs(term) > D(10) ** -110:
+        n += 1
+        term = term * (-z * z) / n
+        total += term / (2 * n + 1)
+    return (1 - 2 / PI.sqrt() * total) / 2
+
+
+def lower(x):
+    return upper(-D(x))
+
+
+def inverse(target, from_above):  # Newton at 100 digits: Q(z) = target or Phi(z) = target
+    t = D(target)
+    z = D(-NormalDist().inv_cdf(float(t)) if from_above else NormalDist().inv_cdf(float(t)))
+    for _ in range(8):
+        step = ((upper(z) if from_above else lower(z)) - t) / density(z)
+        z = z + step if from_above else z - step
+    return z
+
+
+def truncated(u, a, b):  # standard normal truncated to [a, b], at the uniform u
+    u = D(u)
+    if a >= 0:
+        qa, qb = upper(a), (upper(b) if b != math.inf else D(0))
+        return inverse(qa - u * (qa - qb), True)
+    pa, pb = lower(a), (lower(b) if b != math.inf else D(1))
+    return inverse(pa + u * (pb - pa), False)
+
+
+print("quantiles", [repr(NormalDist().inv_cdf(p)) for p in (0.975, 1e-10, 1 - 1e-10)])
+print("Phi", ["%.17g" % float(lower(x)) for x in (-37, -10, -8, -5, -4, -3, -1, 1, 3)])
+print("Q", ["%.17g" % float(upper(x)) for x in (1, 4, 8, 10)])
+print("truncated", ["%.17g" % float(truncated(u, a, b)) for u, a, b in
+                    [(0.3, -1, 1), (0.5, 0, math.inf), (0.999999999, 0, math.inf), (0.5, 8, 9), (0.1, 8, 9), (0.5, 9, 10), (0.5, -9, -8)]])
+print("one draw, mean 30, sd 5, [0, 40], u = 0.7285097861965271:", "%.17g" % float(30 + 5 * truncated(0.7285097861965271, -6, 2)))
+mass = lower(1) - lower(-1)
+var = 1 - 2 * density(D(1)) / mass
+print("[-1, 1]: variance", "%.15g" % float(var))
+mu4 = 3 * var - 2 * density(D(1)) / mass
+print("[-1, 1]: fourth central moment", "%.15g" % float(mu4), "(Simpson gave 0.164500379091170)")
+n = 100_000
+se_mean, se_var = (float(var) / n) ** 0.5, ((float(mu4) - float(var) ** 2) / n) ** 0.5
+print("bounds: mean 10 +-", 1.96 * se_mean, "variance", float(var) - 1.96 * se_var, float(var) + 1.96 * se_var)
+```

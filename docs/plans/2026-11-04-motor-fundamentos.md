@@ -2,7 +2,7 @@
 
 | Campo | Valor |
 | --- | --- |
-| Status | Aprovado (04/11/2026) |
+| Status | Concluído (05/11/2026) |
 | Data | 04/11/2026 |
 | Pedido | "Pode prosseguir" (04/11/2026), para o sub-plano 1 do roteiro aprovado: "Classe de erro do motor; helper `catchError`; MRG32k3a com sequência por chave e subsequência por replicação; distribuições por inversão (fixa, exponencial, triangular, normal truncada)". |
 | Contexto | [Roteiro](2026-11-04-roteiro-motor.md) (sub-plano 1, interfaces e pendências), [ADR-0011](../adr/0011-motor-de-simulacao-e-esquema.md) itens 5 e 6, [ADR-0013](../adr/0013-erros-esperados.md), [RN-SIM-001 e 010](../product/rules/simulation.md), [code-style.md](../architecture/code-style.md) seções 2, 4, 5, 7 e 10, [pesquisa da literatura do motor](../research/literatura-do-motor.md) e as notas [gerador](../research/notes/literatura-do-motor/gerador-mrg32k3a.md) e [distribuições](../research/notes/literatura-do-motor/distribuicoes-e-numerica.md) |
@@ -35,6 +35,9 @@
 | Parâmetros da normal truncada | Média e desvio-padrão obrigatórios; mínimo opcional, padrão 0; máximo opcional, sem limite superior quando ausente. O esquema (sub-plano 3) exige mínimo ≥ 0 e mínimo < máximo | 04/11/2026 |
 | Onde ficam os auxiliares de teste e se o `jump.ts` tem teste próprio | Em `src/tests/helpers/`, fora do *build* da lib (`exclude` do `tsconfig.lib.json`, `include` do `tsconfig.spec.json`) e da mutação, cada um com o spec ao lado; `rng/` mantido; `jump.spec.ts` com módulo 7 e literais conferidos por multiplicação repetida em Python | 05/11/2026 |
 | Nomes revistos no *code review* | Funções com verbo (`findStreamStart`, `findStreamIndex`, `drawTimeSec`, `drawTimesSec`); quantis no lugar de "inversas" (`exponentialQuantile`, `triangularQuantile`, parâmetro `uniform`); contagens com `Count`; `component1Jump`/`component2Jump` no salto; replicação limitada a 2⁵¹ − 1 | 05/11/2026 |
+| Φ e Q: Hart mediu erro relativo de até 8,7×10⁻⁹ na cauda, longe da estimativa de 10⁻¹² do plano | Manter Hart, publicado e simples; tolerâncias dos testes pelas medições; a alternativa estudada (Marsaglia 2004 + fração contínua de Laplace, ≤ 3,7×10⁻¹⁴) fica em [`docs/research/precisao-da-normal.md`](../research/precisao-da-normal.md) | 05/11/2026 |
+| Tolerância dos testes de média e variância: o plano dizia 4 erros-padrão; a tarefa 4 usou 1,96 (o IC de 95% de `simulation.md`) | Manter 1,96 erros-padrão (mais rigoroso) e corrigir o plano | 05/11/2026 |
+| Nomes de funções (segundo *code review*) | Procedimento leva verbo (`findStreamStart`, `drawTimeSec`, `evaluatePolynomial`); função matemática leva o nome do objeto, como `Math.sqrt` (`normalQuantile`, `normalCdf`, `normalSurvival`, `relativeError`, `lowerTail`) | 05/11/2026 |
 
 ## Decisões técnicas deste plano
 
@@ -45,7 +48,7 @@
 | Início da sequência e subsequência separados: `findStreamStart(index)` uma vez por chave; `createRandomStream(start, replication)` por replicação | **Fato:** cerca de 0,08 ms por salto de sequência com exponenciação binária (nota do gerador, seção 2); repetir o salto em cada replicação multiplicaria o custo pelo número de replicações |
 | Potências de matriz por quadrados sucessivos de A₁ e A₂ (127 e 76 quadrados), em `bigint`, calculadas uma vez | Evita copiar as matrizes publicadas no código do pacote; o `.res` e um índice alto conferido por cálculo independente provam o resultado |
 | `catchError` e os auxiliares de teste (`drawUniforms`, `sampleMean`, `sampleVariance`) em `src/tests/helpers/`, cada um com o próprio teste | Os testes de faixa, de somas e de momentos não podem ter laço (ADR-0009); as estatísticas de produção do motor só chegam no sub-plano 6, e estes auxiliares servem só aos testes |
-| Referências: AS 241 contra `statistics.NormalDist().inv_cdf` do Python 3.10.12 da máquina (a função implementa o AS 241 e cita Wichura 1988 no código); Φ e Q contra um cálculo próprio de alta precisão com `decimal` de 50 algarismos (série para \|x\| pequeno e fração contínua na cauda); índice alto contra potência de matriz em inteiros do Python, a partir das matrizes A₁ e A₂ do artigo | R, Octave e `mpmath` não estão instalados. `0.5 * math.erfc(-x / math.sqrt(2))` perde cerca de 2·(x/√2)²·ε na cauda (≈ 2×10⁻¹⁴ em \|x\| = 10) e não serve de referência ali. Scripts e comandos registrados em `docs/architecture/sim-engine.md` |
+| Referências: AS 241 contra `statistics.NormalDist().inv_cdf` do Python 3.10.12 da máquina (a função implementa o AS 241 e cita Wichura 1988 no código); Φ e Q contra um cálculo próprio de alta precisão com `decimal` de 100 algarismos (série para \|x\| pequeno e fração contínua na cauda); índice alto contra potência de matriz em inteiros do Python, a partir das matrizes A₁ e A₂ do artigo | R, Octave e `mpmath` não estão instalados. `0.5 * math.erfc(-x / math.sqrt(2))` perde cerca de 2·(x/√2)²·ε na cauda (≈ 2×10⁻¹⁴ em \|x\| = 10) e não serve de referência ali. Scripts e comandos registrados em `docs/architecture/sim-engine.md` |
 | Normal truncada devolve um valor limitado a [mínimo, máximo] | A pesquisa sugere limitar (palpite, nota de distribuições, seção 3): o arredondamento não pode pôr um tempo fora do intervalo. Um intervalo com probabilidade zero em dupla precisão (por exemplo [40, 41] desvios) é recusado antes, na compilação (sub-plano 4, `INVALID_PLANT`) |
 | Triangular conferida com casos calculados à mão | O `triinv` do Octave é GPL e mudou a ordem dos parâmetros depois da versão 1.6.3 ([pesquisa](../research/literatura-do-motor.md)) |
 | `SimulationError` sem `details` neste sub-plano | O formato de `details` é declarado por código (ADR-0013); os sub-planos 4 e 6, que lançam os primeiros erros com dados, o declaram |
@@ -84,24 +87,24 @@ Parâmetros fora da faixa (tempos negativos, desvio ≤ 0, mínimo ≥ máximo, 
 | ADR-0013, item 5 | unitário | `catchError returns the thrown error`; `catchError fails when nothing is thrown` | 1 |
 | ADR-0013, "Em aberto" | unitário | `toMatchObject checks the code of a simulation error`; `toMatchObject fails on a different code`; `rejects.toMatchObject checks the code of a rejected simulation error` | 1 |
 | Auxiliares de teste | unitário | `drawUniforms returns the requested count`; `sampleMean of $values is $expected`; `sampleVariance of $values is $expected` | 2 e 4 |
-| ADR-0011 item 5 (gerador igual à referência) | unitário, `it.each` | `stream $index starts at the reference state`; `$case matches the reference output` (valores e somas do `.res` que a API alcança) | 2 |
+| ADR-0011 item 5 (gerador igual à referência) | unitário, `it.each` | `stream $index starts at the reference state`; `stream 2, replication $replication gives the reference uniforms`; `stream 2 sums the 100 values after its first to the reference sum` (valores e a soma do `.res` que a API alcança) | 2 |
 | Foco 1 | unitário | `uniforms stay strictly between 0 and 1`; `equal components give m1 times norm, not zero` | 2 |
-| Foco 7 | unitário | `stream 2^63 + 5 starts at the independently computed state`; `replication $replication starts at the reference substream` | 2 |
-| FNV-1a conforme a especificação | unitário, `it.each` | `hashes $input to the reference value` | 3 |
+| Foco 7 | unitário | `stream 2^63 + 5, replication $replication starts at the independently computed state` (replicações 0 e 7) | 2 |
+| FNV-1a conforme a especificação | unitário, `it.each` | `hashes $label to the reference value` | 3 |
 | RN-SIM-001 | unitário | `RN-SIM-001: the same seed and key give the same stream index` | 3 |
 | RN-SIM-010 | unitário | `RN-SIM-010: a key keeps its stream index when other keys change`; `RN-SIM-010: a key keeps its stream index when the key order changes` (a chamada de base fica no Arrange) | 3 |
 | Semente muda o sorteio | unitário | `different seeds give different stream indices` | 3 |
 | Focos 8 e 9 | unitário | `rejects repeated stream indices as an invalid plant`; `rejects a key with a non-ASCII character` | 3 |
 | ADR-0011 item 6 (fixa, exponencial, triangular) | unitário, `it.each` | `exponential quantile of $uniform is $expected`; `triangular quantile of $uniform on ($minSec, $modeSec, $maxSec) is $expected`, inclusive moda nos extremos (foco 6) | 4 |
-| Foco 10 | unitário | `a fixed variability draws no random number` | 4 |
+| Foco 10 | unitário | `RN-SIM-010: a fixed variability draws no random number` (e o mesmo, com "exactly one", para as demais) | 4 |
 | Média e variância teóricas | unitário | `exponential samples match the theoretical mean`, `... variance`; o mesmo para a triangular e a normal truncada | 4 e 5 |
 | AS 241 igual à referência (foco 5) | unitário, `it.each` | `normal quantile of $p matches the reference` | 5 |
 | Φ e Q iguais à referência de alta precisão | unitário, `it.each` | `normal cdf of $x matches the reference`; `normal survival of $x matches the reference` | 5 |
-| Focos 2, 3 e 4 | unitário, `it.each` | `truncated normal on [$lower, $upper] matches the reference at u = $u`; `keeps a zero-mass truncation inside its bounds` | 5 |
+| Focos 2, 3 e 4 | unitário, `it.each` | `truncated normal on [$lower, $upper] matches the reference at u = $uniform`; `keeps a zero-mass truncation on [$lower, $upper] inside its bounds` | 5 |
 
 - **Níveis usados e por quê:** só unitário, com tabelas `it.each`. Propriedade com fast-check entra no sub-plano 4 (roteiro); aqui, momentos usam uma sequência fixa com 10⁵ amostras. Integração, API e ponta a ponta não se aplicam: não há banco, rota nem tela.
 - **Dados de teste:** literais. Estados, valores e somas do gerador vêm do `tests/test2RngStream.res` da [versão Apache 2.0](https://github.com/umontreal-simul/RngStreams); o índice alto, do cálculo independente em Python; os do FNV, dos vetores da especificação; a AS 241, do Python; Φ e Q, do cálculo de alta precisão; a triangular e os momentos teóricos, calculados à mão (exponencial com média 30: média 30, variância 900; triangular (20, 25, 35): média 80/3, variância 175/18). A origem de cada tabela e os scripts ficam em `sim-engine.md`, não em comentário no teste.
-- **Tolerâncias** (**estimativas**, a confirmar pelos testes; se uma falhar com o código certo, parar e levar ao usuário): estados inteiros e índices, iguais; uniformes do `.res`, os algarismos que o arquivo imprime; AS 241, erro relativo de 10⁻¹⁴; Φ e Q, 10⁻¹⁴ em |x| ≤ 5 e 10⁻¹² em 5 < |x| ≤ 10; média, 4 erros-padrão (σ/√n); variância, 4 erros-padrão de s², com SE(s²) ≈ σ²·√((κ − 1)/n), escritos como literais a partir da curtose κ de cada distribuição (exponencial κ = 9; triangular κ = 2,4; normal padrão truncada em [−1, 1], κ calculado à parte).
+- **Tolerâncias** (**estimativas**, a confirmar pelos testes; se uma falhar com o código certo, parar e levar ao usuário): estados inteiros e índices, iguais; uniformes do `.res`, os algarismos que o arquivo imprime; AS 241, erro relativo de 10⁻¹⁴ (nos testes: `toBeCloseTo` com 13 casas, |z| ≤ 10); Φ e Q, 10⁻¹⁴ em |x| ≤ 5 e 10⁻¹² em 5 < |x| ≤ 10 (falhou: Hart mede até 8,7×10⁻⁹ na cauda; as tolerâncias finais, medidas, estão em `sim-engine.md`, decisão do usuário de 05/11/2026); média, 1,96 erros-padrão (σ/√n, o IC de 95%; o plano previa 4, corrigido em 05/11/2026); variância, 1,96 erros-padrão de s², com SE(s²) ≈ σ²·√((κ − 1)/n), escritos como literais a partir da curtose κ de cada distribuição (exponencial κ = 9; triangular κ = 2,4; normal padrão truncada em [−1, 1], κ ≈ 1,94).
 - **Metas:** 90% de linhas e ramificações; 80% de mutação no motor. O Stryker não muta literais numéricos; o risco são mutantes aritméticos em termos pequenos dos polinômios (da ordem de 10⁻¹⁵) que ficam dentro da tolerância: cada sobrevivente é listado com a leitura (equivalente ou falta de teste). A transcrição dos coeficientes do AS 241 é conferida contra as somas de conferência publicadas pela StatLib, usadas só como dado.
 - **Como rodar:** `pnpm nx test sim-engine --coverage`, `pnpm nx lint sim-engine`, `pnpm nx typecheck sim-engine`, `pnpm nx run sim-engine:mutate`.
 
@@ -127,7 +130,7 @@ Nenhuma.
 - Testar: `libs/sim-engine/src/errors/simulation-error.spec.ts`, `libs/sim-engine/src/tests/helpers/catch-error.spec.ts`
 
 **Interfaces:**
-- Produz: `type SimulationErrorCode = 'SIMULATION_LIMIT_EXCEEDED' | 'INVALID_PLANT'`; `class SimulationError extends Error` com `readonly code: SimulationErrorCode`, `override readonly name = 'SimulationError'` e construtor `(code: SimulationErrorCode, message: string)`, que atribui `this.code`; `catchError(act: () => unknown): unknown`.
+- Produz: `type SimulationErrorCode = 'SIMULATION_LIMIT_EXCEEDED' | 'INVALID_PLANT'`; `class SimulationError extends Error` com `readonly code: SimulationErrorCode`, `override readonly name = 'SimulationError'` e construtor `(code: SimulationErrorCode, message: string)`, que atribui `this.code`; `catchError(act: () => void): unknown` (síncrono; uma função assíncrona é recusada pelo lint).
 
 - [ ] **Passo 1: testes que falham** (linhas da tarefa 1 no "Plano de testes"). O teste negativo do `toMatchObject` usa o próprio `catchError` sobre a asserção; o assíncrono usa `await expect(promise).rejects.toMatchObject({ code })`.
 - [ ] **Passo 2:** `pnpm nx test sim-engine` · Esperado: FALHA porque os módulos não existem.
@@ -144,7 +147,7 @@ Nenhuma.
 - Testar: `libs/sim-engine/src/rng/mrg32k3a.spec.ts`, `libs/sim-engine/src/rng/jump.spec.ts`, `libs/sim-engine/src/tests/helpers/draw-uniforms.spec.ts`, `libs/sim-engine/src/tests/helpers/summarize-uniforms.spec.ts`
 
 **Interfaces:**
-- Produz: `interface StreamStart` (os seis valores do início da sequência, `readonly`); `findStreamStart(streamIndex: bigint): StreamStart`, que salta `streamIndex · 2¹²⁷` passos a partir do estado inicial do pacote; `interface RandomStream` com os seis valores do estado (mutáveis; só `nextUniform` os altera); `createRandomStream(start: StreamStart, replication: number): RandomStream`, que salta `replication · 2⁷⁶` passos; `nextUniform(stream: RandomStream): number`. Auxiliar de teste: `drawUniforms(stream: RandomStream, count: number): number[]`.
+- Produz: `interface StreamStart` (os seis valores do início da sequência, `readonly`); `findStreamStart(streamIndex: bigint): StreamStart`, que salta `streamIndex · 2¹²⁷` passos a partir do estado inicial do pacote; `interface RandomStream` com os seis valores do estado (mutáveis; só `nextUniform` os altera); `createRandomStream(start: StreamStart, replication: number): RandomStream`, que salta `replication · 2⁷⁶` passos; `nextUniform(stream: RandomStream): number`. Auxiliar de teste: `drawUniforms(stream: RandomStream, uniformCount: number): number[]`.
 
 - [ ] **Passo 1: testes que falham** (linhas da tarefa 2). Os casos do `.res` são os que a API alcança: estados iniciais das sequências 0, 1 e 2 (as `g1`, `g2` e `g3` do arquivo), valores e somas de sequências e subsequências. Os de salto arbitrário (2⁵ + 3), semente do pacote diferente e salto para trás ficam de fora, porque a API não os expõe; a correspondência entre as chamadas do teste C++ (`ResetNextSubstream` etc.) e o número da replicação é conferida no `testRngStream.cpp` e anotada. O índice 2⁶³ + 5 é conferido contra o script Python de potência de matriz.
 - [ ] **Passo 2:** `pnpm nx test sim-engine` · Esperado: FALHA porque os módulos não existem.
@@ -193,9 +196,9 @@ Nenhuma.
 ## Tarefa 5: normal truncada e fechamento
 
 **Arquivos:**
-- Criar: `libs/sim-engine/src/distributions/normal.ts`, `libs/sim-engine/src/distributions/truncated-normal.ts`
+- Criar: `libs/sim-engine/src/distributions/normal.ts`, `libs/sim-engine/src/distributions/truncated-normal.ts`, `libs/sim-engine/src/tests/helpers/relative-error.ts`, `docs/research/precisao-da-normal.md`
 - Modificar: `libs/sim-engine/src/distributions/variability.ts`, `docs/plans/2026-11-04-roteiro-motor.md`, `docs/plans/README.md`, `docs/product/references.md`, `docs/architecture/sim-engine.md`
-- Testar: `libs/sim-engine/src/distributions/normal.spec.ts`, `truncated-normal.spec.ts`
+- Testar: `libs/sim-engine/src/distributions/normal.spec.ts`, `truncated-normal.spec.ts`, `libs/sim-engine/src/tests/helpers/relative-error.spec.ts`
 
 **Interfaces:**
 - Consome: `Variability` e `drawTimeSec` (tarefa 4), aos quais acrescenta `{ kind: 'truncatedNormal'; meanSec; standardDeviationSec; minSec; maxSec }` (`maxSec` pode ser `Infinity`; o padrão 0 do mínimo é aplicado pelo esquema ou pela compilação, não aqui) e o ramo dele.

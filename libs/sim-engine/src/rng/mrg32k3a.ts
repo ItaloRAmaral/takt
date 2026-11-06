@@ -53,21 +53,33 @@ const PACKAGE_STATE: StreamStart = {
 
 /** The state at the start of a stream: three values per component of the generator. */
 export interface StreamStart {
+  /** Component 1, the oldest of its three values, in [0, m1). */
   readonly s10: number;
+  /** Component 1, the middle value, in [0, m1). */
   readonly s11: number;
+  /** Component 1, the newest value, in [0, m1). */
   readonly s12: number;
+  /** Component 2, the oldest of its three values, in [0, m2). */
   readonly s20: number;
+  /** Component 2, the middle value, in [0, m2). */
   readonly s21: number;
+  /** Component 2, the newest value, in [0, m2). */
   readonly s22: number;
 }
 
 /** The current state of a stream. Only {@link nextUniform} changes it. */
 export interface RandomStream {
+  /** Component 1, the oldest of its three values, in [0, m1). */
   s10: number;
+  /** Component 1, the middle value, in [0, m1). */
   s11: number;
+  /** Component 1, the newest value, in [0, m1). */
   s12: number;
+  /** Component 2, the oldest of its three values, in [0, m2). */
   s20: number;
+  /** Component 2, the middle value, in [0, m2). */
   s21: number;
+  /** Component 2, the newest value, in [0, m2). */
   s22: number;
 }
 
@@ -143,6 +155,7 @@ export function nextUniform(stream: RandomStream): number {
   // Every product stays below 2^53 (A12 · s is at most about 6.0e15), so
   // this arithmetic on numbers is exact.
   let p1 = (A12 * stream.s11 - A13N * stream.s10) % M1;
+
   if (p1 < 0) {
     p1 += M1;
   }
@@ -152,6 +165,7 @@ export function nextUniform(stream: RandomStream): number {
   stream.s12 = p1;
 
   let p2 = (A21 * stream.s22 - A23N * stream.s20) % M2;
+
   if (p2 < 0) {
     p2 += M2;
   }
