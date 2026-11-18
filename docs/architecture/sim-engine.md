@@ -2,7 +2,7 @@
 
 > **Resumo.** Como o motor é construído hoje. O motor é um núcleo funcional em TypeScript puro, sem React, Three.js nem DOM, que roda num Web Worker do `takt-web-app`. O porquê está no [ADR-0011](../adr/0011-motor-de-simulacao-e-esquema.md) e no [ADR-0013](../adr/0013-erros-esperados.md); o plano que o constrói é o [roteiro do motor](../plans/2026-11-04-roteiro-motor.md). Este documento cresce a cada sub-plano.
 
-Atualizado em 06/11/2026 (sub-plano 1 concluído; correções da revisão final).
+Atualizado em 18/11/2026 (sub-plano 2 em andamento: casos de referência de `log` e `exp`).
 
 ## Estrutura
 
@@ -11,7 +11,8 @@ Pastas por conceito ([guia de estilo](code-style.md), seção 7), dentro de `lib
 | Pasta | O que tem | Sub-plano |
 | --- | --- | --- |
 | `errors/` | `SimulationError`, o erro esperado do motor | 1 |
-| `tests/helpers/` | Auxiliares só de teste (`catchError`, `drawUniforms`, `summarizeUniforms`, `drawTimesSec`, `sampleMean`, `sampleVariance`, `relativeError`), cada um com o spec ao lado; não saem pelo `index.ts`, não entram no *build* (`exclude` do `tsconfig.lib.json`) nem na mutação (`mutate` da Stryker), mas contam na cobertura; o lint do motor proíbe importá-los fora dos specs (`no-restricted-imports`, com caso no teste de conformidade) | 1 |
+| `tests/helpers/` | Auxiliares só de teste (`catchError`, `drawUniforms`, `summarizeUniforms`, `drawTimesSec`, `sampleMean`, `sampleVariance`, `relativeError`; e, do sub-plano 2, `toBits`, `fromBits` e `ulpDistance`), cada um com o spec ao lado; não saem pelo `index.ts`, não entram no *build* (`exclude` do `tsconfig.lib.json`) nem na mutação (`mutate` da Stryker), mas contam na cobertura; o lint do motor proíbe importá-los fora dos specs (`no-restricted-imports`, com caso no teste de conformidade) | 1 |
+| `tests/fixtures/` | Casos de referência de `log` e `exp` (`fdlibm-cases.ts`, gerado; tipos em `fdlibm-case.ts`); ver "Casos de referência de `log` e `exp`" | 2 |
 | `rng/` | Gerador MRG32k3a (`mrg32k3a.ts`), saltos por potência de matriz (`jump.ts`), índice da sequência por chave (`stream-index.ts`) | 1 |
 | `distributions/` | `Variability` e `drawTimeSec` (`variability.ts`); quantis da exponencial (`exponential.ts`), da triangular (`triangular.ts`) e da normal truncada (`truncated-normal.ts`); quantil, função de distribuição e cauda superior da normal padrão (`normal.ts`) | 1 |
 
@@ -337,3 +338,13 @@ n = 100_000
 se_mean, se_var = (float(var) / n) ** 0.5, ((float(mu4) - float(var) ** 2) / n) ** 0.5
 print("bounds: mean 10 +-", 1.96 * se_mean, "variance", float(var) - 1.96 * se_var, float(var) + 1.96 * se_var)
 ```
+
+## Casos de referência de `log` e `exp` (sub-plano 2)
+
+`src/tests/fixtures/fdlibm-cases.ts` guarda, para cada entrada, o que o fdlibm 5.3 compilado em C dá e o valor corretamente arredondado, todos como bits de `double` em hexadecimal; todo `NaN` é escrito como `7ff8000000000000`. É gerado, não editado à mão, e fica no `.prettierignore`.
+
+- **Entradas** (`measurements/math/make_cases.py`, semente 20261118): valores especiais; 1 ± k·ulp (k de 1 a 50); os dois lados de cada fronteira de ramo do `e_log.c` (normalização em `(hx + 0x95f64) & 0x100000`, sinal de `i | j`, \|f\| < 2⁻²⁰) e do `e_exp.c` (`o_threshold`, `u_threshold`, filtro do expoente, 0,5·ln 2, 1,5·ln 2, 2⁻²⁸, com sinal e vizinhos); 201 pontos entre −745,2 e −707, onde `k` cruza −1021; amostra espalhada por todos os expoentes; e entradas como as do motor (u e 1 − u no `log`; −x²/2 com x em [0, 37] no `exp`). Resultado em 18/11/2026: 1674 casos de `log` e 1755 de `exp`; o fdlibm difere do valor corretamente arredondado em 40 e 157, sempre por 1 ulp, o que confirma o "less than 1 ulp" dos dois arquivos. Gerar duas vezes dá o mesmo arquivo.
+- **Oráculo:** `measurements/math/fdlibm_oracle.c`, que só lê entradas e chama `__ieee754_log` e `__ieee754_exp`. O fdlibm não fica no repositório: `e_log.c` (1.3, 95/01/18), `e_exp.c` (1.6, 04/04/22) e `fdlibm.h`, baixados de `https://netlib.org/fdlibm/` em 18/11/2026 num diretório vazio, com SHA-256 `a2b1bd1b367026a35f36da53425cd618386c3bf69d23ac224a40791aa9855ac9`, `04c96195b7ced914d659b5fd204724c182f091af8631fe42016ad6e27cb302ef` e `64113c472c2676499288bc35a821b0867916552930bc52c7445d2c50dddf0e71`. Compilado com o gcc 11.4.0 do Ubuntu 22.04: `gcc -O0 -ffp-contract=off -fno-strict-aliasing -D__LITTLE_ENDIAN -I <fdlibm> fdlibm_oracle.c <fdlibm>/e_log.c <fdlibm>/e_exp.c -o fdlibm_oracle`. O `-D__LITTLE_ENDIAN` é obrigatório no x86_64: o `fdlibm.h` só o define para i386 e afins, e sem ele `__HI` e `__LO` leem as palavras trocadas. O aviso "`__P` redefined" vem do conflito do `fdlibm.h` com o `sys/cdefs.h` e não muda nada. Conferência antes de usar: log 1 = 0, log 2 e exp 0 iguais ao valor correto; exp 1 dá `4005bf0a8b14576a`, 1 ulp acima do correto (`…5769`).
+- **Referência corretamente arredondada:** `decimal` do Python 3.10.12 com 100 algarismos (`ln` e `exp` sobre o valor exato do `double`), convertido com `float`; o `InvalidOperation` de `log` de negativo vira `NaN`.
+- **Regerar:** `python3 -I libs/sim-engine/measurements/math/make_cases.py <fdlibm_oracle> libs/sim-engine/src/tests/fixtures/fdlibm-cases.ts`.
+- **Observado de passagem:** o `Math.exp(1)` do Node 24.22.2 (V8 13.6) dá `2.718281828459045`, o valor correto, e não o do fdlibm 5.3; o fdlibm "modificado" do V8 antigo não é idêntico ao original. Por isso nenhum motor serve de oráculo do port, só o C.
