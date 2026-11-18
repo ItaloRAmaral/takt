@@ -153,24 +153,24 @@ Nenhuma.
 
 **Commit sugerido:** `test(sim-engine): measure log and exp bits in Node, Chromium, Firefox and WebKit` · arquivos: os da lista.
 
-## Tarefa 3: medição no macOS e no Windows (pull request próprio)
+## Tarefa 3: medição em Ubuntu, macOS e Windows no merge
 
 **Arquivos:**
 - Criar: `.github/workflows/math-measurement.yml`
-- Modificar: `docs/architecture/workspace.md`
+- Modificar: `libs/sim-engine/measurements/math/compare.py` (opção `--require-identical`), `docs/architecture/workspace.md`
 
-Este arquivo vai num ramo próprio a partir da `main` e num pull request pequeno, mesclado antes das rodadas, porque o `workflow_dispatch` só aparece com o arquivo no ramo padrão.
+Revisto com o usuário em 18/11/2026 ("podemos criar o workflow para testar no merge dessa mesma PR"): o workflow entra neste pull request e roda quando ele, e cada mudança seguinte no motor, chega à `main`; a D4 foi decidida com a medição do Linux (tarefa 4).
 
 **Interfaces:**
-- Consome: o alvo `measure-math` e o projeto `browser` (tarefa 2), lidos do ramo indicado em `--ref`.
-- Produz: os artefatos `math-measurement-darwin` e `math-measurement-win32`, com `chromium-`, `firefox-` e `webkit-<plataforma>.json`, baixados pelo usuário com `gh run download`.
+- Consome: o alvo `measure-math` (tarefa 2), com o projeto `node` e o `browser`.
+- Produz: os artefatos `math-measurement-Linux`, `-macOS` e `-Windows` (12 arquivos: `node-`, `chromium-`, `firefox-` e `webkit-<plataforma>.json`) e um job `compare` que publica as tabelas no resumo da execução e falha se algum conjunto exigido diferir. `compare.py <pasta> --require-identical PREFIX ...` sai com erro se um conjunto que começa com um dos prefixos tiver mais de um grupo de ambientes ou faltar em algum. Nesta tarefa, exige `uniforms` e `draws.triangular` (os controles); a tarefa 7 passa a exigir também `fdlibm.` e `draws.`.
 
-- [ ] **Passo 1:** escrever o workflow: `workflow_dispatch`, matriz `os: [macos-15, windows-latest]`, `permissions: contents: read`, checkout com `persist-credentials: false`, as mesmas actions do `ci.yml` (mesmos SHAs), `pnpm install --frozen-lockfile`, `pnpm exec playwright install chromium firefox webkit`, só a medição do projeto `browser` (sem lint nem testes) e `actions/upload-artifact` fixada por SHA (versão com pelo menos 7 dias).
-- [ ] **Passo 2:** pull request próprio, mesclado pelo usuário.
-- [ ] **Passo 3:** depois da tarefa 2, o usuário dispara (`gh workflow run math-measurement.yml --ref feat/engine-d4-math`) e baixa os artefatos para `test-output/math-measurement/`. `compare.py` · Esperado: dez ambientes nas tabelas (Node e três navegadores em três sistemas).
-- [ ] **Passo 4:** `workspace.md`: o workflow e quando rodá-lo.
+- [ ] **Passo 1:** `--require-identical` no `compare.py`, conferido nos resultados locais: com os controles sai 0; com `draws.` sai 1 (os sorteios nativos divergem).
+- [ ] **Passo 2:** o workflow: `push` na `main` com filtro de caminho (`libs/sim-engine/**`, `pnpm-lock.yaml`, o próprio workflow) e `workflow_dispatch`; `permissions: contents: read`; matriz `os: [ubuntu-latest, macos-15, windows-latest]` com `fail-fast: false`; checkout com `persist-credentials: false`; as mesmas actions do `ci.yml` (mesmos SHAs); `pnpm install --frozen-lockfile`; `pnpm exec playwright install --with-deps chromium firefox webkit`; `pnpm nx run sim-engine:measure-math`; `actions/upload-artifact` v7.0.2 e `actions/download-artifact` v8.0.2, fixadas por SHA (publicadas em 07/10/2026).
+- [ ] **Passo 3:** `workspace.md`: o workflow, quando roda e o que exige.
+- [ ] **Passo 4:** depois do merge, conferir a primeira execução; os resultados nativos do Safari e do Windows entram no relatório (pendência para depois do merge).
 
-**Commit sugerido:** `ci(repo): add a manual workflow that measures log and exp on macOS WebKit` · arquivos: os da lista.
+**Commit sugerido:** `ci(repo): measure log and exp on three systems when engine code reaches main` · arquivos: os da lista.
 
 ## Tarefa 4: relatório, decisão e registro
 

@@ -10,14 +10,17 @@ Reads every <engine>-<platform>.json that measure-math wrote and prints Markdown
 Stops if a measurement was made against other reference cases than the current
 fixture, because the results would no longer line up with their inputs.
 
-Usage: python3 -I compare.py <folder with the measurements>
+Usage: python3 -I compare.py <folder> [--require-identical PREFIX ...]
+
+With --require-identical, exits with an error if a set whose name starts with
+one of the prefixes differs between environments or is missing in one.
 """
 
+import argparse
 import json
 import pathlib
 import re
 import string
-import sys
 
 FIXTURE = pathlib.Path(__file__).resolve().parents[2] / "src/tests/fixtures/fdlibm-cases.ts"
 CANONICAL_NAN = "7ff8000000000000"
@@ -123,6 +126,41 @@ def print_fixture(measurements, fixture, set_names):
                 )
 
 
+def group_environments(measurements, name):
+    """Groups the environments that gave identical bits for a set, and lists
+    those that lack it."""
+    groups = {}
+    missing = []
+
+    for measurement in measurements:
+        results = measurement["sets"].get(name)
+
+        if results is None:
+            missing.append(measurement["environment"])
+            continue
+
+        groups.setdefault("\n".join(results), (results, []))[1].append(measurement["environment"])
+
+    return groups, missing
+
+
+def check_identical(measurements, set_names, prefixes):
+    """Names every set starting with one of the prefixes that is not identical
+    in all environments; an empty list means the check passed."""
+    failures = []
+
+    for name in set_names:
+        if not name.startswith(tuple(prefixes)):
+            continue
+
+        groups, missing = group_environments(measurements, name)
+
+        if len(groups) > 1 or missing:
+            failures.append(f"{name}: {len(groups)} groups, missing in {len(missing)}")
+
+    return failures
+
+
 def print_groups(measurements, set_names):
     print(
         "\n| Conjunto | Valores | Grupos de ambientes com bits iguais | Pares de grupos: valores diferentes (primeiro índice) |"
@@ -130,17 +168,7 @@ def print_groups(measurements, set_names):
     )
 
     for name in set_names:
-        groups = {}
-        missing = []
-
-        for measurement in measurements:
-            results = measurement["sets"].get(name)
-
-            if results is None:
-                missing.append(measurement["environment"])
-                continue
-
-            groups.setdefault("\n".join(results), (results, []))[1].append(measurement["environment"])
+        groups, missing = group_environments(measurements, name)
 
         if len(groups) > len(string.ascii_uppercase):
             raise SystemExit(f"{name}: {len(groups)} groups, more than there are labels")
@@ -166,8 +194,18 @@ def print_groups(measurements, set_names):
 
 
 def main():
+    parser = argparse.ArgumentParser(description="Compares the D4 measurements.")
+    parser.add_argument("folder", help="folder with the <engine>-<platform>.json files")
+    parser.add_argument(
+        "--require-identical",
+        nargs="+",
+        default=[],
+        metavar="PREFIX",
+        help="fail unless every set starting with a prefix is identical in all environments",
+    )
+    arguments = parser.parse_args()
     fixture, digest = read_fixture()
-    measurements = read_measurements(sys.argv[1], digest)
+    measurements = read_measurements(arguments.folder, digest)
 
     if not measurements:
         raise SystemExit("no measurements found")
@@ -176,6 +214,10 @@ def main():
     print_environments(measurements)
     print_fixture(measurements, fixture, set_names)
     print_groups(measurements, set_names)
+    failures = check_identical(measurements, set_names, arguments.require_identical)
+
+    if failures:
+        raise SystemExit("not identical in every environment:\n" + "\n".join(failures))
 
 
 if __name__ == "__main__":
