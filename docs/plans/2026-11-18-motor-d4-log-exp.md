@@ -2,7 +2,7 @@
 
 | Campo | Valor |
 | --- | --- |
-| Status | Proposto |
+| Status | Aprovado (18/11/2026) |
 | Data | 18/11/2026 |
 | Pedido | "Pode começar o sub-plano 2" (06/11/2026), para a linha 2 do roteiro aprovado: "`Math.log` e `Math.exp` [...] comparadas bit a bit entre Node e os motores dos navegadores (V8, SpiderMonkey, JavaScriptCore) [...]; decisão da D4 com o usuário". Escopo ampliado pelo usuário em 18/11/2026: "Tudo num plano só" (medição, decisão e, na opção (b), as funções próprias). |
 | Contexto | [Roteiro](2026-11-04-roteiro-motor.md) (linha 2, riscos e pendências), [RN-SIM-001](../product/rules/simulation.md), [PDR-0008](../pdr/0008-simulacao-com-reproducao.md), [ADR-0011](../adr/0011-motor-de-simulacao-e-esquema.md), [ADR-0009](../adr/0009-estrategia-de-testes.md), [ADR-0010](../adr/0010-qualidade-e-ci.md), [code-style.md](../architecture/code-style.md) seção 7 e "Decisões pendentes" (D4), [pesquisa da literatura do motor](../research/literatura-do-motor.md) (seção "A D4 já tem resposta provável"), [pesquisa do guia de estilo](../research/guia-de-estilo-de-codigo.md) (D4), [sim-engine.md](../architecture/sim-engine.md), [workspace.md](../architecture/workspace.md), código do sub-plano 1 em `libs/sim-engine/src` |
@@ -34,7 +34,7 @@
 | Como medir o Safari | WebKit do Playwright num executor macOS do GitHub Actions, por workflow manual; sem página hospedada nem Safari real | 18/11/2026 |
 | Escopo | Um plano só: medição, decisão e, se for (b), as funções próprias | 18/11/2026 |
 | Funções próprias, na opção (b) | Port do fdlibm (`e_log.c` e `e_exp.c`), com o aviso da Sun preservado | 18/11/2026 |
-| Ajuste das exceções de dependência (Nx 24.0.3, `semver`) | Fora deste plano, num PR próprio a partir de 10/11/2026 | 06/11/2026 |
+| Exceções de idade mínima (Nx 24.0.3 e `semver` 6.3.2, vencidas em 06/11 e 09/11) | Saem neste mesmo pull request, na tarefa 2 (antes: "vamos esperar até 10/11", 06/11/2026) | 18/11/2026 |
 
 ## Decisões técnicas deste plano
 
@@ -137,17 +137,17 @@ Nenhuma.
 
 **Arquivos:**
 - Criar: `libs/sim-engine/measurements/math/measure-math.ts`, `libs/sim-engine/measurements/math/math.node.measure.ts`, `libs/sim-engine/measurements/math/math.browser.measure.ts`, `libs/sim-engine/measurements/math/compare.py`, `libs/sim-engine/vitest.measure.config.mts`
-- Modificar: `package.json` e `pnpm-lock.yaml` (as duas dependências), `.gitignore` (`test-output`), `libs/sim-engine/package.json` (alvo `measure-math`), `libs/sim-engine/tsconfig.spec.json` (incluir `measurements/**/*.ts` e `vitest.measure.config.mts`), `libs/sim-engine/eslint.config.mjs` (bloco para `measurements/**` que permite `navigator` e `node:fs`), `CLAUDE.md` (tabela "Commands"), `docs/architecture/workspace.md`
+- Modificar: `package.json` e `pnpm-lock.yaml` (as duas dependências), `pnpm-workspace.yaml` (sem as exceções `semver@6.3.2` e `nx`/`@nx/*@24.0.3` de `minimumReleaseAgeExclude`), `.gitignore` (`test-output`), `libs/sim-engine/package.json` (alvo `measure-math`), `libs/sim-engine/tsconfig.spec.json` (incluir `measurements/**/*.ts` e `vitest.measure.config.mts`), `libs/sim-engine/eslint.config.mjs` (bloco para `measurements/**` que permite `navigator` e `node:fs`), `CLAUDE.md` (tabela "Commands"), `docs/architecture/workspace.md`
 
 **Interfaces:**
 - Consome: `toBits` e o fixture (tarefa 1); `findStreamIndex`, `findStreamStart`, `createRandomStream`, `nextUniform`, `drawTimeSec` (sub-plano 1).
 - Produz: `measureMath(functions: Readonly<Record<string, MathFunctions>>, cases: FdlibmCases): MathMeasurement`, com `MathFunctions = { log(x: number): number; exp(x: number): number }` e `MathMeasurement = { environment: string; sets: Record<string, string[]> }`. Os conjuntos são: os 10⁵ uniformes da chave `d4:uniforms` (vetores do gerador, que devem ser iguais em todo ambiente); `log` e `exp` de cada entrada de `functions` sobre o fixture e sobre as entradas do motor (10⁵ uniformes da chave `d4:uniforms`, como u e 1 − u, e −x²/2 com x = 37·u); e os três sorteios ponta a ponta. A tarefa 2 passa `{ native: { log: Math.log, exp: Math.exp } }`; a tarefa 7 acrescenta `fdlibm`. Arquivo de saída: `libs/sim-engine/test-output/math-measurement/<motor>-<plataforma>.json`, com a plataforma de `process.platform` no Node e do `userAgent` nos navegadores (`linux`, `darwin`, `win32`). `compare.py <pasta>` lê todos os arquivos da pasta e imprime as tabelas em Markdown: no fixture, por função e ambiente, diferenças contra o fdlibm e contra o valor corretamente arredondado, com a maior distância em ulps; nos uniformes, nas entradas do motor e nos sorteios, quantos valores diferem entre cada par de ambientes e o primeiro índice diferente.
 
-- [ ] **Passo 1:** instalar as dependências exatas; o usuário roda `pnpm exec playwright install chromium firefox webkit` e, se o WSL pedir bibliotecas do sistema, `sudo pnpm exec playwright install-deps`.
+- [ ] **Passo 1:** tirar as exceções vencidas do `pnpm-workspace.yaml` (e o comentário de cada uma) e conferir com `pnpm install --frozen-lockfile` · Esperado: PASSA sem as exceções. Instalar as dependências exatas; o usuário roda `pnpm exec playwright install chromium firefox webkit` e, se o WSL pedir bibliotecas do sistema, `sudo pnpm exec playwright install-deps`.
 - [ ] **Passo 2:** escrever `measure-math.ts`, as duas entradas e a configuração (projetos `node` e `browser`, este com as instâncias `chromium`, `firefox` e `webkit`, `api.allowWrite` só aqui). Cada entrada tem um `it` que mede, grava e confere só a própria medição (`expect` sobre a quantidade de conjuntos e de valores).
 - [ ] **Passo 3:** `pnpm nx run sim-engine:measure-math` · Esperado: quatro arquivos em `test-output/math-measurement/` (`node-linux`, `chromium-linux`, `firefox-linux`, `webkit-linux`); `git status` não os mostra. `python3 -I libs/sim-engine/measurements/math/compare.py libs/sim-engine/test-output/math-measurement` · Esperado: tabelas, com os uniformes e a triangular sem diferenças (foco 7).
 - [ ] **Passo 4:** `pnpm nx run-many -t lint typecheck test` · Esperado: PASSA; a configuração do `test` não muda.
-- [ ] **Passo 5:** `workspace.md` (dependências, navegadores, alvo novo); `CLAUDE.md` "Commands".
+- [ ] **Passo 5:** `workspace.md` (dependências, navegadores, alvo novo; tabela de exceções sem as duas linhas); `CLAUDE.md` "Commands".
 
 **Commit sugerido:** `test(sim-engine): measure log and exp bits in Node, Chromium, Firefox and WebKit` · arquivos: os da lista.
 
