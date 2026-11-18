@@ -18,9 +18,9 @@ Atualizado em 18/11/2026.
 | Plano | Status | Data |
 | --- | --- | --- |
 | [Workspace Nx do marco 1](2026-11-03-workspace-nx.md) | Concluído (PR #1, 04/11/2026) | 03/11/2026 |
-| [Roteiro: esquema da planta e motor (marco 1)](2026-11-04-roteiro-motor.md) | Aprovado; sub-plano 1 concluído | 04/11/2026 |
+| [Roteiro: esquema da planta e motor (marco 1)](2026-11-04-roteiro-motor.md) | Aprovado; sub-planos 1 e 2 concluídos | 04/11/2026 |
 | [Fundamentos do motor (sub-plano 1)](2026-11-04-motor-fundamentos.md) | Concluído (05/11/2026) | 04/11/2026 |
-| [Medição da D4 e `log`/`exp` do motor (sub-plano 2)](2026-11-18-motor-d4-log-exp.md) | Aprovado | 18/11/2026 |
+| [Medição da D4 e `log`/`exp` do motor (sub-plano 2)](2026-11-18-motor-d4-log-exp.md) | Concluído (18/11/2026) | 18/11/2026 |
 
 ## Medição do revisor
 

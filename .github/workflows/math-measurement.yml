@@ -56,5 +56,5 @@ jobs:
           path: math-measurement
       - run: >
           python3 -I libs/sim-engine/measurements/math/compare.py math-measurement
-          --require-identical uniforms draws.triangular
+          --require-identical uniforms fdlibm. draws.
           | tee -a "$GITHUB_STEP_SUMMARY"

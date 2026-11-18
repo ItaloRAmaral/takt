@@ -1,13 +1,15 @@
 import { server } from 'vitest/browser';
+import { exp } from '../../src/math/exp.js';
+import { log } from '../../src/math/log.js';
 import { fdlibmCases } from '../../src/tests/fixtures/fdlibm-cases.js';
-import { expectedNativeCounts } from './expected-counts.js';
+import { expectedCounts } from './expected-counts.js';
 import { countValues, measureMath } from './measure-math.js';
 
 it('records the bits of log, exp and the engine draws', async () => {
   const measurement = measureMath(
     `${server.browser}-${server.platform}`,
     navigator.userAgent,
-    { native: { log: Math.log, exp: Math.exp } },
+    { native: { log: Math.log, exp: Math.exp }, fdlibm: { log, exp } },
     fdlibmCases,
   );
 
@@ -16,5 +18,5 @@ it('records the bits of log, exp and the engine draws', async () => {
     JSON.stringify(measurement),
   );
 
-  expect(countValues(measurement)).toEqual(expectedNativeCounts);
+  expect(countValues(measurement)).toEqual(expectedCounts);
 });

@@ -82,9 +82,22 @@ Grupos de ambientes com bits idênticos e quantos valores diferem entre cada par
 - **(a) Aceitar e documentar** ("reprodutível por motor JavaScript"): pela medição, a promessa ficaria "reprodutível no mesmo navegador, na mesma versão", porque a atualização do navegador também muda os bits. Não cobre o caso comum do produto, professor e aluno em navegadores diferentes.
 - **(b) Funções próprias** só com as quatro operações e bits: a especificação garante o mesmo resultado em todo motor conforme. O port do fdlibm 5.3 ([netlib](https://www.netlib.org/fdlibm/)) foi escolhido pelo usuário em 18/11/2026; ele deve reproduzir exatamente a coluna do grupo B (Firefox e Node), menos `exp(1)`, e o fixture já tem o oráculo em C para provar isso.
 
+## Depois da decisão: `log` e `exp` próprios [Medição]
+
+Com o [ADR-0014](../adr/0014-log-e-exp-proprios-no-motor.md), o motor passou a usar ports do fdlibm 5.3 (`src/math/log.ts` e `exp.ts`), só com as quatro operações e operações de bits. Medido de novo em 18/11/2026, nos mesmos quatro ambientes:
+
+| Conjunto | Resultado |
+| --- | --- |
+| `log` e `exp` próprios sobre o fixture (2683 e 2785 casos) | Iguais ao fdlibm em C em todos os casos, nos quatro ambientes |
+| `log` e `exp` próprios sobre as entradas do motor (10⁵ cada) | Um só grupo: os quatro ambientes |
+| Sorteios da exponencial, da triangular e da normal truncada | Um só grupo: os quatro ambientes |
+| `Math.log` e `Math.exp` nativos (controle) | Continuam em três grupos |
+
+O workflow `math-measurement.yml` repete a medição em Ubuntu, macOS e Windows a cada merge que mude o motor e falha se `log`, `exp` ou os sorteios divergirem. As funções próprias custam cerca de 30 a 35 ns a mais por chamada que as nativas (Node 24, 10⁶ chamadas), desprezível num turno.
+
 ## Limites
 
-- Só Linux x86_64. macOS (Safari, libm da Apple) e Windows rodam pelo workflow do sub-plano, depois do merge.
+- A medição deste relatório é só Linux x86_64. macOS (Safari, libm da Apple) e Windows rodam pelo workflow, depois do merge; os resultados nativos deles ficam para uma atualização deste relatório.
 - Navegadores *headless* do Playwright, não as versões instaladas por usuários; a biblioteca matemática é a mesma do motor de cada um, mas a versão pode ser outra.
 - Sem Mac Intel, celular nem tablet (fora do escopo, decisão do usuário).
 - A estimativa de rodada supõe independência entre sorteios e não simula a propagação na trajetória.

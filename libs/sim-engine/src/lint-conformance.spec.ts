@@ -28,6 +28,10 @@ describe('engine lint rules', { timeout: 30_000 }, () => {
     { api: 'new Date()', ruleId: 'no-restricted-syntax' },
     { api: 'Date()', ruleId: 'no-restricted-syntax' },
     { api: 'performance.now()', ruleId: 'no-restricted-properties' },
+    { api: 'Math.log(2)', ruleId: 'no-restricted-properties' },
+    { api: 'Math.exp(2)', ruleId: 'no-restricted-properties' },
+    { api: 'Math.pow(2, 3)', ruleId: 'no-restricted-properties' },
+    { api: '2 ** 51', ruleId: 'no-restricted-syntax' },
   ])('rejects $api in the engine', async ({ api, ruleId }) => {
     const code = `export const value = ${api};\n`;
 
@@ -36,6 +40,35 @@ describe('engine lint rules', { timeout: 30_000 }, () => {
     expect(messages).toContainEqual(
       expect.objectContaining({ ruleId, line: 1 }),
     );
+  });
+
+  it('rejects the exponent assignment operator in the engine', async () => {
+    const code = `let base = 2;\nbase **= 3;\nexport const value = base;\n`;
+
+    const messages = await lintEngineFile('value.ts', code);
+
+    expect(messages).toContainEqual(
+      expect.objectContaining({ ruleId: 'no-restricted-syntax', line: 2 }),
+    );
+  });
+
+  it.each([{ api: 'Math.sqrt(2)' }, { api: '2n ** 127n' }])(
+    'accepts $api in the engine',
+    async ({ api }) => {
+      const code = `export const value = ${api};\n`;
+
+      const messages = await lintEngineFile('value.ts', code);
+
+      expect(messages).toEqual([]);
+    },
+  );
+
+  it('allows Math.log in a spec', async () => {
+    const code = `export const value = Math.log(2);\n`;
+
+    const messages = await lintEngineFile('rng/value.spec.ts', code);
+
+    expect(messages).toEqual([]);
   });
 
   it.each([

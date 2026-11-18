@@ -24,6 +24,69 @@ const forbiddenImportPaths = [
   },
 ];
 
+const nondeterministicProperties = [
+  { object: 'Math', property: 'random', message: nondeterminism },
+  { object: 'Date', property: 'now', message: nondeterminism },
+  { object: 'performance', property: 'now', message: nondeterminism },
+];
+
+const nondeterministicSyntax = [
+  noEnum,
+  {
+    selector: "NewExpression[callee.name='Date']",
+    message: nondeterminism,
+  },
+  {
+    selector: "CallExpression[callee.name='Date']",
+    message: nondeterminism,
+  },
+  {
+    selector:
+      "MemberExpression[object.name='globalThis'][property.name=/^(Math|Date)$/]",
+    message: nondeterminism,
+  },
+];
+
+const approximated =
+  'Engines may give different bits for this: use log and exp from src/math, or a port with only the four operations (ADR-0014).';
+
+// The Math functions the specification leaves "implementation-approximated".
+const approximatedMathProperties = [
+  'acos',
+  'acosh',
+  'asin',
+  'asinh',
+  'atan',
+  'atanh',
+  'atan2',
+  'cbrt',
+  'cos',
+  'cosh',
+  'exp',
+  'expm1',
+  'hypot',
+  'log',
+  'log1p',
+  'log10',
+  'log2',
+  'pow',
+  'sin',
+  'sinh',
+  'tan',
+  'tanh',
+].map((property) => ({ object: 'Math', property, message: approximated }));
+
+const approximatedSyntax = [
+  {
+    selector: "BinaryExpression[operator='**']:not([left.bigint])",
+    message: approximated,
+  },
+  {
+    selector: "AssignmentExpression[operator='**=']",
+    message: approximated,
+  },
+];
+
 const forbiddenImportPatterns = [
   {
     group: ['@react-three/*'],
@@ -32,34 +95,14 @@ const forbiddenImportPatterns = [
 ];
 
 // A rule set again in a later block replaces the earlier options, so the
-// engine-code block repeats the lists above and adds the test-helper pattern.
+// engine-code block repeats the lists above and adds its own: test helpers,
+// approximated Math and ** on numbers, which specs and helpers may still use.
 export default defineConfig(
   baseConfig,
   {
     rules: {
-      'no-restricted-properties': [
-        'error',
-        { object: 'Math', property: 'random', message: nondeterminism },
-        { object: 'Date', property: 'now', message: nondeterminism },
-        { object: 'performance', property: 'now', message: nondeterminism },
-      ],
-      'no-restricted-syntax': [
-        'error',
-        noEnum,
-        {
-          selector: "NewExpression[callee.name='Date']",
-          message: nondeterminism,
-        },
-        {
-          selector: "CallExpression[callee.name='Date']",
-          message: nondeterminism,
-        },
-        {
-          selector:
-            "MemberExpression[object.name='globalThis'][property.name=/^(Math|Date)$/]",
-          message: nondeterminism,
-        },
-      ],
+      'no-restricted-properties': ['error', ...nondeterministicProperties],
+      'no-restricted-syntax': ['error', ...nondeterministicSyntax],
       'no-restricted-globals': ['error', ...browserGlobals],
       '@typescript-eslint/no-restricted-imports': [
         'error',
@@ -71,6 +114,16 @@ export default defineConfig(
     files: ['src/**/*.ts'],
     ignores: ['src/**/*.spec.ts', 'src/tests/**'],
     rules: {
+      'no-restricted-properties': [
+        'error',
+        ...nondeterministicProperties,
+        ...approximatedMathProperties,
+      ],
+      'no-restricted-syntax': [
+        'error',
+        ...nondeterministicSyntax,
+        ...approximatedSyntax,
+      ],
       '@typescript-eslint/no-restricted-imports': [
         'error',
         {

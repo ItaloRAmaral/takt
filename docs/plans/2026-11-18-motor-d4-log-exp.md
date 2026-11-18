@@ -2,7 +2,7 @@
 
 | Campo | Valor |
 | --- | --- |
-| Status | Aprovado (18/11/2026) |
+| Status | Concluído (18/11/2026) |
 | Data | 18/11/2026 |
 | Pedido | "Pode começar o sub-plano 2" (06/11/2026), para a linha 2 do roteiro aprovado: "`Math.log` e `Math.exp` [...] comparadas bit a bit entre Node e os motores dos navegadores (V8, SpiderMonkey, JavaScriptCore) [...]; decisão da D4 com o usuário". Escopo ampliado pelo usuário em 18/11/2026: "Tudo num plano só" (medição, decisão e, na opção (b), as funções próprias). |
 | Contexto | [Roteiro](2026-11-04-roteiro-motor.md) (linha 2, riscos e pendências), [RN-SIM-001](../product/rules/simulation.md), [PDR-0008](../pdr/0008-simulacao-com-reproducao.md), [ADR-0011](../adr/0011-motor-de-simulacao-e-esquema.md), [ADR-0009](../adr/0009-estrategia-de-testes.md), [ADR-0010](../adr/0010-qualidade-e-ci.md), [code-style.md](../architecture/code-style.md) seção 7 e "Decisões pendentes" (D4), [pesquisa da literatura do motor](../research/literatura-do-motor.md) (seção "A D4 já tem resposta provável"), [pesquisa do guia de estilo](../research/guia-de-estilo-de-codigo.md) (D4), [sim-engine.md](../architecture/sim-engine.md), [workspace.md](../architecture/workspace.md), código do sub-plano 1 em `libs/sim-engine/src` |

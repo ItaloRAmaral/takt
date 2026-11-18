@@ -1,3 +1,5 @@
+import { log } from '../math/log.js';
+
 /**
  * Gives the exponential time at a uniform number: the quantile function,
  * −mean · ln(1 − uniform).
@@ -10,5 +12,5 @@
  * exponentialQuantile(0.5, 30); // 30 · ln 2 ≈ 20.79
  */
 export function exponentialQuantile(uniform: number, meanSec: number): number {
-  return -meanSec * Math.log(1 - uniform);
+  return -meanSec * log(1 - uniform);
 }

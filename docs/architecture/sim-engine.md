@@ -2,7 +2,7 @@
 
 > **Resumo.** Como o motor é construído hoje. O motor é um núcleo funcional em TypeScript puro, sem React, Three.js nem DOM, que roda num Web Worker do `takt-web-app`. O porquê está no [ADR-0011](../adr/0011-motor-de-simulacao-e-esquema.md) e no [ADR-0013](../adr/0013-erros-esperados.md); o plano que o constrói é o [roteiro do motor](../plans/2026-11-04-roteiro-motor.md). Este documento cresce a cada sub-plano.
 
-Atualizado em 18/11/2026 (sub-plano 2 em andamento: casos de referência de `log` e `exp`).
+Atualizado em 18/11/2026 (sub-plano 2 concluído: `log` e `exp` próprios, ADR-0014).
 
 ## Estrutura
 
@@ -132,7 +132,7 @@ Método da inversão: cada amostra é a inversa da função de distribuição ap
 
 - **Tipo interno:** `Variability`, com `kind` e tempos em segundos: `fixed` (`valueSec`), `exponential` (`meanSec`), `triangular` (`minSec`, `modeSec`, `maxSec`), `truncatedNormal` (`meanSec`, `standardDeviationSec`, `minSec`, `maxSec`, com `maxSec` podendo ser `Infinity`). O esquema da planta (sub-plano 3) tem outro formato; a compilação (sub-plano 4) converte um no outro.
 - **`drawTimeSec(variabilidade, sequência)`:** `switch` exaustivo sobre `kind`, sem `default`. A fixa **não consome** número aleatório; as demais consomem exatamente um. Os testes conferem o estado da sequência depois do sorteio.
-- **Exponencial:** `−média · ln(1 − u)`. Usa `Math.log`, que a especificação do JavaScript não obriga a ser igual entre motores (D4, sub-plano 2); por isso os testes da inversa usam `toBeCloseTo` com 12 casas.
+- **Exponencial:** `−média · ln(1 − u)`, com o `log` próprio de `src/math/` (ADR-0014), igual em todo motor JavaScript. Os testes da inversa usam `toBeCloseTo` com 12 casas, escritos antes da troca, quando ela usava `Math.log`.
 - **Triangular:** fórmula fechada por partes, `mín + √(u · (máx − mín) · (moda − mín))` até u = (moda − mín) / (máx − mín), e `máx − √((1 − u) · (máx − mín) · (máx − moda))` acima. Só usa `Math.sqrt`, que a especificação manda arredondar corretamente: o resultado é igual em todo motor, e os testes da inversa comparam com igualdade exata, com valores de u e parâmetros escolhidos para dar raízes exatas, inclusive a moda nos dois extremos.
 - **Mutante equivalente na prática:** trocar `u <=` por `u <` na triangular. Na fronteira os dois ramos dão a moda em aritmética exata; só o arredondamento poderia separá-los, e só com u exatamente igual à fração da moda.
 
@@ -246,13 +246,15 @@ for name, f, m, v, m4 in [("exp", inv_exp, 30.0, 900.0, 9 * 30.0**4),
 
 Normal com média 10 e desvio 1, truncada em [9, 11] (a padrão em [−1, 1]), sequência 0, replicação 0, 10⁵ amostras: média 9,99951 (z = −0,29) e variância 0,28984 (z = −1,44), dentro do IC de 95%. **Cálculo próprio:** variância 1 − 2φ(1)/(Φ(1) − Φ(−1)) = 0,291125094772793 e 4º momento central 3·variância − 2φ(1)/(Φ(1) − Φ(−1)) = 0,164500379091173 (por integração por partes; conferido por integração numérica, 0,164500379091170). Limites nos testes: média de 9,99665 a 10,00335; variância de 0,28937 a 0,29288.
 
-### Funções do `Math` usadas (insumo da D4, sub-plano 2)
+### Funções matemáticas usadas
 
 | Função | Onde | Igual em todo motor? |
 | --- | --- | --- |
 | `Math.sqrt` | triangular; AS 241 (caudas) | Sim: a especificação exige arredondamento correto |
-| `Math.log` | exponencial; AS 241 (caudas) | Não garantido |
-| `Math.exp` | Hart (Φ e Q) | Não garantido |
+| `log` (`src/math/log.ts`) | exponencial; AS 241 (caudas) | Sim: port do fdlibm só com as quatro operações (ADR-0014) |
+| `exp` (`src/math/exp.ts`) | Hart (Φ e Q) | Sim: port do fdlibm só com as quatro operações (ADR-0014) |
+
+Até o sub-plano 2 eram `Math.log` e `Math.exp`, que dão bits diferentes por navegador ([medição](../research/precisao-de-log-e-exp.md)). A troca não mudou nenhum valor esperado dos testes nem os exemplos dos JSDoc: nesses casos, o `Math.log` do Node 24 já era o fdlibm, e o `Math.exp` só difere dele em `exp(1)`. O lint do motor recusa as funções aproximadas de `Math` e `**` sobre `number` (ver "`log` e `exp` próprios"); o `2 ** 51` do gerador virou `Number(2n ** 51n)`, uma potência de `bigint`, exata.
 
 ### Mutantes equivalentes da normal
 
@@ -355,6 +357,8 @@ print("bounds: mean 10 +-", 1.96 * se_mean, "variance", float(var) - 1.96 * se_v
 
 - **Por quê:** `Math.log` e `Math.exp` dão bits diferentes conforme o navegador ([medição](../research/precisao-de-log-e-exp.md)); as funções de `src/math/` usam só as quatro operações e operações de bits, que a especificação obriga a serem iguais em todo motor.
 - **`log`** (`log.ts`): port linha a linha de `__ieee754_log` do `e_log.c` do fdlibm 5.3, com o aviso de licença da Sun no topo como comentário legal (`/*! ... */`). As constantes estão na forma decimal mais curta que dá o mesmo `double` dos hexadecimais do arquivo C (conferido em Python), por causa do `no-loss-of-precision`; `0.33333333333333333` do C vira `0.3333333333333333`, o mesmo `double`. Nomes como no C, no formato do lint: constantes `LN2_HI`, `LG1`; locais `hx`, `k`, `f`, `s`, `r`, `hfsq`, `dk`.
+- **Lint:** no código do motor (fora dos specs e de `src/tests/`), `no-restricted-properties` recusa `Math.acos`, `acosh`, `asin`, `asinh`, `atan`, `atanh`, `atan2`, `cbrt`, `cos`, `cosh`, `exp`, `expm1`, `hypot`, `log`, `log1p`, `log10`, `log2`, `pow`, `sin`, `sinh`, `tan` e `tanh`, e `no-restricted-syntax` recusa `**` com lado esquerdo que não seja literal `bigint` e `**=`. Como uma regra redefinida substitui a anterior, o bloco do código do motor repete as proibições de não determinismo (constantes compartilhadas no `eslint.config.mjs`). Testes de conformidade: recusa de `Math.log`, `Math.exp`, `Math.pow`, `2 ** 51` e `**=`; aceitação de `Math.sqrt` e `2n ** 127n`; `Math.log` permitido num spec.
+- **Entre motores** (18/11/2026, Linux): com as funções próprias, os uniformes, `log`, `exp` e os três sorteios dão os mesmos bits no Node 24, Chromium 158, Firefox 159 e WebKit 27.2, e iguais ao fdlibm em C; o workflow `math-measurement.yml` repete a prova em Ubuntu, macOS e Windows a cada merge que mude o motor, exigindo `uniforms`, `fdlibm.` e `draws.` idênticos.
 - **Bits do `double`** (`float-words.ts`): `highWord` (com sinal, como o `int hx` do C), `lowWord` (sem sinal) e `fromWords`, por um `DataView` com ordem de bytes explícita, para dar as mesmas palavras em toda plataforma.
 - **Prova:** igual bit a bit ao fdlibm em C nos 2683 casos de `log` do fixture e a no máximo 1 ulp do valor corretamente arredondado; cobertura de 100% dos ramos pelas fronteiras de ramo do fixture.
 - **Atalho de \|f\| < 2⁻²⁰:** o `e_log.c` tem um caminho curto para x perto de 1 ou de uma potência de 2. A primeira rodada de mutação mostrou que apagá-lo não mudava nenhum caso do fixture. Uma busca em Python (os dois caminhos reproduzidos com os mesmos `double`, semente 11, até 2·10⁵ palavras baixas por combinação de expoente e mantissa perto da fronteira) achou entradas em que os dois caminhos arredondam diferente, só com k = 0 (x logo acima ou abaixo de 1): `3feffffe37cb539d`, `3feffffe38ee39cc`, `3fefffff2d487e07`, `3fefffff3626a717`, `3ff00000f02b63b3`, `3ff00000ff558342`, `3ff000018081e4fd` e `3ff00001f8f4f410`, que entraram no fixture como casos fixos.

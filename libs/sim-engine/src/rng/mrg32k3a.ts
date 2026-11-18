@@ -9,7 +9,7 @@ const A21 = 527612;
 const A23N = 1370589;
 const NORM = 1 / (M1 + 1);
 const PACKAGE_SEED = 12345;
-const SUBSTREAMS_PER_STREAM = 2 ** 51;
+const SUBSTREAMS_PER_STREAM = Number(2n ** 51n);
 
 const M1_BIG = BigInt(M1);
 const M2_BIG = BigInt(M2);

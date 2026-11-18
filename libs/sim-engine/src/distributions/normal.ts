@@ -1,3 +1,6 @@
+import { exp } from '../math/exp.js';
+import { log } from '../math/log.js';
+
 // Wichura (1988), AS 241, PPND16
 const SPLIT_NEAR_HALF = 0.425;
 const SPLIT_TAIL = 5;
@@ -87,7 +90,7 @@ export function normalQuantile(p: number): number {
     return (q * evaluatePolynomial(A, r)) / evaluatePolynomial(B, r);
   }
 
-  let r = Math.sqrt(-Math.log(q < 0 ? p : 1 - p));
+  let r = Math.sqrt(-log(q < 0 ? p : 1 - p));
   let z: number;
 
   if (r <= SPLIT_TAIL) {
@@ -106,7 +109,7 @@ function lowerTail(xAbs: number): number {
     return 0;
   }
 
-  const exponential = Math.exp(-(xAbs * xAbs) / 2);
+  const exponential = exp(-(xAbs * xAbs) / 2);
 
   if (xAbs < HART_RATIONAL_LIMIT) {
     return (
