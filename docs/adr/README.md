@@ -2,7 +2,7 @@
 
 > **Resumo.** Cada ADR registra uma decisão técnica completa: contexto, decisão, alternativas, consequências e como verificar que ela está sendo seguida. Decisões de produto ficam nos PDRs, em [`../pdr/`](../pdr/README.md). O **como** o sistema funciona hoje fica nos documentos vivos de [`../architecture/`](../architecture/README.md).
 
-Atualizado em 03/11/2026. Os registros 0001 a 0012 foram aceitos por Italo em 20/10/2026; o 0013, em 03/11/2026.
+Atualizado em 18/11/2026. Os registros 0001 a 0012 foram aceitos por Italo em 20/10/2026; o 0013, em 03/11/2026. O 0014, em 18/11/2026.
 
 ## Como funciona
 
@@ -30,6 +30,7 @@ Atualizado em 03/11/2026. Os registros 0001 a 0012 foram aceitos por Italo em 20
 | [0011](0011-motor-de-simulacao-e-esquema.md) | Motor de simulação e esquema da planta | `sim-engine`, `plant-schema`, web | Aceito | 20/10/2026 |
 | [0012](0012-front-end.md) | Front-end estático com Vite, React e React Three Fiber | `takt-web-app`, hospedagem | Aceito | 20/10/2026 |
 | [0013](0013-erros-esperados.md) | Erros esperados como exceções com código | `takt-core-api`, `sim-engine`, Worker, testes | Aceito | 03/11/2026 |
+| [0014](0014-log-e-exp-proprios-no-motor.md) | Logaritmo e exponencial próprios no motor (port do fdlibm) | `sim-engine`, CI | Aceito | 18/11/2026 |
 
 ## Temas ainda sem ADR
 

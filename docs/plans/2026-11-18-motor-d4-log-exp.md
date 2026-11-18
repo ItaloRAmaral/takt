@@ -35,6 +35,7 @@
 | Escopo | Um plano só: medição, decisão e, se for (b), as funções próprias | 18/11/2026 |
 | Funções próprias, na opção (b) | Port do fdlibm (`e_log.c` e `e_exp.c`), com o aviso da Sun preservado | 18/11/2026 |
 | Casos difíceis do CORE-MATH, sem licença declarada | Nem commitados nem baixados: "se não vai mudar nada, vamos deixar sem baixar" (a primeira resposta, baixar na hora, foi revista no mesmo dia). No lugar, casos "quase difíceis" inventados: de 10⁶ candidatos sorteados, os mil por função mais perto do meio entre dois `double` ("pode seguir") | 18/11/2026 |
+| Workflow de macOS e Windows: PR próprio antes das rodadas? | Não: "podemos criar o workflow para testar no merge dessa mesma PR, mas já podemos decidir com esses dados já adquiridos". O workflow entra neste PR, roda no merge para a `main` e depois de cada mudança no motor, e a D4 é decidida com a medição do Linux | 18/11/2026 |
 | Exceções de idade mínima (Nx 24.0.3 e `semver` 6.3.2, vencidas em 06/11 e 09/11) | Saem neste mesmo pull request, na tarefa 2 (antes: "vamos esperar até 10/11", 06/11/2026) | 18/11/2026 |
 
 ## Decisões técnicas deste plano
@@ -102,7 +103,7 @@
 
 | Princípio quebrado | Critério e evidência | Alternativa descartada | Gatilho de revisão | Impacto em testes |
 | --- | --- | --- | --- | --- |
-| "Comente só o que o código não consegue dizer" (seção 2): `log.ts` e `exp.ts` levam o aviso de licença da Sun, como comentário legal `/*! ... */`, que os empacotadores preservam no bundle do `takt-web-app` | Exigência da licença: "provided that this notice is preserved". Critério: obrigação externa que o guia não prevê | Escrever a partir de um artigo (Tang 1989 e 1990), sem aviso: mais trabalho e risco, e o usuário escolheu o port | O guia ganhar uma regra para avisos de licença | Nenhum |
+| "Comente só o que o código não consegue dizer" (seção 2): `log.ts` e `exp.ts` levam o aviso de licença da Sun, como comentário legal `/*! ... */`, que os empacotadores preservam no bundle do `takt-web-app` | Exigência da licença: "provided that this notice is preserved". Critério: obrigação externa que o guia não prevê | Escrever do zero a partir da descrição do algoritmo, sem aviso: mais trabalho e risco, e o usuário escolheu o port | O guia ganhar uma regra para avisos de licença | Nenhum |
 | Funções curtas e nomes sem abreviação (seção 2): o port mantém a estrutura do C e os nomes do fdlibm, só no formato que o lint exige (constantes de módulo em `UPPER_CASE`: `ln2_hi` vira `LN2_HI`, `Lg1` vira `LG1`; variáveis locais em `camelCase`: `R` vira `r`, `hfsq` fica `hfsq`) | Um port fiel é conferido linha a linha contra o original; renomear e reestruturar tira essa conferência. O oráculo bit a bit cobre o comportamento, não a leitura | Reescrever com nomes por extenso: diverge do original e dificulta a revisão | Troca do algoritmo | Nenhum |
 
 ## Registros novos propostos

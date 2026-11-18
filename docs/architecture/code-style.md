@@ -2,7 +2,7 @@
 
 > **Resumo.** Como escrever código no Takt: princípios de design, critérios para quebrar um princípio quando ele vira excesso de engenharia, convenções de TypeScript e convenções por projeto (API, motor, esquema, web, testes). O guia fica abaixo do `CLAUDE.md`, dos ADRs e PDRs aceitos e das regras `RN-...`. Cada regra diz se é imposta por **ferramenta** ou verificada na **revisão**.
 
-Atualizado em 05/11/2026 · Base: pesquisa [Guia de estilo de código](../research/guia-de-estilo-de-codigo.md) · Decisões: [ADR-0001](../adr/0001-monorepo-nx-e-nomes.md), [ADR-0002](../adr/0002-arquitetura-hexagonal-por-contexto.md), [ADR-0008](../adr/0008-validacao-de-dados.md) a [ADR-0013](../adr/0013-erros-esperados.md).
+Atualizado em 18/11/2026 · Base: pesquisa [Guia de estilo de código](../research/guia-de-estilo-de-codigo.md) · Decisões: [ADR-0001](../adr/0001-monorepo-nx-e-nomes.md), [ADR-0002](../adr/0002-arquitetura-hexagonal-por-contexto.md), [ADR-0008](../adr/0008-validacao-de-dados.md) a [ADR-0014](../adr/0014-log-e-exp-proprios-no-motor.md).
 
 Este guia tem uma versão curta para o Claude Code em [`.claude/rules/`](../../.claude/rules/), um arquivo por área. **O guia é a fonte da verdade.** Quando os dois divergirem, vale o guia, e os dois mudam no mesmo pull request.
 
@@ -163,7 +163,7 @@ O motor é um **núcleo funcional**: recebe valores (planta compilada, semente, 
 - **Laço quente:** objetos com todos os campos inicializados na criação, sempre na mesma ordem, sem `delete`; evite criar objeto por evento. Quebrar outro princípio por desempenho exige medição (seção 3, critério 6).
 - **Imutabilidade na fronteira:** a API pública usa `readonly` e `ReadonlyArray`. Dentro de uma execução, mutação local é aceita, desde que não escape: `run` continua determinística para quem chama.
 - **Comentários obrigatórios** onde há literatura: fórmula, fonte, hipótese e unidade (por exemplo, AS 241 de Wichura), com JSDoc nos exports públicos.
-- **Reprodutibilidade entre navegadores:** **pendente (D4)**. Funções de `Math` podem dar resultados diferentes entre motores JavaScript; a medição no marco 1 decide se o limite é documentado ou se o motor usa funções próprias.
+- **Reprodutibilidade entre navegadores** ([ADR-0014](../adr/0014-log-e-exp-proprios-no-motor.md)): o motor não chama as funções de `Math` que a especificação deixa "implementation-approximated" (`log`, `exp`, `pow`, as trigonométricas e afins) nem `**` sobre `number`; usa `log` e `exp` próprios, portados do fdlibm, que dão os mesmos bits em todo motor JavaScript. `Math.sqrt`, `abs`, `min`, `max` e os arredondamentos são exatos e continuam permitidos. Uma função aproximada nova ganha implementação própria. Lint e testes de conformidade impõem a regra.
 
 ## 8. Esquema (`@takt/plant-schema`)
 
@@ -221,4 +221,3 @@ Estes pontos conflitam com registros aceitos ou fecham um "Em aberto" deles, e c
 | --- | --- | --- |
 | D1 | Versão do Prisma e transação do RLS (ADR-0003) | marco 4 |
 | D2 | Portas de leitura que devolvem tipo próprio (ADR-0002) | revisão do fim do marco 4 |
-| D4 | Precisão de `Math` entre navegadores (ADR-0011, RN-SIM-001) | marco 1 (medir) |
