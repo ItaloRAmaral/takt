@@ -53,7 +53,7 @@ A raiz aplica os presets `strictTypeChecked` e `stylisticTypeChecked` do typescr
 ## Testes, cobertura e mutação
 
 - **Vitest** em cada biblioteca, `vitest run`. Cobertura v8 sobre `src/**/*.ts`, sem os `*.spec.ts`, com mínimo de **90% de linhas e de ramificações**. As metas só são conferidas com `--coverage`.
-- **Stryker** só no motor (`pnpm nx run sim-engine:mutate`), com `break: 80`. Três contornos, comentados em `libs/sim-engine/stryker.config.mjs`: roda **da raiz**, porque um sandbox só da pasta do motor quebra os caminhos para `tsconfig.base.json` e para o ESLint da raiz; os plugins são listados pelo nome, porque com pnpm o padrão `@stryker-mutator/*` não os encontra; `vitest.related: false`, para rodar também testes que não importam código. Relatório em `reports/mutation/sim-engine.html`.
+- **Stryker** só no motor (`pnpm nx run sim-engine:mutate`), com `break: 80`. Três contornos, comentados em `libs/sim-engine/stryker.config.mjs`: roda **da raiz**, porque um sandbox só da pasta do motor quebra os caminhos para `tsconfig.base.json` e para o ESLint da raiz; os plugins são listados pelo nome, porque com pnpm o padrão `@stryker-mutator/*` não os encontra; `vitest.related: false`, para rodar também testes que não importam código. Relatório em `reports/mutation/sim-engine.html`. Os testes de momentos das distribuições (10⁵ amostras: `exponential`, `triangular`, `truncated normal`) têm `describe(..., { timeout: 30_000 }, ...)`: fora do Stryker levam menos de 1 s, mas no teste inicial da mutação, com a cobertura por teste instrumentando o laço e os arquivos em paralelo, passaram dos 5 s padrão (medido em 18/11/2026, quando os testes do `exp` aumentaram a carga).
 
 ## Medição de `log` e `exp` entre motores (D4)
 

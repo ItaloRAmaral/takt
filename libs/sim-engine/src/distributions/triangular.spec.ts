@@ -3,7 +3,7 @@ import { drawTimesSec } from '../tests/helpers/draw-times-sec.js';
 import { sampleMean, sampleVariance } from '../tests/helpers/sample-moments.js';
 import { triangularQuantile } from './triangular.js';
 
-describe('triangular', () => {
+describe('triangular', { timeout: 30_000 }, () => {
   it.each([
     { uniform: 0.0625, minSec: 10, modeSec: 20, maxSec: 50, expected: 15 },
     { uniform: 0.25, minSec: 10, modeSec: 20, maxSec: 50, expected: 20 },

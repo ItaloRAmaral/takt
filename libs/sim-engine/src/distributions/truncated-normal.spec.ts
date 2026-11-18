@@ -3,7 +3,7 @@ import { drawTimesSec } from '../tests/helpers/draw-times-sec.js';
 import { sampleMean, sampleVariance } from '../tests/helpers/sample-moments.js';
 import { truncatedNormalQuantile } from './truncated-normal.js';
 
-describe('truncated normal', () => {
+describe('truncated normal', { timeout: 30_000 }, () => {
   it.each([
     {
       uniform: 0.3,

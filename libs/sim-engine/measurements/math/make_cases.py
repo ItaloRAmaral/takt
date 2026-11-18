@@ -54,7 +54,7 @@ def log_inputs(rng):
     special = [
         "0000000000000000", "8000000000000000", "bff0000000000000",
         "fff0000000000000", "7ff0000000000000", "7ff8000000000000",
-        "3ff0000000000000", "0000000000000001", "8000000000000001",
+        "fff8000000000000", "3ff0000000000000", "0000000000000001", "8000000000000001",
         "0008000000000000", "000fffffffffffff", "0010000000000000",
         "7fefffffffffffff", "4000000000000000", "3fe0000000000000",
         "4090000000000000",
@@ -93,9 +93,13 @@ def log_inputs(rng):
 def exp_inputs(rng):
     special = [
         "0000000000000000", "8000000000000000", "7ff0000000000000",
-        "fff0000000000000", "7ff8000000000000", "3ff0000000000000",
-        "bff0000000000000", "0000000000000001", "8000000000000001",
+        "fff0000000000000", "7ff8000000000000", "fff8000000000000",
+        "3ff0000000000000", "bff0000000000000", "0000000000000001",
+        "8000000000000001",
     ]
+    # Far beyond the overflow and underflow limits, where a port without
+    # those checks would scale the exponent around and give garbage.
+    special += [to_bits(x) for x in (1000.0, 2.0**64, 1e300, -1000.0, -(2.0**64), -1e300)]
     branches = []
 
     for bits in (
@@ -111,11 +115,26 @@ def exp_inputs(rng):
             signed = f"{int(sign, 16) << 60 | magnitude:016x}"
             branches += with_neighbors(signed)
 
+    # Inputs where the |x| < 2**-28 shortcut of e_exp.c (1 + x) and its general
+    # path round differently, below 2**-28 and at it, so a port that drops the
+    # shortcut or moves its limit fails; found by a seeded search.
+    shortcut = [
+        "3e2000002ff7c0fc", "3e2000006fcfd73d", "3e201000cffaea0c", "3e202000efeffc4f",
+        "3e2030008fbff9ba", "3e2030006ffd7de0", "3e205000cff4ffa4", "3e205000efea1afe",
+        "3e30000067888144", "3e30000047e4ee73", "be300000846503c2", "be3000005c7809e4",
+    ]
+    # Inputs whose high word is exactly at the 0.5 ln2 and 1.5 ln2 limits, where
+    # moving a limit by one changes the reduction and the rounding; found by a
+    # seeded search.
+    shortcut += [
+        "3fd62e422335e9e2", "3fd62e42cd425ec3", "bfd62e42de27660b", "bfd62e428e8b88c2",
+        "3ff0a2b2c0d64421", "3ff0a2b2f391361a", "bff0a2b2cf8f95c3", "bff0a2b2d6c500f4",
+    ]
     k_limit = [-745.2 + step * (745.2 - 707.0) / 200 for step in range(201)]
     spread = [rng.uniform(-745.2, 709.8) for _ in range(1000)]
     engine = [-((37 * rng.random()) ** 2) / 2 for _ in range(500)]
 
-    return special + branches + [to_bits(x) for x in k_limit + spread + engine]
+    return special + branches + shortcut + [to_bits(x) for x in k_limit + spread + engine]
 
 
 def distance_to_midpoint(function, value):
@@ -165,6 +184,10 @@ def correctly_rounded(function, bits):
         result = exact.ln() if function == "log" else exact.exp()
     except decimal.InvalidOperation:
         return CANONICAL_NAN
+    except decimal.Overflow:
+        # Only exp overflows: e^x beyond the context's exponent range is far
+        # above the largest double, so it rounds to +Infinity.
+        return to_bits(math.inf)
 
     return to_bits(float(result))
 

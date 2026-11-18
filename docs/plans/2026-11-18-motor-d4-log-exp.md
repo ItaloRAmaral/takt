@@ -35,6 +35,7 @@
 | Escopo | Um plano só: medição, decisão e, se for (b), as funções próprias | 18/11/2026 |
 | Funções próprias, na opção (b) | Port do fdlibm (`e_log.c` e `e_exp.c`), com o aviso da Sun preservado | 18/11/2026 |
 | Casos difíceis do CORE-MATH, sem licença declarada | Nem commitados nem baixados: "se não vai mudar nada, vamos deixar sem baixar" (a primeira resposta, baixar na hora, foi revista no mesmo dia). No lugar, casos "quase difíceis" inventados: de 10⁶ candidatos sorteados, os mil por função mais perto do meio entre dois `double` ("pode seguir") | 18/11/2026 |
+| Teste inicial da mutação estourando os 5 s nos testes de momentos (10⁵ amostras), depois que os testes do `exp` aumentaram a carga | `describe(..., { timeout: 30_000 }, ...)` em `exponential`, `triangular` e `truncated normal`, como nos testes de conformidade do lint; o `testTimeout` global ficou como está (plano curto, "pode") | 18/11/2026 |
 | Workflow de macOS e Windows: PR próprio antes das rodadas? | Não: "podemos criar o workflow para testar no merge dessa mesma PR, mas já podemos decidir com esses dados já adquiridos". O workflow entra neste PR, roda no merge para a `main` e depois de cada mudança no motor, e a D4 é decidida com a medição do Linux | 18/11/2026 |
 | Exceções de idade mínima (Nx 24.0.3 e `semver` 6.3.2, vencidas em 06/11 e 09/11) | Saem neste mesmo pull request, na tarefa 2 (antes: "vamos esperar até 10/11", 06/11/2026) | 18/11/2026 |
 
@@ -216,6 +217,8 @@ Revisto com o usuário em 18/11/2026 ("podemos criar o workflow para testar no m
 - [ ] **Passo 2:** portar `__ieee754_exp` do `e_exp.c` (aviso, origem, mesmas regras da tarefa 5); `__HI(y) += (k<<20)` vira `fromWords(highWord(y) + (k << 20), lowWord(y))`.
 - [ ] **Passo 3:** `pnpm nx test sim-engine --coverage` · Esperado: PASSA.
 - [ ] **Passo 4:** foco 9, registrado.
+
+Na execução (18/11/2026), a mutação mostrou lacunas do fixture e elas foram fechadas antes de fechar a tarefa: casos que separam o atalho de \|x\| < 2⁻²⁸ do caminho geral, as faixas de 0,5·ln 2 e 1,5·ln 2, um `NaN` negativo e entradas muito além dos limites; e o `make_cases.py` passou a tratar o `Overflow` do `decimal` como +∞. Detalhes em `sim-engine.md`.
 
 **Commit sugerido:** `feat(sim-engine): port the fdlibm exponential` · arquivos: os da lista.
 

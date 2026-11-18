@@ -3,7 +3,7 @@ import { drawTimesSec } from '../tests/helpers/draw-times-sec.js';
 import { sampleMean, sampleVariance } from '../tests/helpers/sample-moments.js';
 import { exponentialQuantile } from './exponential.js';
 
-describe('exponential', () => {
+describe('exponential', { timeout: 30_000 }, () => {
   it.each([
     { uniform: 0.5, expected: 20.79441541679836 },
     { uniform: 0.75, expected: 41.58883083359672 },
