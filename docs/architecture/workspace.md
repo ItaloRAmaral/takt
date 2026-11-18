@@ -2,7 +2,7 @@
 
 > **Resumo.** Como o monorepo é montado hoje: projetos, versões fixadas, segurança da instalação, lint, testes, cobertura, mutação, hooks locais e CI. O porquê está nos ADRs [0001](../adr/0001-monorepo-nx-e-nomes.md), [0009](../adr/0009-estrategia-de-testes.md), [0010](../adr/0010-qualidade-e-ci.md) e [0011](../adr/0011-motor-de-simulacao-e-esquema.md); os comandos, no `CLAUDE.md`, seção "Commands".
 
-Atualizado em 06/11/2026. Criado pelo plano [Workspace Nx do marco 1](../plans/2026-11-03-workspace-nx.md), cujas notas de execução registram cada desvio.
+Atualizado em 18/11/2026 (medição da D4). Criado pelo plano [Workspace Nx do marco 1](../plans/2026-11-03-workspace-nx.md), cujas notas de execução registram cada desvio.
 
 ## Estrutura
 
@@ -25,12 +25,7 @@ Para atualizar uma dependência: um pull request só para isso, com a versão pu
 
 **Idade mínima de 7 dias** (`minimumReleaseAge: 10080`, em minutos), decidida pelo fundador em 03/11/2026; resolve o "Em aberto" do ADR-0010. Vale também para as actions do CI e a imagem do Semgrep. Gatilho de revisão: um incidente público em que o pacote malicioso ficou publicado por mais de 7 dias, ou o pnpm mudar o padrão.
 
-**Exceções em vigor** (`minimumReleaseAgeExclude`, cada uma aprovada pelo fundador e com data para sair):
-
-| Exceção | Motivo | Remover depois de |
-| --- | --- | --- |
-| `semver@6.3.2` | Exigido pelo Babel via Nx; o `trustPolicy` recusa a 6.3.1, anterior à publicação confiável | 09/11/2026 |
-| `nx` e 16 pacotes `@nx/*` na 24.0.3 | O Nx 24.0.2 fixa o `undici` 7.29.0, com 6 vulnerabilidades altas; a 24.0.3 fixa o 7.30.1 | 06/11/2026 |
+**Exceções em vigor** (`minimumReleaseAgeExclude`): nenhuma. As do `semver@6.3.2` e do Nx 24.0.3 saíram em 18/11/2026, depois de completarem os 7 dias.
 
 **Overrides em vigor** (`overrides`, aprovados pelo fundador):
 
@@ -59,6 +54,15 @@ A raiz aplica os presets `strictTypeChecked` e `stylisticTypeChecked` do typescr
 
 - **Vitest** em cada biblioteca, `vitest run`. Cobertura v8 sobre `src/**/*.ts`, sem os `*.spec.ts`, com mínimo de **90% de linhas e de ramificações**. As metas só são conferidas com `--coverage`.
 - **Stryker** só no motor (`pnpm nx run sim-engine:mutate`), com `break: 80`. Três contornos, comentados em `libs/sim-engine/stryker.config.mjs`: roda **da raiz**, porque um sandbox só da pasta do motor quebra os caminhos para `tsconfig.base.json` e para o ESLint da raiz; os plugins são listados pelo nome, porque com pnpm o padrão `@stryker-mutator/*` não os encontra; `vitest.related: false`, para rodar também testes que não importam código. Relatório em `reports/mutation/sim-engine.html`.
+
+## Medição de `log` e `exp` entre motores (D4)
+
+Fora do `test` comum, para decidir a D4 ([plano](../plans/2026-11-18-motor-d4-log-exp.md)):
+
+- **Ferramentas:** `playwright` 1.65.0 e `@vitest/browser-playwright` 5.0.5, exatos. Os navegadores do Playwright (Chromium 158, Firefox 159, WebKit 27.2) são baixados por `pnpm exec playwright install chromium firefox webkit` para `~/.cache/ms-playwright`; no Linux eles precisam de bibliotecas do sistema, instaladas uma vez com `sudo env "PATH=$PATH" pnpm exec playwright install-deps chromium firefox webkit`.
+- **Rodar:** `pnpm nx run sim-engine:measure-math` usa `libs/sim-engine/vitest.measure.config.mts`, com o projeto `node` e o projeto `browser` (as três instâncias); `-- --project node` roda só um. Cada ambiente grava `libs/sim-engine/test-output/math-measurement/<motor>-<plataforma>.json` (pasta `test-output`, ignorada pelo git). O navegador grava pelo `server.commands.writeFile` do Vitest, que só escreve dentro da raiz do projeto e é permitido por padrão porque o servidor não fica exposto na rede (`api.allowWrite`).
+- **Comparar:** `python3 -I libs/sim-engine/measurements/math/compare.py libs/sim-engine/test-output/math-measurement` imprime as tabelas em Markdown: por ambiente, no fixture, as diferenças contra o fdlibm e contra o valor correto; em cada conjunto, os grupos de ambientes com bits iguais e as diferenças entre cada par de grupos. Cada medição grava o *digest* (FNV-1a) das entradas do fixture, e o script recusa a que foi feita contra outra versão dele.
+- **Lint:** `measurements/**` pode usar globais do navegador (`navigator.userAgent`), porque não é código do motor.
 
 ## Hooks locais (husky)
 

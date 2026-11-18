@@ -14,7 +14,8 @@ export default defineConfig(() => ({
       reportsDirectory: './test-output/vitest/coverage',
       provider: 'v8' as const,
       include: ['src/**/*.ts'],
-      exclude: ['src/**/*.spec.ts'],
+      // Generated reference data, not code.
+      exclude: ['src/**/*.spec.ts', 'src/tests/fixtures/fdlibm-cases.ts'],
       thresholds: { lines: 90, branches: 90 },
     },
   },

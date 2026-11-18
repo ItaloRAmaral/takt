@@ -80,6 +80,7 @@ Node 24.22.2 and pnpm 12.16.0 (`.nvmrc`, `packageManager`); how the workspace wo
 | Everything the change affected | `pnpm nx affected -t lint typecheck test` |
 | Everything | `pnpm nx run-many -t lint typecheck test` |
 | Mutation (engine, slow) | `pnpm nx run sim-engine:mutate` |
+| Measure `log`/`exp` across JavaScript engines (D4) | `pnpm nx run sim-engine:measure-math`, then `python3 -I libs/sim-engine/measurements/math/compare.py libs/sim-engine/test-output/math-measurement` |
 | Formatting | `pnpm exec prettier --check .` |
 
 Projects: `sim-engine`, `plant-schema`. Commit message body lines are at most 100 characters (commitlint).

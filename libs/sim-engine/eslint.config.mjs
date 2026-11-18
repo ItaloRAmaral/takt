@@ -87,4 +87,10 @@ export default defineConfig(
       ],
     },
   },
+  {
+    // The D4 measurement runs outside the engine, in Node and in browsers, and
+    // reads the browser's user agent.
+    files: ['measurements/**/*.ts'],
+    rules: { 'no-restricted-globals': 'off' },
+  },
 );

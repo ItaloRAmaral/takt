@@ -6,6 +6,11 @@ export interface FdlibmCase {
   readonly fdlibm: string;
   /** The correctly rounded result, from a 100-digit computation. */
   readonly correctlyRounded: string;
+  /**
+   * Whether the exact result lies among the closest to the midpoint between
+   * two doubles, where a correctly rounded library and one that is not differ.
+   */
+  readonly nearMidpoint: boolean;
 }
 
 /** The reference cases of each function; every `NaN` is written as `7ff8000000000000`. */

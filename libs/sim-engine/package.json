@@ -22,6 +22,9 @@
     "targets": {
       "mutate": {
         "command": "stryker run libs/sim-engine/stryker.config.mjs"
+      },
+      "measure-math": {
+        "command": "vitest run --config libs/sim-engine/vitest.measure.config.mts"
       }
     }
   },
