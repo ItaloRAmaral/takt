@@ -72,6 +72,13 @@ def log_inputs(rng):
             for low in (0x00000000, 0x00000001, 0xFFFFFFFF):
                 branches.append(words((exponent << 20) | mantissa, low))
 
+    # Inputs where the |f| < 2**-20 shortcut of e_log.c and its general path
+    # round differently, so a port that drops or changes the shortcut fails;
+    # found by a seeded search over that region.
+    shortcut = [
+        "3feffffe37cb539d", "3feffffe38ee39cc", "3fefffff2d487e07", "3fefffff3626a717",
+        "3ff00000f02b63b3", "3ff00000ff558342", "3ff000018081e4fd", "3ff00001f8f4f410",
+    ]
     spread = [
         words((rng.randrange(0x001, 0x7FF) << 20) | rng.getrandbits(20), rng.getrandbits(32))
         for _ in range(800)
@@ -80,7 +87,7 @@ def log_inputs(rng):
     uniforms = [rng.random() for _ in range(250)]
     engine = [to_bits(u) for u in uniforms] + [to_bits(1 - u) for u in uniforms]
 
-    return special + near_one + branches + spread + engine
+    return special + near_one + branches + shortcut + spread + engine
 
 
 def exp_inputs(rng):

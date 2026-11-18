@@ -85,7 +85,7 @@
 | Medição nos dez ambientes (linha 2 do roteiro) | medição (Vitest no Node e no modo navegador) | `records the bits of log, exp and the engine draws` | 2 e 3 |
 | Foco 7 e gerador igual em todo ambiente (roteiro, linha 2) | medição | linhas dos uniformes e da triangular no relatório: zero diferenças | 4 |
 | Bits altos e baixos de um `double` (opção b) | unitário, `it.each` | `highWord of $label is $high`; `lowWord of $label is $low`; `fromWords($high, $low) is $label` (1, −0, menor subnormal, `Number.MAX_VALUE`) | 5 |
-| Auxiliares de teste do port | unitário | `mapBits applies the function to each input`; `maxUlpDistance of $label is $distance` | 5 |
+| Auxiliares de teste do port | unitário | `lists the inputs whose result differs from fdlibm`; `treats every NaN as the same result`; `maxUlpDistance of $label is $distance`; `maxUlpDistance of no cases is 0` | 5 |
 | Foco 1 a 4 (opção b) | unitário, `it.each` | `log of $label is $expected` (valores especiais, literais); `log matches fdlibm bit for bit on the reference cases`; `log stays within 1 ulp of the correctly rounded value` | 5 |
 | Foco 2 e 3 (opção b) | unitário, `it.each` | `exp of $label is $expected`; `exp matches fdlibm bit for bit on the reference cases`; `exp stays within 1 ulp of the correctly rounded value` | 6 |
 | Foco 9 | medição | tempo de 10⁶ chamadas, registrado em `sim-engine.md` | 5 e 6 |
@@ -187,12 +187,12 @@ Revisto com o usuário em 18/11/2026 ("podemos criar o workflow para testar no m
 ## Tarefa 5: `log` do fdlibm (opção b)
 
 **Arquivos:**
-- Criar: `libs/sim-engine/src/math/float-words.ts`, `libs/sim-engine/src/math/log.ts`, `libs/sim-engine/src/tests/helpers/map-bits.ts`, `libs/sim-engine/src/tests/helpers/max-ulp-distance.ts`
-- Testar: `libs/sim-engine/src/math/float-words.spec.ts`, `libs/sim-engine/src/math/log.spec.ts`, `libs/sim-engine/src/tests/helpers/map-bits.spec.ts`, `libs/sim-engine/src/tests/helpers/max-ulp-distance.spec.ts`
+- Criar: `libs/sim-engine/src/math/float-words.ts`, `libs/sim-engine/src/math/log.ts`, `libs/sim-engine/src/tests/helpers/find-fdlibm-mismatches.ts`, `libs/sim-engine/src/tests/helpers/max-ulp-distance.ts`
+- Testar: `libs/sim-engine/src/math/float-words.spec.ts`, `libs/sim-engine/src/math/log.spec.ts`, `libs/sim-engine/src/tests/helpers/find-fdlibm-mismatches.spec.ts`, `libs/sim-engine/src/tests/helpers/max-ulp-distance.spec.ts`
 - Modificar: `docs/architecture/sim-engine.md` (linha de `tests/helpers/`)
 
 **Interfaces:**
-- Consome: fixture, `toBits`, `fromBits` e `ulpDistance` (tarefa 1); auxiliares novos de teste `mapBits(fn: (x: number) => number, inputs: readonly string[]): string[]` e `maxUlpDistance(fn: (x: number) => number, cases: readonly FdlibmCase[]): number`, em `src/tests/helpers/`, cada um com spec.
+- Consome: fixture, `toBits`, `fromBits` e `ulpDistance` (tarefa 1); auxiliares novos de teste `findFdlibmMismatches(fn: (x: number) => number, cases: readonly FdlibmCase[]): string[]` (as entradas cujo resultado difere do fdlibm; trocou o `mapBits` previsto, que obrigaria o teste a extrair entradas e saídas com `map`) e `maxUlpDistance(fn: (x: number) => number, cases: readonly FdlibmCase[]): number`, em `src/tests/helpers/`, cada um com spec.
 - Produz: `highWord(x: number): number` (32 bits altos, com sinal, como o `int` do C); `lowWord(x: number): number` (32 bits baixos, sem sinal); `fromWords(high: number, low: number): number`, os três com um `DataView` de módulo; `log(x: number): number`.
 
 - [ ] **Passo 1:** testes que falham: `float-words` (1 → `0x3ff00000`, 0; −0 → `0x80000000` com sinal, 0) e os três de `log` (plano de testes). `pnpm nx test sim-engine` · Esperado: FALHA.
