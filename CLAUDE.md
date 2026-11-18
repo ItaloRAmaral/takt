@@ -50,7 +50,7 @@ Read only what the task needs; every doc starts with a short summary.
 
 Style follows `docs/architecture/code-style.md`; its principles may be broken only with the justification it requires in the plan. The rules below never are.
 
-- `@takt/sim-engine` never imports React, Three.js or DOM APIs, and never uses `Math.random` (ADR-0001, ADR-0011).
+- `@takt/sim-engine` never imports React, Three.js or DOM APIs, never uses `Math.random`, and never uses the approximated `Math` functions (`log`, `exp`, `pow`, trigonometric) or `**` on numbers: it uses its own `log` and `exp` (ADR-0001, ADR-0011, ADR-0014).
 - In `takt-core-api`, `domain/` imports nothing external (no `@nestjs/*`, `@prisma/*`, `zod`) (ADR-0002).
 - Authorization is always decided on the server, per organization; a role is never global (ADR-0006).
 - Every business table has `organization_id` and row-level security (ADR-0003).
@@ -80,6 +80,7 @@ Node 24.22.2 and pnpm 12.16.0 (`.nvmrc`, `packageManager`); how the workspace wo
 | Everything the change affected | `pnpm nx affected -t lint typecheck test` |
 | Everything | `pnpm nx run-many -t lint typecheck test` |
 | Mutation (engine, slow) | `pnpm nx run sim-engine:mutate` |
+| Measure `log`/`exp` across JavaScript engines (D4) | `pnpm nx run sim-engine:measure-math`, then `python3 -I libs/sim-engine/measurements/math/compare.py libs/sim-engine/test-output/math-measurement` |
 | Formatting | `pnpm exec prettier --check .` |
 
 Projects: `sim-engine`, `plant-schema`. Commit message body lines are at most 100 characters (commitlint).

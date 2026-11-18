@@ -9,3 +9,4 @@ reports
 .stryker-tmp
 .nx/cache
 .nx/workspace-data
+libs/sim-engine/src/tests/fixtures/fdlibm-cases.ts

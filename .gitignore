@@ -38,6 +38,7 @@ testem.log
 
 # test and mutation reports
 reports
+test-output
 .stryker-tmp
 
 # secrets
