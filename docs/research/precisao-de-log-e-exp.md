@@ -1,6 +1,6 @@
 # Precisão de `log` e `exp` entre motores JavaScript (D4)
 
-> **Resumo.** O mesmo sorteio do motor dá bits diferentes conforme o navegador. Medido em 18/11/2026 no Linux: o Chromium 158 calcula `Math.log` e `Math.exp` corretamente arredondados (libm do LLVM); o Firefox 159 e o Node 24 usam o fdlibm, bit a bit; o WebKit 27.2 usa a libm do sistema, um terceiro resultado. Na exponencial, **6,8% dos sorteios** diferem entre Chrome e Firefox, o primeiro já no 14º; uma rodada de turno quase certamente diverge. O gerador e a triangular, que só usam aritmética e `Math.sqrt`, dão os mesmos bits em todos. A promessa da RN-SIM-001 ("o professor e o aluno veem os mesmos números") não vale com as funções nativas.
+> **Resumo.** O mesmo sorteio do motor dá bits diferentes conforme o navegador. Medido em 18/11/2026 no Linux: o Chromium 158 calcula `Math.log` e `Math.exp` corretamente arredondados (libm do LLVM); o Firefox 159 e o Node 24 usam o fdlibm, bit a bit; o WebKit 27.2 usa a libm do sistema, um terceiro resultado. Na exponencial, **6,8% dos sorteios** diferem entre Chrome e Firefox, o primeiro já no 14º; uma rodada de turno quase certamente diverge. O gerador e a triangular, que só usam aritmética e `Math.sqrt`, dão os mesmos bits em todos. A promessa da RN-SIM-001 ("o professor e o aluno veem os mesmos números") não vale com as funções nativas. Com o `log` e o `exp` próprios do [ADR-0014](../adr/0014-log-e-exp-proprios-no-motor.md), os sorteios dão os mesmos bits em 12 ambientes: os quatro motores no Linux, no macOS arm64 e no Windows; nesses três sistemas, as funções nativas se dividem em seis resultados, e até o mesmo Node muda no macOS.
 
 Data: 18/11/2026. Pedido: sub-plano 2 do [roteiro do motor](../plans/2026-11-04-roteiro-motor.md), [plano](../plans/2026-11-18-motor-d4-log-exp.md), tarefa 4. Decisão pendente D4 do [guia de estilo](../architecture/code-style.md).
 
@@ -93,13 +93,44 @@ Com o [ADR-0014](../adr/0014-log-e-exp-proprios-no-motor.md), o motor passou a u
 | Sorteios da exponencial, da triangular e da normal truncada | Um só grupo: os quatro ambientes |
 | `Math.log` e `Math.exp` nativos (controle) | Continuam em três grupos |
 
-O workflow `math-measurement.yml` repete a medição em Ubuntu, macOS e Windows a cada merge que mude o motor e falha se `log`, `exp` ou os sorteios divergirem. As funções próprias custam cerca de 30 a 35 ns a mais por chamada que as nativas (Node 24, 10⁶ chamadas), desprezível num turno.
+O workflow `math-measurement.yml` repete a medição em Ubuntu, macOS e Windows a cada merge que mude o motor e falha se `log`, `exp` ou os sorteios divergirem (resultado abaixo). As funções próprias custam cerca de 30 a 35 ns a mais por chamada que as nativas (Node 24, 10⁶ chamadas), desprezível num turno.
+
+## Em três sistemas operacionais [Medição]
+
+Primeira execução do workflow, no merge do sub-plano 2 (18/11/2026, [execução 44422262340](https://github.com/ItaloRAmaral/takt/actions/runs/44422262340)), com as mesmas versões de Node e navegadores da medição no Linux:
+
+| Executor | Imagem | Arquitetura |
+| --- | --- | --- |
+| `ubuntu-latest` | `ubuntu-26.04` | x64 |
+| `macos-15` | `macos-15-arm64` | arm64 |
+| `windows-latest` | `windows-2025-vs2026` | x64 |
+
+- **O motor:** uniformes, `log` e `exp` próprios (fixture e entradas do motor) e os sorteios das três distribuições dão bits idênticos nos 12 ambientes (4 motores × 3 sistemas). Conferido também localmente, com `compare.py --require-identical` sobre os artefatos: código de saída 0.
+- **As funções nativas** se dividem em seis grupos:
+
+| Grupo | Ambientes | `log` no fixture (≠ correto) | `exp` no fixture (≠ correto) |
+| --- | --- | --- | --- |
+| A | Chromium nos três sistemas | 0 | 0 |
+| B | Firefox nos três; Node no Linux e no Windows | 311 | 666 |
+| C | Node no macOS arm64 | 307 | 665 |
+| D | WebKit no macOS | 3 | 427 |
+| E | WebKit no Linux | 2 | 358 |
+| F | WebKit no Windows | 4 | 471 |
+
+- **Chromium e Firefox** dão o mesmo resultado nos três sistemas. [Estimativa] Cada um compila a própria biblioteca matemática (a libm do LLVM e o fdlibm, como na medição no Linux) em vez de chamar a do sistema.
+- **O mesmo Node 24.22.2** dá outro resultado no macOS arm64: difere do Node no Linux e no Windows em 14 casos de `log` e 1 de `exp` do fixture, e em 1631 de 10⁵ valores de `log(u)`. [Palpite] O compilador do arm64 funde multiplicação e soma numa instrução só (FMA) no fdlibm do V8; não verificado.
+- **O WebKit** dá um resultado por sistema. [Estimativa] Chama a libm de cada um, como o `MathCommon.h` indica para o Linux.
+- Os números do fixture são maiores que os da medição no Linux (311 contra 305 no `log`, 666 contra 654 no `exp`) porque o fixture ganhou casos depois dela (2683 e 2785).
+
+Isso reforça o [ADR-0014](../adr/0014-log-e-exp-proprios-no-motor.md): com as funções nativas, nem a mesma versão do mesmo motor garante os mesmos bits em máquinas diferentes.
+
+**[Fato]** Essa primeira execução passou verde, mas não teria falhado se os bits divergissem: o passo do `compare` rodava com `bash -e`, sem `pipefail`, e o `| tee` final devolvia o código de saída 0 do `tee`. Corrigido com `shell: bash` explícito, que o GitHub roda com `-eo pipefail` ([sintaxe de workflow, `shell`](https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-syntax#jobsjob_idstepsshell)).
 
 ## Limites
 
-- A medição deste relatório é só Linux x86_64. macOS (Safari, libm da Apple) e Windows rodam pelo workflow, depois do merge; os resultados nativos deles ficam para uma atualização deste relatório.
+- O WebKit medido é o do Playwright, não o Safari instalado no macOS; a biblioteca matemática é a do sistema nos dois, mas a versão do WebKit pode ser outra.
 - Navegadores *headless* do Playwright, não as versões instaladas por usuários; a biblioteca matemática é a mesma do motor de cada um, mas a versão pode ser outra.
-- Sem Mac Intel, celular nem tablet (fora do escopo, decisão do usuário).
+- Sem Mac Intel, Windows arm64, celular nem tablet (os dois últimos fora do escopo, decisão do usuário).
 - A estimativa de rodada supõe independência entre sorteios e não simula a propagação na trajetória.
 
 ## Referências
