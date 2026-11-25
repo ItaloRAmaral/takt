@@ -2,7 +2,7 @@
 
 > **Resumo.** Bibliografia que embasa o Takt e o que cada obra sustenta. A literatura valida a engenharia do motor e a didática; ela não valida a demanda.
 
-Atualizado em 06/11/2026.
+Atualizado em 25/11/2026.
 
 **Regra:** toda referência usada no produto, nos PDRs ou nos ADRs entra neste arquivo, com o que ela embasa. Pesquisas completas ficam em [`../research/`](../research/README.md).
 
@@ -113,6 +113,25 @@ Fonte: pesquisa [Literatura do motor](../research/literatura-do-motor.md) (04/11
 | Law, A. M. [WSC 2004](https://www.informs-sim.org/wsc04papers/009.pdf) | Replicação/deleção e IC pela t |
 | Roser, C.; Nakano, M.; Tanaka, M. "A practical bottleneck detection method", WSC 2001 ([preprint](https://www.allaboutlean.com/wp-content/uploads/2014/05/2001_Roser_WSC-A-Practical-Bottleneck-Detection-Method_Preprint.pdf)) | Limites do gargalo pela maior utilização e pela fila; período ativo |
 | Universidade de Twente, [tutorial do Plant Simulation](https://www.utwente.nl/en/bms/iebis/staff/mes/plantsimulation/tutorialplantsimulation2404-v20250502.pdf) (2025); Simio, ["Anatomy of objects: Server"](https://textbook.simio.com/Workbook6/the-anatomy-of-objects-server.html); [ajuda do Simul8](https://support.minitab.com/en-us/simul8/help-and-how-to/build-a-simulation/conveyors/) | Fila na estação, bloqueio, esteira e relógio das falhas nas ferramentas |
+
+## Modelo de fluxo da planta (esquema v1)
+
+Fonte: pesquisa [Modelo de fluxo da planta](../research/modelo-de-fluxo-da-planta.md) (25/11/2026), com a lista completa (cerca de 55 itens, inclusive fóruns e trechos de busca, marcados assim no relatório) e os dois debates de revisores. Abaixo, as fontes primárias que embasam o [plano do esquema v1](../plans/2026-11-25-esquema-da-planta-v1.md) e o PDR-0022.
+
+| Fonte | O que embasa |
+| --- | --- |
+| Simul8 Help: [Start Points](https://support.minitab.com/en-us/simul8/help-and-how-to/simulation-key-concepts/simulation-objects/start-points/), [Hold Work Here](https://support.minitab.com/en-us/simul8/help-and-how-to/build-a-simulation/hold-work-here/), [Efficiency](https://support.minitab.com/en-us/simul8/help-and-how-to/build-a-simulation/efficiency/), [Conveyors](https://www.simul8.com/support/help/doku.php?id=features:conveyors), [Routing Out](https://support.minitab.com/en-us/simul8/help-and-how-to/build-a-simulation/routing/routing-out/), [Experiment Builder](https://support.minitab.com/en-us/simul8/help-and-how-to/build-a-simulation/experiment-builder/), [Trials](https://support.minitab.com/en-us/simul8/help-and-how-to/simulation-key-concepts/trials/) | Chegada perdida com o destino cheio; estado "Blocked"; falhas no calendário desde o fim do reparo, exponencial e Erlang-2; esteira não acumuladora que para inteira; percentual sorteado por peça; cenários que variam entradas |
+| U. Twente. [Tutorial Plant Simulation 2404](https://www.utwente.nl/en/bms/iems/staff/mes/plantsimulation/tutorialplantsimulation2404-v20250502.pdf) (2025) | Station de capacidade 1 com bloqueio; fonte bloqueada como risco de "modelo inválido"; base das falhas e MTBF como intervalo desde o fim da falha; esteira com capacidade explícita e falhas |
+| Rossetti, M. [livro online do Arena](https://rossetti.github.io/RossettiArenaBook/), caps. [2](https://rossetti.github.io/RossettiArenaBook/ch2-howArenaWorks.html), [6](https://rossetti.github.io/RossettiArenaBook/06-Chapter6.html) e [7](https://rossetti.github.io/RossettiArenaBook/07-Chapter7.html) | Fila embutida no Arena; falha no relógio da simulação e reparo exponencial em exercício; esteira não acumuladora e velocidades típicas |
+| Livro do Simio: Simio and Simulation, [7ª ed.](https://textbook.simio.com/SASMAA7/ch-intermediate-modeling.html) e [Workbook 6ª ed.](https://textbook.simio.com/Workbook6/working-with-flow-and-capacity-the-dmv.html) | Falhas "Calendar Time Based"; bloqueio como padrão com buffer cheio; regra no nó e peso no link |
+| Law, A. M. Simulation Modeling and Analysis, [cap. 14](https://highered.mheducation.com/sites/dl/free/0073401323/1041673/Chapter_14.pdf) (amostra grátis da McGraw-Hill) | Tempo ocupado "mais natural"; exponencial ruim para dados reais de falha; reparo com moda positiva (gama 1,3); peça termina o restante depois do reparo |
+| Roser, C.; Nakano, M.; Tanaka, M. [A practical bottleneck detection method](https://www.allaboutlean.com/wp-content/uploads/2014/05/2001_Roser_WSC-A-Practical-Bottleneck-Detection-Method_Preprint.pdf). WSC 2001 (preprint) | "Bloqueado" distinto de "esperando"; estado ativo inclui reparo; critério do gargalo |
+| Sargent, R. G. [Verification and validation of simulation models](https://www.informs-sim.org/wsc10papers/016.pdf). WSC 2010 | Comparar com modelos analíticos é verificação, não validação das regras próprias |
+| Palmer, G.; Harper, P.; Knight, V. Modelling deadlock in open restricted queueing networks. *EJOR*, 2018 ([resumo do autor](https://vknight.org/posts/modelling-deadlock-in-open-restricted-queueing-networks/)) | Definição de linha travada com bloqueio e capacidades finitas |
+| OEE.com: [glossário](https://oee.com/oee-glossary), [Practical OEE](https://www.oee.com/practical-oee/), [FAQ](https://www.oee.com/faq/) (fornecedor, Vorne) | Qualidade como *first pass yield*, retrabalho como perda; OEE medido no gargalo; faminto e bloqueado como perdas externas |
+| Mullen. [ASEE 2013](https://peer.asee.org/22640.pdf); Torres Júnior et al. [Production, 2022](https://scielo.br/j/prod/a/4h9JD83GZtyFkTCtmFptvsN/abstract/?lang=en) (só o resumo) | Concepções erradas de alunos sobre filas e variabilidade (fila com λ < μ) |
+| Siemens. [Plant Simulation Student](https://resources.sw.siemens.com/en-US/download-tecnomatix-plant-simulation-student-software) | Limite de 80 objetos na edição estudante, parâmetro do limite de 500 elementos |
+| JSON Schema. [Annotations](https://json-schema.org/understanding-json-schema/reference/annotations); Zod. [API](https://zod.dev/api) e [JSON Schema](https://zod.dev/json-schema) | `default` não preenche valor ausente no JSON Schema e preenche no Zod (valores explícitos no documento); `z.strictObject`, `z.toJSONSchema` (Draft 2020-12) |
 
 ## Explicações na interface e aprendizagem
 

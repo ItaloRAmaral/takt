@@ -2,7 +2,7 @@
 
 > **Resumo.** Cada PDR registra uma decisão de produto: contexto, decisão, alternativas, consequências e as regras de negócio que ela gera. Decisões técnicas ficam nos ADRs, em [`../adr/`](../adr/README.md).
 
-Atualizado em 20/10/2026. Todos os registros abaixo foram aceitos por Italo em 20/10/2026.
+Atualizado em 25/11/2026. Os PDRs 0001 a 0021 foram aceitos por Italo em 20/10/2026; o 0022 está proposto.
 
 ## Como funciona
 
@@ -36,6 +36,7 @@ Atualizado em 20/10/2026. Todos os registros abaixo foram aceitos por Italo em 2
 | [0019](0019-hierarquia-de-papeis.md) | Hierarquia de papéis | Aceito | 20/10/2026 |
 | [0020](0020-modos-de-simulacao-e-aquecimento.md) | Modos de simulação, assistente de aquecimento e aviso de utilização | Aceito | 20/10/2026 |
 | [0021](0021-explicacao-em-camadas.md) | Explicação em camadas e ajuda sob demanda | Aceito | 20/10/2026 |
+| [0022](0022-modelo-de-fluxo-da-planta.md) | Modelo de fluxo da planta: fila, bloqueio, falhas, esteira, retrabalho e linha travada | Proposto | 25/11/2026 |
 
 ## Regras de negócio derivadas
 
