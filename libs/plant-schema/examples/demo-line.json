@@ -1,0 +1,326 @@
+{
+  "schemaVersion": 1,
+  "id": "demo_line",
+  "name": "Linha de cinco estações",
+  "grid": {
+    "cols": 24,
+    "rows": 10
+  },
+  "zones": [
+    {
+      "id": "z1",
+      "name": "Linha 1"
+    }
+  ],
+  "elements": [
+    {
+      "id": "src1",
+      "type": "production.source",
+      "zoneId": "z1",
+      "pos": [0, 4],
+      "rotDeg": 0,
+      "size": [1, 1],
+      "params": {
+        "interarrival": {
+          "dist": "exponential",
+          "meanSec": 45
+        },
+        "queueCapacity": 20
+      },
+      "routing": null
+    },
+    {
+      "id": "m1",
+      "type": "production.station",
+      "zoneId": "z1",
+      "pos": [2, 4],
+      "rotDeg": 0,
+      "size": [1, 1],
+      "params": {
+        "cycle": {
+          "dist": "fixed",
+          "valueSec": 40
+        },
+        "idealCycleSec": 40,
+        "defectRate": 0,
+        "failure": null
+      },
+      "routing": null
+    },
+    {
+      "id": "b1",
+      "type": "production.buffer",
+      "zoneId": "z1",
+      "pos": [4, 4],
+      "rotDeg": 0,
+      "size": [1, 1],
+      "params": {
+        "capacity": 10
+      },
+      "routing": null
+    },
+    {
+      "id": "m2",
+      "type": "production.station",
+      "zoneId": "z1",
+      "pos": [6, 4],
+      "rotDeg": 0,
+      "size": [1, 1],
+      "params": {
+        "cycle": {
+          "dist": "fixed",
+          "valueSec": 44
+        },
+        "idealCycleSec": 44,
+        "defectRate": 0,
+        "failure": null
+      },
+      "routing": null
+    },
+    {
+      "id": "b2",
+      "type": "production.buffer",
+      "zoneId": "z1",
+      "pos": [8, 4],
+      "rotDeg": 0,
+      "size": [1, 1],
+      "params": {
+        "capacity": 10
+      },
+      "routing": null
+    },
+    {
+      "id": "m3",
+      "type": "production.station",
+      "zoneId": "z1",
+      "pos": [10, 4],
+      "rotDeg": 0,
+      "size": [1, 1],
+      "params": {
+        "cycle": {
+          "dist": "fixed",
+          "valueSec": 56
+        },
+        "idealCycleSec": 56,
+        "defectRate": 0,
+        "failure": null
+      },
+      "routing": null
+    },
+    {
+      "id": "b3",
+      "type": "production.buffer",
+      "zoneId": "z1",
+      "pos": [12, 4],
+      "rotDeg": 0,
+      "size": [1, 1],
+      "params": {
+        "capacity": 10
+      },
+      "routing": null
+    },
+    {
+      "id": "m4",
+      "type": "production.station",
+      "zoneId": "z1",
+      "pos": [14, 4],
+      "rotDeg": 0,
+      "size": [1, 1],
+      "params": {
+        "cycle": {
+          "dist": "fixed",
+          "valueSec": 50
+        },
+        "idealCycleSec": 50,
+        "defectRate": 0,
+        "failure": null
+      },
+      "routing": null
+    },
+    {
+      "id": "b4",
+      "type": "production.buffer",
+      "zoneId": "z1",
+      "pos": [16, 4],
+      "rotDeg": 0,
+      "size": [1, 1],
+      "params": {
+        "capacity": 10
+      },
+      "routing": null
+    },
+    {
+      "id": "m5",
+      "type": "production.station",
+      "zoneId": "z1",
+      "pos": [18, 4],
+      "rotDeg": 0,
+      "size": [1, 1],
+      "params": {
+        "cycle": {
+          "dist": "fixed",
+          "valueSec": 42
+        },
+        "idealCycleSec": 42,
+        "defectRate": 0.02,
+        "failure": null
+      },
+      "routing": {
+        "rule": "byQuality",
+        "good": "snk1",
+        "rework": null,
+        "scrap": "scr1"
+      }
+    },
+    {
+      "id": "snk1",
+      "type": "production.sink",
+      "zoneId": "z1",
+      "pos": [20, 4],
+      "rotDeg": 0,
+      "size": [1, 1],
+      "params": {}
+    },
+    {
+      "id": "scr1",
+      "type": "production.scrap",
+      "zoneId": "z1",
+      "pos": [18, 6],
+      "rotDeg": 0,
+      "size": [1, 1],
+      "params": {}
+    }
+  ],
+  "connections": [
+    {
+      "id": "c1",
+      "from": "src1",
+      "to": "m1",
+      "kind": "direct"
+    },
+    {
+      "id": "c2",
+      "from": "m1",
+      "to": "b1",
+      "kind": "direct"
+    },
+    {
+      "id": "c3",
+      "from": "b1",
+      "to": "m2",
+      "kind": "direct"
+    },
+    {
+      "id": "c4",
+      "from": "m2",
+      "to": "b2",
+      "kind": "direct"
+    },
+    {
+      "id": "c5",
+      "from": "b2",
+      "to": "m3",
+      "kind": "direct"
+    },
+    {
+      "id": "c6",
+      "from": "m3",
+      "to": "b3",
+      "kind": "direct"
+    },
+    {
+      "id": "c7",
+      "from": "b3",
+      "to": "m4",
+      "kind": "direct"
+    },
+    {
+      "id": "c8",
+      "from": "m4",
+      "to": "b4",
+      "kind": "direct"
+    },
+    {
+      "id": "c9",
+      "from": "b4",
+      "to": "m5",
+      "kind": "direct"
+    },
+    {
+      "id": "c10",
+      "from": "m5",
+      "to": "snk1",
+      "kind": "direct"
+    },
+    {
+      "id": "c11",
+      "from": "m5",
+      "to": "scr1",
+      "kind": "direct"
+    }
+  ],
+  "settings": {
+    "reworkLimit": 2
+  },
+  "scenarios": [
+    {
+      "id": "base",
+      "name": "Atual",
+      "mode": "shift",
+      "durationH": 8,
+      "replicationCount": 30,
+      "seed": 42,
+      "warmupMin": null,
+      "overrides": []
+    },
+    {
+      "id": "m3_faster",
+      "name": "M3 mais rápida",
+      "mode": "shift",
+      "durationH": 8,
+      "replicationCount": 30,
+      "seed": 42,
+      "warmupMin": null,
+      "overrides": [
+        {
+          "elementId": "m3",
+          "param": "cycle",
+          "value": {
+            "dist": "fixed",
+            "valueSec": 46
+          }
+        },
+        {
+          "elementId": "m3",
+          "param": "idealCycleSec",
+          "value": 46
+        }
+      ]
+    },
+    {
+      "id": "with_failures",
+      "name": "Com falhas",
+      "mode": "shift",
+      "durationH": 8,
+      "replicationCount": 30,
+      "seed": 42,
+      "warmupMin": null,
+      "overrides": [
+        {
+          "elementId": "m3",
+          "param": "failure",
+          "value": {
+            "timeToFailure": {
+              "dist": "exponential",
+              "meanSec": 14400
+            },
+            "repairTime": {
+              "dist": "exponential",
+              "meanSec": 900
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -2,7 +2,7 @@
 
 | Campo | Valor |
 | --- | --- |
-| Status | Aprovado (25/11/2026) |
+| Status | Concluído (25/11/2026) |
 | Data | 25/11/2026 |
 | Pedido | "Pull feito, pode começar o sub-plano 3" (24/11/2026), para a linha 3 do roteiro aprovado: "`@takt/plant-schema` completo para o marco 1: todos os elementos do MVP (fonte, estação, buffer, esteira, expedição, refugo) com parâmetros e padrões, roteamento, configurações, cenários e sobreposições; validação estrutural (modo estrito) e semântica; cadeia de migrações; JSON Schema gerado (UC-SIM-001)" |
 | Contexto | [Roteiro](2026-11-04-roteiro-motor.md) (linha 3, interfaces, segurança, riscos e pendências do 3), [UC-SIM-001](../product/use-cases/uc-sim-001-validar-planta.md), [regras de simulação](../product/rules/simulation.md), [regras do editor](../product/rules/editor.md), [RN-JSN-005](../product/rules/json.md), [modelo da planta](../product/plant-model.md), [motor de simulação](../product/simulation.md), [escopo do MVP](../product/mvp-scope.md), [ADR-0008](../adr/0008-validacao-de-dados.md), [ADR-0011](../adr/0011-motor-de-simulacao-e-esquema.md), [ADR-0009](../adr/0009-estrategia-de-testes.md), [ADR-0013](../adr/0013-erros-esperados.md), [code-style.md](../architecture/code-style.md) seção 8, [pesquisa da literatura do motor](../research/literatura-do-motor.md), pesquisa nova do modelo de fluxo (tarefa 1), dois debates de revisores (25/11/2026, resumidos em "Decisões tomadas com o usuário") |
@@ -44,13 +44,14 @@
 | O que um cenário muda | Só o valor inteiro de parâmetros de elementos existentes e o limite de retrabalho, campo a campo; inclui trocar o tipo da distribuição, ligar e desligar falhas e trocar a regra de roteamento (apresentado ao usuário em 25/11/2026, sem objeção) | 24 e 25/11/2026 |
 | Valores explícitos no documento | Todo valor escrito no arquivo; por isso a normal truncada grava `minSec` e `maxSec` (`null` = sem máximo), e o "mínimo opcional com padrão 0, máximo opcional sem limite" de 04/11/2026 vira o padrão do editor | 24/11/2026 |
 | Plano, limites estimados, cadeia de migrações na v2 e revisor de planos mantido | "1. aprovo 2. pode ser 3. concordo" | 25/11/2026 |
+| PDR-0022 | Aceito: "aceito o PDR-0022, pode seguir"; revisão mais detalhada das regras quando o motor rodar as primeiras plantas | 25/11/2026 |
 | Pesquisa e revisão das escolhas | Pesquisa em quatro frentes e dois debates de revisores ("da uma pesquisada a mais para validar"; "coloque + 3 agentes para discutir"); o produto vem antes de qualquer uso acadêmico | 25/11/2026 |
 
 **Decisões técnicas deste plano** (o usuário pode vetar na aprovação):
 
 - **Regra de roteamento no elemento** (`routing`), como no exemplo do `plant-model.md` e no Simul8, Arena e Plant Simulation; só aponta para destinos ligados por conexão, e toda conexão de saída é coberta pela regra.
 - **Percentuais inteiros** de 1 a 100, soma exatamente 100.
-- **Espaço na grade gravado no elemento** (`size: [colunas, linhas]`); o editor escolhe o tamanho de cada tipo (marco 2). Convenção: `pos` é sempre a célula de menor coluna e menor linha da área ocupada; com `rot` 0° e 180° a área tem `size[0]` colunas por `size[1]` linhas, com 90° e 270° as duas se trocam. A sobreposição (RN-EDT-001) usa `pos`, `size` e `rot`.
+- **Espaço na grade gravado no elemento** (`size: [colunas, linhas]`); o editor escolhe o tamanho de cada tipo (marco 2). Convenção: `pos` é sempre a célula de menor coluna e menor linha da área ocupada; com `rotDeg` 0° e 180° a área tem `size[0]` colunas por `size[1]` linhas, com 90° e 270° as duas se trocam. A sobreposição (RN-EDT-001) usa `pos`, `size` e `rotDeg`.
 - **A validação semântica só roda quando a forma passa**, na ordem das extensões 3a e 4a do UC-SIM-001: com problema de forma, volta a lista completa dos de forma. Rodar regras sobre um documento malformado exigiria tratar cada campo ausente em cada regra.
 - **A cadeia de migrações nasce com a primeira migração.** A v1 é a primeira versão: este plano entrega a leitura da versão (`UNSUPPORTED_SCHEMA_VERSION` para a mais nova) e nenhuma etapa de migração; a cadeia, com arquivos de exemplo de cada versão (ADR-0009), entra na v2, quando houver o que migrar e testar.
 - **Exemplo do `plant-model.md` corrigido:** hoje ele trava (m1 → rw1 → m1 com conexões diretas). O retrabalho passa a voltar ao fluxo depois da estação (rw1 → b1).
@@ -107,7 +108,12 @@
 
 ## Desvios do guia de estilo
 
-Nenhum.
+- **`defectRate`, não `defectRatio`** (decisão do fundador em 25/11/2026, segunda revisão de código):
+  1. **Princípio quebrado:** seção 2, sufixo `Ratio` para frações de 0 a 1.
+  2. **Critério e evidência:** o nome já está no ADR-0008 aceito, no UC-SIM-001 e no glossário; renomear só o código deixaria o campo diferente de todos os documentos, e o ADR aceito não pode ser editado.
+  3. **Alternativa descartada:** `defectRatio` no código e nos docs vivos, com o ADR-0008 dizendo outro nome.
+  4. **Gatilho de revisão:** a próxima versão do formato (v2), quando uma migração pode renomear o campo.
+  5. **Impacto em testes:** nenhum; cobertura igual.
 
 ## Registros novos propostos
 
@@ -149,7 +155,7 @@ Só documentos; o código das tarefas 2 a 8 começa depois que o usuário aceita
 
 **Interfaces:**
 - Produz:
-  - `PLANT_LIMITS`: objeto congelado com `elementCount: 500`, `connectionCount: 2000`, `zoneCount: 50`, `scenarioCount: 20`, `overrideCount: 2000`, `capacity: 10_000`, `timeSec: 31_536_000`, `durationH: 720`, `gridCells: 200`, `idLength: 64`, `nameLength: 120`, `reworkLimit: 10`, `lengthM: 10_000`, `speedMPerMin: 10_000`, `seed: 4_294_967_295`.
+  - `PLANT_LIMITS`: objeto congelado com `elementCount: 500`, `connectionCount: 2000`, `zoneCount: 50`, `scenarioCount: 20`, `overrideCount: 2000`, `capacity: 10_000`, `timeSec: 31_536_000`, `durationH: 720`, `gridCells: 200`, `idLength: 64`, `nameLength: 120`, `reworkLimit: 10`, `lengthM: 10_000`, `speedMPerMin: 10_000`, `seed: 4_294_967_295`, `minReplicationCount: 5`, `maxReplicationCount: 100`, `schemaUrlLength: 2048` (os três últimos acrescentados na segunda revisão de código).
   - `timeDistributionSchema(options: { readonly positive: boolean })` e `type TimeDistribution` (uniões por `dist`): `{ dist: 'fixed'; valueSec }`, `{ dist: 'exponential'; meanSec }`, `{ dist: 'triangular'; minSec; modeSec; maxSec }`, `{ dist: 'truncatedNormal'; meanSec; standardDeviationSec; minSec; maxSec: number | null }`. Todo tempo de 0 ao teto; `meanSec` da exponencial e `standardDeviationSec` > 0; com `positive: true`, `valueSec` > 0. A coerência entre campos (mínimo, moda, máximo) é semântica (tarefa 4).
   - `type PlantIssueCode`: união de literais com os códigos abaixo; `interface PlantIssue { readonly elementId?: string; readonly path: readonly (string | number)[]; readonly code: PlantIssueCode }` (formato de objeto: `interface`, `code-style.md` seção 4).
   - `parseStructure<T>(schema: z.ZodType<T>, input: unknown): { readonly success: true; readonly data: T } | { readonly success: false; readonly issues: PlantIssue[] }`: único ponto que chama `safeParse`, com `reportInput: true` (para separar `REQUIRED` de `INVALID_TYPE`), e que nunca devolve a entrada; os problemas saem sem `elementId` (a tarefa 5 o preenche pelo caminho). Uma chave desconhecida entra no caminho só se tiver de 1 a 64 caracteres ASCII imprimíveis; senão o caminho para no objeto que a contém.
@@ -158,7 +164,7 @@ Só documentos; o código das tarefas 2 a 8 começa depois que o usuário aceita
 | --- | --- | --- |
 | `REQUIRED` | campo obrigatório ausente | forma |
 | `INVALID_TYPE` | tipo errado (texto onde se espera número, `NaN`, `Infinity`) | forma |
-| `INVALID_VALUE` | valor fora dos literais (tipo de elemento, `dist`, `rot`, modo, versão não inteira) | forma |
+| `INVALID_VALUE` | valor fora dos literais (tipo de elemento, `dist`, `rotDeg`, modo, versão não inteira) | forma |
 | `INVALID_FORMAT` | ID fora do padrão | forma |
 | `OUT_OF_RANGE` | número abaixo do piso ou acima do teto; inteiro esperado | forma |
 | `TOO_MANY_ITEMS` | lista acima do limite; texto acima do comprimento | forma |
@@ -187,7 +193,7 @@ Só documentos; o código das tarefas 2 a 8 começa depois que o usuário aceita
 - Consome: `timeDistributionSchema`, `PLANT_LIMITS`, `parseStructure` (tarefa 2).
 - Produz (tipos por `z.infer`, todos os objetos estritos):
   - `type Routing`: `{ rule: 'byQuality'; good: string; rework: string | null; scrap: string }`, `{ rule: 'byPercentage'; shares: { to: string; sharePct: number }[] }` (`sharePct` inteiro de 1 a 100; de 2 a 2000 itens; `byPercentage` como no glossário), `{ rule: 'shortestQueue' }`.
-  - Base de todo elemento: `id`, `type`, `zoneId`, `pos: [col, row]`, `rot: 0 | 90 | 180 | 270`, `size: [cols, rows]` (inteiros de 1 a 200).
+  - Base de todo elemento: `id`, `type`, `zoneId`, `pos: [col, row]`, `rotDeg: 0 | 90 | 180 | 270`, `size: [cols, rows]` (inteiros de 1 a 200).
   - `type PlantElement`, união por `type`:
     - `'production.source'`: `params: { interarrival: TimeDistribution (positive); queueCapacity: int 0..10 000 }`, `routing: Routing | null`;
     - `'production.station'`: `params: { cycle: TimeDistribution; idealCycleSec: number > 0 e ≤ teto; defectRate: number 0..1; failure: { timeToFailure: TimeDistribution (positive); repairTime: TimeDistribution } | null }`, `routing: Routing | null`;
@@ -217,7 +223,7 @@ Só documentos; o código das tarefas 2 a 8 começa depois que o usuário aceita
 
 **Interfaces:**
 - Consome: `Plant`, `PlantIssue` (tarefas 2 e 3).
-- Produz: `validateSemantics(plant: Plant): PlantIssue[]` (todos os problemas da planta base, cada um com `elementId` quando ligado a um elemento, na ordem dos elementos e, dentro de um elemento, das regras abaixo).
+- Produz: `validateSemantics(plant: Plant): PlantIssue[]` (todos os problemas da planta base, cada um com `elementId` quando ligado a um elemento, na ordem das verificações: referências, faixas, grafo, grade, roteamento; uma regra cujo destino não existe só gera `UNKNOWN_REFERENCE`).
 
 Regras, cada uma com seus testes (o caminho e o código esperado no `toMatchObject`):
 
@@ -248,7 +254,7 @@ Regras, cada uma com seus testes (o caminho e o código esperado no `toMatchObje
 ## Tarefa 5: cenários e `validatePlant`
 
 **Arquivos:**
-- Criar: `src/apply-scenario.ts`, `src/semantics/scenarios.ts`, `src/validate-plant.ts`, `src/tests/helpers/catch-error.ts` (cópia do helper do motor, que o esquema não pode importar; duas cópias ficam abaixo da regra de três)
+- Criar: `src/apply-scenario.ts`, `src/semantics/scenarios.ts`, `src/validate-plant.ts`, `src/tests/helpers/catch-error.ts` (adiantado para a tarefa 2 na execução, onde o teste do caminho de defeito de `parseStructure` o usa) (cópia do helper do motor, que o esquema não pode importar; duas cópias ficam abaixo da regra de três)
 - Modificar: `src/index.ts`
 - Testar: `src/apply-scenario.spec.ts`, `src/semantics/scenarios.spec.ts`, `src/validate-plant.spec.ts`, `src/tests/helpers/catch-error.spec.ts`
 
@@ -277,7 +283,8 @@ Regras, cada uma com seus testes (o caminho e o código esperado no `toMatchObje
 - Testar: `src/defaults.spec.ts`, `src/demo-line.spec.ts`
 
 **Interfaces:**
-- Produz: `ELEMENT_DEFAULTS` (por tipo: `params`, `routing: null`, `size: [1, 1]`, `rot: 0`, com os valores da tabela de decisões; estação com `idealCycleSec: 50` e `failure: null`); `DEFAULT_FAILURE` (`timeToFailure` exponencial de 14 400 s, `repairTime` exponencial de 900 s); `DEFAULT_SETTINGS` (`reworkLimit: 2`); `DEFAULT_SCENARIO` (`mode: 'shift'`, `durationH: 8`, `replicationCount: 30`, `seed: 42`, `warmupMin: null`, `overrides: []`).
+- **Mudança na execução (25/11/2026):** as constantes viraram funções que devolvem objetos novos a cada chamada (`createDefaultElement(type, placement)`, `createDefaultFailure()`, `createDefaultScenario({ id, name })`, `createDefaultSettings()`), porque uma constante com objetos aninhados compartilhados deixaria o editor alterar, sem querer, o padrão de todos os elementos seguintes. Os valores são os de baixo.
+- Produz (como planejado): `ELEMENT_DEFAULTS` (por tipo: `params`, `routing: null`, `size: [1, 1]`, `rotDeg: 0`, com os valores da tabela de decisões; estação com `idealCycleSec: 50` e `failure: null`); `DEFAULT_FAILURE` (`timeToFailure` exponencial de 14 400 s, `repairTime` exponencial de 900 s); `DEFAULT_SETTINGS` (`reworkLimit: 2`); `DEFAULT_SCENARIO` (`mode: 'shift'`, `durationH: 8`, `replicationCount: 30`, `seed: 42`, `warmupMin: null`, `overrides: []`).
 - A planta de exemplo: fonte exponencial de 45 s com fila 20; cinco estações fixas de 40, 44, 56, 50 e 42 s, com buffers de 10 entre elas; expedição; a última estação com `defectRate: 0.02` e regra por qualidade para a expedição e um refugo; sem laço de retrabalho; cenários "Atual", "M3 mais rápida" (ciclo de 46 s) e "Com falhas" (M3 com `DEFAULT_FAILURE`). **[Palpite]** Os números vêm do debate e só valem depois de rodados (sobrecarga, gargalo que muda para M4, vazão que sobe): conferidos nos sub-planos 5 e 6, que ajustam o arquivo se preciso.
 
 - [ ] **Passo 1: testes que falham:** `RN-EDT-003: a source, a station and a sink with the defaults are valid` (planta montada só com `ELEMENT_DEFAULTS`, `DEFAULT_SETTINGS` e `DEFAULT_SCENARIO`); `RN-EDT-003: a station with DEFAULT_FAILURE is valid`; `the demo plant is valid`.
