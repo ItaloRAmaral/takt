@@ -120,4 +120,29 @@ describe('plant schema lint rules', { timeout: 30_000 }, () => {
       expect(messages).toEqual([]);
     },
   );
+
+  it('rejects importing test helpers outside a spec', async () => {
+    const code = `import { catchError } from './tests/helpers/catch-error.js';\n\nexport const value = catchError;\n`;
+
+    const messages = await lintSchemaFile('value.ts', code);
+
+    expect(messages).toContainEqual(
+      expect.objectContaining({
+        ruleId: '@typescript-eslint/no-restricted-imports',
+        line: 1,
+      }),
+    );
+  });
+
+  it('allows a spec to import test helpers', async () => {
+    const code = `import { catchError } from './tests/helpers/catch-error.js';\n\nexport const value = catchError;\n`;
+
+    const messages = await lintSchemaFile('value.spec.ts', code);
+
+    expect(messages).not.toContainEqual(
+      expect.objectContaining({
+        ruleId: '@typescript-eslint/no-restricted-imports',
+      }),
+    );
+  });
 });

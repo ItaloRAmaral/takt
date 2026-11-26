@@ -169,6 +169,7 @@ O motor é um **núcleo funcional**: recebe valores (planta compilada, semente, 
 
 - **Zod é a fonte da verdade.** Tipos por `z.infer`; o JSON Schema é gerado (ADR-0008).
 - **Dois níveis de validação:** estrutural (formato) e semântica (regras), com resultado `{ elementId?, path, code }`.
+- **Pastas pelos dois níveis:** `structure/` (a forma, em Zod) e `semantics/` (as regras da planta). Na raiz de `src/` fica só o que o `index.ts` exporta como função ou valor (decisão do fundador em 26/11/2026).
 - **Migrações em cadeia,** uma por versão do formato.
 - **Sem `enum`** e com `erasableSyntaxOnly`; unidade no nome de todo campo com grandeza física.
 

@@ -2,7 +2,7 @@
 
 > **Resumo.** Pesquisas na literatura que embasam decisões do Takt. Cada pesquisa tem um relatório (conclusões, com fato, estimativa e palpite separados) e as notas brutas por subtema. As referências usadas ficam também em [`../product/references.md`](../product/references.md).
 
-Atualizado em 18/11/2026.
+Atualizado em 25/11/2026.
 
 | Pesquisa | Pergunta | Data | Usada em |
 | --- | --- | --- | --- |
@@ -14,7 +14,8 @@ Atualizado em 18/11/2026.
 | [Precisão da função de distribuição da normal](precisao-da-normal.md) | Hart (West 2005) tem a precisão que o plano estimou? Há alternativa publicada com erro relativo pequeno na cauda? | 05/11/2026 | [Fundamentos do motor](../plans/2026-11-04-motor-fundamentos.md), tarefa 5; [`sim-engine.md`](../architecture/sim-engine.md) |
 | [Literatura do motor](literatura-do-motor.md) | As afirmações e escolhas do roteiro do motor estão certas segundo a literatura? Gerador, distribuições, IC, D4, casos de validação, MSER-5, fila, bloqueio, falhas, OEE e gargalo | 04/11/2026 | [Roteiro do motor](../plans/2026-11-04-roteiro-motor.md); corrige pontos da pesquisa sobre aquecimento |
 | [Precisão de `log` e `exp` entre motores JavaScript](precisao-de-log-e-exp.md) | O mesmo sorteio dá os mesmos bits em Chrome, Firefox, Safari e Node? Com que frequência diverge? | 18/11/2026 | D4; [medição da D4](../plans/2026-11-18-motor-d4-log-exp.md) |
+| [Modelo de fluxo da planta](modelo-de-fluxo-da-planta.md) | As escolhas de fila, bloqueio, falhas, esteira, defeitos, roteamento, padrões, limites e cenários do esquema v1 têm respaldo nas ferramentas e na literatura? Inclui dois debates de revisores | 25/11/2026 | [Esquema da planta v1](../plans/2026-11-25-esquema-da-planta-v1.md); PDR-0022 |
 
-Notas: [notes/aquecimento/](notes/aquecimento/), [notes/explicacao/](notes/explicacao/), [notes/front-end/](notes/front-end/), [notes/agentes-e-skills/](notes/agentes-e-skills/), [notes/estilo-de-codigo/](notes/estilo-de-codigo/), [notes/literatura-do-motor/](notes/literatura-do-motor/).
+Notas: [notes/aquecimento/](notes/aquecimento/), [notes/explicacao/](notes/explicacao/), [notes/front-end/](notes/front-end/), [notes/agentes-e-skills/](notes/agentes-e-skills/), [notes/estilo-de-codigo/](notes/estilo-de-codigo/), [notes/literatura-do-motor/](notes/literatura-do-motor/), [notes/modelo-de-fluxo/](notes/modelo-de-fluxo/).
 
 **Regra:** toda referência usada no produto, nos PDRs ou nos ADRs entra em [`../product/references.md`](../product/references.md).

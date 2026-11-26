@@ -10,3 +10,4 @@ reports
 .nx/cache
 .nx/workspace-data
 libs/sim-engine/src/tests/fixtures/fdlibm-cases.ts
+libs/plant-schema/plant.schema.v1.json

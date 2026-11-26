@@ -2,7 +2,7 @@
 
 > **Resumo.** Cada PDR registra uma decisão de produto: contexto, decisão, alternativas, consequências e as regras de negócio que ela gera. Decisões técnicas ficam nos ADRs, em [`../adr/`](../adr/README.md).
 
-Atualizado em 20/10/2026. Todos os registros abaixo foram aceitos por Italo em 20/10/2026.
+Atualizado em 25/11/2026. Todos os registros abaixo foram aceitos por Italo: os PDRs 0001 a 0021 em 20/10/2026 e o 0022 em 25/11/2026.
 
 ## Como funciona
 
@@ -36,6 +36,7 @@ Atualizado em 20/10/2026. Todos os registros abaixo foram aceitos por Italo em 2
 | [0019](0019-hierarquia-de-papeis.md) | Hierarquia de papéis | Aceito | 20/10/2026 |
 | [0020](0020-modos-de-simulacao-e-aquecimento.md) | Modos de simulação, assistente de aquecimento e aviso de utilização | Aceito | 20/10/2026 |
 | [0021](0021-explicacao-em-camadas.md) | Explicação em camadas e ajuda sob demanda | Aceito | 20/10/2026 |
+| [0022](0022-modelo-de-fluxo-da-planta.md) | Modelo de fluxo da planta: fila, bloqueio, falhas, esteira, retrabalho e linha travada | Aceito | 25/11/2026 |
 
 ## Regras de negócio derivadas
 
@@ -48,7 +49,7 @@ IDs citados pelos PDRs; o texto exato está em [`product/rules/`](../product/rul
 | `RN-GRP` | Grupos | 001–004 | PDR-0011 |
 | `RN-PLT` | Plantas | 001–004 | PDR-0012 |
 | `RN-JSN` | JSON | 001–007 | PDR-0013 |
-| `RN-SIM` | Simulação | 001–012 | PDR-0008, 0014, 0020 |
-| `RN-EDT` | Editor | 001–004 | PDR-0007 |
+| `RN-SIM` | Simulação | 001–017 | PDR-0008, 0014, 0020, 0022 |
+| `RN-EDT` | Editor | 001–004 | PDR-0007, 0022 |
 | `RN-I18` | Idiomas | 001–004 | PDR-0016 |
 | `RN-HLP` | Explicação e ajuda | 001–010 | PDR-0021 |

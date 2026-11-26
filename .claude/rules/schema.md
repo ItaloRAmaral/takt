@@ -9,6 +9,7 @@ Source of truth: `docs/architecture/code-style.md`, section 8, and ADR-0008 and 
 
 - Zod is the source of truth: types come from `z.infer`; the JSON Schema is generated, never hand-written.
 - Two validation levels: structural (shape) and semantic (rules). Each issue is `{ elementId?, path, code }` with a code from `docs/product/rules/`.
+- Folders follow the two levels: `structure/` (the Zod shape) and `semantics/` (the plant rules). The root of `src/` holds only what `index.ts` exports as a function or value.
 - One migration per format version, chained; never edit a released version's schema.
 - No `enum` (use literal unions); `erasableSyntaxOnly` is on.
 - Every field with a physical quantity carries its unit in the name (`cycleSec`, `mtbfMin`).
