@@ -2,10 +2,10 @@
 
 | Campo | Valor |
 | --- | --- |
-| Status | Proposto |
+| Status | Aceito |
 | Data | 26/11/2026 |
 | Relator | Italo |
-| Aprovadores | pendente |
+| Aprovadores | Italo |
 | Escopo | `@takt/sim-engine`, `@takt/plant-schema` |
 
 ## Contexto

@@ -11,6 +11,11 @@
       "import": "./src/index.ts",
       "default": "./src/index.ts"
     },
+    "./apply-scenario": {
+      "types": "./src/apply-scenario.ts",
+      "import": "./src/apply-scenario.ts",
+      "default": "./src/apply-scenario.ts"
+    },
     "./package.json": "./package.json"
   },
   "nx": {
