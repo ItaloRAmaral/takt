@@ -138,3 +138,10 @@ Origem: [PDR-0022](../../pdr/0022-modelo-de-fluxo-da-planta.md). Base: [pesquisa
 - **Origem:** PDR-0022.
 - **Exemplo:** "A linha travou em 2h13: M1 e RW esperam uma pela outra (7 de 30 replicações)."
 - **Quando violada:** `PLANT_DEADLOCK`.
+
+### RN-SIM-018: Ordem no mesmo instante e de onde se puxa
+
+- **Enunciado:** num mesmo instante, um fim de processamento vem antes de uma chegada, e a vaga que ele libera serve à chegada daquele instante. A primeira chegada de uma fonte acontece depois do primeiro intervalo sorteado, não no instante 0. Uma replicação cobre do instante 0 até a duração, sem ela: um evento exatamente no fim não acontece. Todo elemento com mais de uma entrada (estação, buffer ou expedição) puxa a peça que espera há mais tempo; no empate, a da conexão que vem primeiro na planta. O retrabalho na frente no empate (RN-SIM-014) vale antes da ordem das conexões.
+- **Origem:** ADR-0011 (item 3) e PDR-0022 (item 3); decisão do fundador em 26/11/2026.
+- **Exemplo:** a estação termina às 60 s com a fila da fonte cheia, e a chegada das 60 s entra na fila. Duas fontes têm peças esperando desde 60 s: a estação puxa a da fonte cuja conexão vem primeiro.
+- **Quando violada:** é um invariante do motor.
