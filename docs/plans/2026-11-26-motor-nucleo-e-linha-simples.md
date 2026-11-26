@@ -237,10 +237,16 @@ Refatoração sob os testes existentes (o `.res` oficial e os de `jump.spec.ts`)
     - `testLimits` (`{ elementCount: 500, durationSec: 2_592_000, eventCount: 10_000_000 }`, valores de teste, não padrões);
     - `parseUncheckedPlant(text: string): Plant`, que devolve o `JSON.parse` sem validar, com o `as` justificado num comentário (só para o teste de `__proto__`, que nenhuma planta validada pode ter).
 
-- [ ] **Passo 1: testes que falham:** os da tarefa 4 no "Plano de testes". Valores: `truncationMass(0, 1, 40, 41) === 0`; `Infinity` no `maxSec` quando `null`; para o teto, `elementCount: 2` com três elementos, e `durationSec: 3599` com 1 h; `UC-SIM-002: accepts ...` com `elementCount: 3` e `durationSec: 3600`; `the stream of a key does not depend on the other elements`: o `streamStart` de `m1` é igual numa planta com e sem uma segunda estação `m2` (duas compilações no Arrange, uma comparação no Assert); `__proto__`: planta de `parseUncheckedPlant` com uma sobreposição de `cycle` cujo valor é `{"dist":"fixed","valueSec":5,"__proto__":{"polluted":true}}`; esperado: `Object.prototype` sem `polluted` e o ciclo compilado `{ kind: 'fixed', valueSec: 5 }`.
-- [ ] **Passo 2:** rodar `pnpm nx test sim-engine` · Esperado: FALHA.
-- [ ] **Passo 3:** implementar.
-- [ ] **Passo 4:** rodar `pnpm nx test sim-engine` · Esperado: PASSA.
+- [x] **Passo 1: testes que falham:** os da tarefa 4 no "Plano de testes". Valores: `truncationMass(0, 1, 40, 41) === 0`; `Infinity` no `maxSec` quando `null`; para o teto, `elementCount: 2` com três elementos, e `durationSec: 3599` com 1 h; `UC-SIM-002: accepts ...` com `elementCount: 3` e `durationSec: 3600`; `the stream of a key does not depend on the other elements`: o `streamStart` de `m1` é igual numa planta com e sem uma segunda estação `m2` (duas compilações no Arrange, uma comparação no Assert); `__proto__`: planta de `parseUncheckedPlant` com uma sobreposição de `cycle` cujo valor é `{"dist":"fixed","valueSec":5,"__proto__":{"polluted":true}}`; esperado: `Object.prototype` sem `polluted` e o ciclo compilado `{ kind: 'fixed', valueSec: 5 }`.
+- [x] **Passo 2:** rodar `pnpm nx test sim-engine` · Esperado: FALHA.
+- [x] **Passo 3:** implementar.
+- [x] **Passo 4:** rodar `pnpm nx test sim-engine` · Esperado: PASSA.
+
+**Diferenças do planejado (26/11/2026):**
+- `truncatedNormalQuantile` **não** passou a chamar `truncationMass`: o sorteio calcularia Φ três vezes em vez de duas. `truncationMass` usa as mesmas funções (`normalSurvival`, `normalCdf`) e o mesmo ramo (`lower >= 0`) do sorteio, o que atende ao motivo da pendência do sub-plano 1 (não repetir o corte de 37 à mão).
+- O auxiliar `parseUncheckedPlant(text)` virou `withUncheckedOverride(plant, overrideJson)`, porque montar o texto de uma planta inteira com `__proto__` exigiria lógica no teste ou `String.replace` (o Semgrep recusa).
+- Auxiliares a mais: `makeConveyor`, `makeScrap` (tabela de defeitos) e `makeLinePlant` (linhas conectadas em ordem, com posições sem sobreposição).
+- Entradas e saída de cada elemento lidas direto das conexões (sem vetor intermediário com `?? []`), e dois testes de defeito a mais: elemento sem saída e conexão para elemento inexistente.
 
 **Commit sugerido:** `feat(sim-engine): compile a plant with its scenario applied` · arquivos: os listados.
 

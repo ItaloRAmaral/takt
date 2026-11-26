@@ -56,3 +56,33 @@ export function truncatedNormalQuantile(
 
   return Math.min(Math.max(timeSec, minSec), maxSec);
 }
+
+/**
+ * Gives the probability a normal distribution puts on [`minSec`, `maxSec`],
+ * by the same tail areas and the same branch {@link truncatedNormalQuantile}
+ * rescales the uniform number to. It is 0 when the interval holds no
+ * probability in double precision, so a plant can be refused before any draw.
+ *
+ * @param meanSec - The mean of the normal before truncation, in seconds.
+ * @param standardDeviationSec - Its standard deviation, in seconds, above 0.
+ * @param minSec - The shortest time, in seconds.
+ * @param maxSec - The longest time, in seconds, above `minSec`; may be
+ *   `Infinity`.
+ * @returns The probability, from 0 to 1.
+ *
+ * @example
+ * truncationMass(0, 1, 40, 41); // 0
+ */
+export function truncationMass(
+  meanSec: number,
+  standardDeviationSec: number,
+  minSec: number,
+  maxSec: number,
+): number {
+  const lower = (minSec - meanSec) / standardDeviationSec;
+  const upper = (maxSec - meanSec) / standardDeviationSec;
+
+  return lower >= 0
+    ? normalSurvival(lower) - normalSurvival(upper)
+    : normalCdf(upper) - normalCdf(lower);
+}

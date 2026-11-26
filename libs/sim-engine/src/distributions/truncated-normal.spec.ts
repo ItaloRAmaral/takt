@@ -1,7 +1,7 @@
 import { createRandomStream, findStreamStart } from '../rng/mrg32k3a.js';
 import { drawTimesSec } from '../tests/helpers/draw-times-sec.js';
 import { sampleMean, sampleVariance } from '../tests/helpers/sample-moments.js';
-import { truncatedNormalQuantile } from './truncated-normal.js';
+import { truncatedNormalQuantile, truncationMass } from './truncated-normal.js';
 
 describe('truncated normal', { timeout: 30_000 }, () => {
   it.each([
@@ -120,4 +120,18 @@ describe('truncated normal', { timeout: 30_000 }, () => {
     expect(variance).toBeGreaterThan(0.28937);
     expect(variance).toBeLessThan(0.29288);
   });
+
+  it.each([
+    { label: '[−1, 1]', minSec: -1, maxSec: 1, mass: 0.6826894921370859 },
+    { label: '[0, ∞)', minSec: 0, maxSec: Infinity, mass: 0.5 },
+    { label: '[40, 41]', minSec: 40, maxSec: 41, mass: 0 },
+    { label: '[−41, −40]', minSec: -41, maxSec: -40, mass: 0 },
+  ])(
+    'truncationMass of a standard normal on $label is $mass',
+    ({ minSec, maxSec, mass }) => {
+      const area = truncationMass(0, 1, minSec, maxSec);
+
+      expect(area).toBeCloseTo(mass, 12);
+    },
+  );
 });
