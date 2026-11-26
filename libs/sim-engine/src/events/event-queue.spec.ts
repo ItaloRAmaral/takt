@@ -7,6 +7,7 @@ import {
 } from '../tests/helpers/scheduled-slots.js';
 import {
   createEventQueue,
+  nextEventTimeSec,
   scheduleSlot,
   slotTimeSec,
   takeNextSlot,
@@ -33,6 +34,26 @@ describe('event queue', () => {
     const slot = takeNextSlot(queue);
 
     expect(slot).toBe(-1);
+  });
+
+  it('nextEventTimeSec gives the time of the next event and leaves it scheduled', () => {
+    const queue = scheduleSlots([
+      { kind: 'arrival', tSec: 10 },
+      { kind: 'arrival', tSec: 5 },
+    ]);
+
+    const tSec = nextEventTimeSec(queue);
+
+    expect(tSec).toBe(5);
+    expect(queue.size).toBe(2);
+  });
+
+  it('nextEventTimeSec of an empty queue is Infinity', () => {
+    const queue = createEventQueue(['arrival']);
+
+    const tSec = nextEventTimeSec(queue);
+
+    expect(tSec).toBe(Infinity);
   });
 
   it('slotTimeSec gives the time a slot was scheduled at', () => {

@@ -3,6 +3,7 @@ import { drawTimeSec } from '../distributions/variability.js';
 import { SimulationError } from '../errors/simulation-error.js';
 import {
   createEventQueue,
+  nextEventTimeSec,
   scheduleSlot,
   slotTimeSec,
   takeNextSlot,
@@ -84,10 +85,11 @@ interface Run {
 /**
  * Runs one replication of a shift: parts arrive at the sources, wait in
  * their queues, are processed one at a time by the stations, wait in the
- * buffers and leave at the sinks (RN-SIM-013, RN-SIM-014). Events at the
- * same instant run by kind, then by scheduling order; after each event the
+ * buffers and leave at the sinks (RN-SIM-013, RN-SIM-014). The events of
+ * one instant all run first, by kind, then by scheduling order; then the
  * elements with room pull, in document order, until a whole pass moves
- * nothing (RN-SIM-018). An event at or after the end of the shift is not
+ * nothing, and a source queue left above its capacity loses its newest
+ * arrival (RN-SIM-018). An event at or after the end of the shift is not
  * processed.
  *
  * @param plant - The plant, from `compilePlant`.
@@ -118,24 +120,25 @@ export function simulateReplication(
     }
   });
 
-  // The sources always schedule their next arrival, so the queue is never
-  // empty here; slotTimeSec would stop the run with a defect if it were.
-  for (
-    let slot = takeNextSlot(run.queue);
-    slotTimeSec(run.queue, slot) < plant.durationSec;
-    slot = takeNextSlot(run.queue)
-  ) {
-    eventCount += 1;
+  while (nextEventTimeSec(run.queue) < plant.durationSec) {
+    const tSec = nextEventTimeSec(run.queue);
 
-    if (eventCount > options.limits.eventCount) {
-      throw new SimulationError(
-        'SIMULATION_LIMIT_EXCEEDED',
-        { limit: 'eventCount' },
-        `The replication passed the limit of ${String(options.limits.eventCount)} events.`,
-      );
+    while (nextEventTimeSec(run.queue) === tSec) {
+      eventCount += 1;
+
+      if (eventCount > options.limits.eventCount) {
+        throw new SimulationError(
+          'SIMULATION_LIMIT_EXCEEDED',
+          { limit: 'eventCount' },
+          `The replication passed the limit of ${String(options.limits.eventCount)} events.`,
+        );
+      }
+
+      handleEvent(run, takeNextSlot(run.queue), tSec);
     }
 
-    handleEvent(run, slot, slotTimeSec(run.queue, slot));
+    moveParts(run, tSec);
+    loseOverflows(run, tSec);
   }
 
   addWipArea(run.series, run.wip.sinceSec, plant.durationSec, run.wip.value);
@@ -195,16 +198,12 @@ function handleEvent(run: Run, slot: number, tSec: number): void {
   const element = itemAt(run.slotElements, slot);
 
   if (element.kind === 'source') {
-    const partId = arrive(run, element, slot, tSec);
-
-    moveParts(run, tSec);
-    loseOverflow(run, element, partId, tSec);
+    arrive(run, element, slot, tSec);
 
     return;
   }
 
   finishProcessing(run, element, tSec);
-  moveParts(run, tSec);
 }
 
 function scheduleArrival(
@@ -220,7 +219,7 @@ function scheduleArrival(
   );
 }
 
-function arrive(run: Run, source: Source, slot: number, tSec: number): number {
+function arrive(run: Run, source: Source, slot: number, tSec: number): void {
   scheduleArrival(run, source, slot, tSec);
   run.arrivalSecByPart.push(tSec);
   run.entrySecByPart.push(tSec);
@@ -233,21 +232,24 @@ function arrive(run: Run, source: Source, slot: number, tSec: number): number {
   changeWip(run, tSec, 1);
   record(run, { tSec, type: 'arrive', sourceId: source.id, partId });
   refreshHeadAvailability(run, source.index);
-
-  return partId;
 }
 
-function loseOverflow(
-  run: Run,
-  source: Source,
-  partId: number,
-  tSec: number,
-): void {
+function loseOverflows(run: Run, tSec: number): void {
+  for (const element of run.slotElements) {
+    if (element.kind === 'source') {
+      loseOverflow(run, element, tSec);
+    }
+  }
+}
+
+function loseOverflow(run: Run, source: Source, tSec: number): void {
   const queued = itemAt(run.partsByElement, source.index);
 
   if (queued.length <= source.queueCapacity) {
     return;
   }
+
+  const partId = itemAt(queued, queued.length - 1);
 
   queued.pop();
   run.lostCountByElement[source.index] =

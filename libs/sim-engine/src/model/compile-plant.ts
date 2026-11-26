@@ -2,9 +2,11 @@ import type {
   Plant,
   PlantElement,
   Routing,
+  Scenario,
   TimeDistribution,
 } from '@takt/plant-schema';
 import { applyScenario } from '@takt/plant-schema/apply-scenario';
+import { itemAt } from '../collections/item-at.js';
 import { truncationMass } from '../distributions/truncated-normal.js';
 import { SimulationError, type RunIssue } from '../errors/simulation-error.js';
 import type { RunOptions } from '../replication/run-options.js';
@@ -51,18 +53,24 @@ export function compilePlant(
     );
   }
 
-  const scenario = plant.scenarios.find(({ id }) => id === scenarioId);
+  const scenarioIndex = plant.scenarios.findIndex(
+    ({ id }) => id === scenarioId,
+  );
 
-  if (scenario === undefined) {
+  if (scenarioIndex === -1) {
     throw new Error(`The plant has no scenario "${scenarioId}".`);
   }
+
+  const scenario = itemAt(plant.scenarios, scenarioIndex);
 
   if (scenario.mode !== 'shift') {
     throw new Error(`The ${scenario.mode} mode runs from sub-plan 6 on.`);
   }
 
   const applied = applyScenario(plant, scenarioId);
-  const durationSec = scenario.durationH * 3600;
+  // Whole seconds: the product of hours and 3600 is not always exact (1.1 h
+  // gives 3960.0000000000005 s), and an event at the end must not run.
+  const durationSec = Math.round(scenario.durationH * 3600);
 
   if (durationSec > limits.durationSec) {
     throw new SimulationError(
@@ -72,7 +80,7 @@ export function compilePlant(
     );
   }
 
-  const issues = findEmptyTruncations(applied);
+  const issues = findEmptyTruncations(applied, scenario, scenarioIndex);
 
   if (issues.length > 0) {
     throw new SimulationError(
@@ -210,15 +218,35 @@ function unsupported(id: string, feature: string): Error {
   );
 }
 
-function findEmptyTruncations(plant: Plant): RunIssue[] {
+function findEmptyTruncations(
+  applied: Plant,
+  scenario: Scenario,
+  scenarioIndex: number,
+): RunIssue[] {
   const issues: RunIssue[] = [];
 
-  plant.elements.forEach((element, index) => {
+  applied.elements.forEach((element, index) => {
     for (const [param, distribution] of timesOf(element)) {
       if (isEmptyTruncation(distribution)) {
+        const overrideIndex = scenario.overrides.findIndex(
+          (override) =>
+            'elementId' in override &&
+            override.elementId === element.id &&
+            override.param === param,
+        );
+
         issues.push({
           elementId: element.id,
-          path: ['elements', index, 'params', param],
+          path:
+            overrideIndex === -1
+              ? ['elements', index, 'params', param]
+              : [
+                  'scenarios',
+                  scenarioIndex,
+                  'overrides',
+                  overrideIndex,
+                  'value',
+                ],
           code: 'EMPTY_TRUNCATION',
         });
       }

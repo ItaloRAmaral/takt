@@ -203,6 +203,40 @@ describe('simulateReplication', () => {
     ]);
   });
 
+  it('RN-SIM-018: parts that become available at the same instant go to an idle station by connection order', () => {
+    const plant = makePlant({
+      elements: [
+        {
+          ...makeFixedSource({ id: 'src1', intervalSec: 30, queueCapacity: 5 }),
+          pos: [0, 0],
+        },
+        {
+          ...makeFixedSource({ id: 'src2', intervalSec: 30, queueCapacity: 5 }),
+          pos: [0, 2],
+        },
+        { ...makeFixedStation({ cycleSec: 10 }), pos: [2, 0] },
+        { ...makeSink(), pos: [4, 0] },
+      ],
+      connections: [
+        { id: 'c1', from: 'src2', to: 'm1', kind: 'direct' },
+        { id: 'c2', from: 'src1', to: 'm1', kind: 'direct' },
+        { id: 'c3', from: 'm1', to: 'snk1', kind: 'direct' },
+      ],
+      scenarios: [makeScenario({ durationSec: 50 })],
+    });
+
+    const result = simulateReplication(
+      compilePlant(plant, 'base', logged),
+      0,
+      logged,
+    );
+
+    expect(selectLogEvents(result.log, 'start')).toEqual([
+      { tSec: 30, type: 'start', stationId: 'm1', partId: 2 },
+      { tSec: 40, type: 'start', stationId: 'm1', partId: 1 },
+    ]);
+  });
+
   it('RN-SIM-018: an end of processing frees the place for an arrival at the same instant', () => {
     const plant = makeLinePlant(
       [
@@ -221,6 +255,34 @@ describe('simulateReplication', () => {
 
     expect(selectPartIds(result.log, 'start')).toEqual([1, 2, 3]);
     expect(selectPartIds(result.log, 'lose')).toEqual([]);
+  });
+
+  it('RN-SIM-018: at the same instant, the log shows the end of processing before the arrival', () => {
+    const plant = makeLinePlant(
+      [
+        makeFixedSource({ intervalSec: 30, queueCapacity: 0 }),
+        makeFixedStation({ cycleSec: 30 }),
+        makeSink(),
+      ],
+      makeScenario({ durationSec: 61 }),
+    );
+
+    const result = simulateReplication(
+      compilePlant(plant, 'base', logged),
+      0,
+      logged,
+    );
+
+    expect(result.log).toEqual([
+      { tSec: 30, type: 'arrive', sourceId: 'src1', partId: 1 },
+      { tSec: 30, type: 'move', partId: 1, fromId: 'src1', toId: 'm1' },
+      { tSec: 30, type: 'start', stationId: 'm1', partId: 1 },
+      { tSec: 60, type: 'finish', stationId: 'm1', partId: 1 },
+      { tSec: 60, type: 'arrive', sourceId: 'src1', partId: 2 },
+      { tSec: 60, type: 'move', partId: 1, fromId: 'm1', toId: 'snk1' },
+      { tSec: 60, type: 'move', partId: 2, fromId: 'src1', toId: 'm1' },
+      { tSec: 60, type: 'start', stationId: 'm1', partId: 2 },
+    ]);
   });
 
   it('RN-SIM-018: the first arrival comes after the first interval', () => {

@@ -74,6 +74,56 @@ describe('compilePlant', () => {
     });
   });
 
+  it('UC-SIM-002: compiles the duration in whole seconds', () => {
+    const plant = makePlant({ scenarios: [makeScenario({ durationH: 1.1 })] });
+
+    const compiled = compilePlant(plant, 'base', options);
+
+    expect(compiled.durationSec).toBe(3960);
+  });
+
+  it('UC-SIM-002: points an EMPTY_TRUNCATION at the override of its own element and parameter', () => {
+    const plant = makeLinePlant(
+      [makeSource(), makeStation(), makeStation({ id: 'm2' }), makeSink()],
+      makeScenario({
+        overrides: [
+          {
+            elementId: 'm2',
+            param: 'cycle',
+            value: { dist: 'fixed', valueSec: 40 },
+          },
+          { elementId: 'm1', param: 'idealCycleSec', value: 45 },
+          {
+            elementId: 'm1',
+            param: 'cycle',
+            value: {
+              dist: 'truncatedNormal',
+              meanSec: 0,
+              standardDeviationSec: 1,
+              minSec: 40,
+              maxSec: 41,
+            },
+          },
+        ],
+      }),
+    );
+
+    const error = catchError(() => compilePlant(plant, 'base', options));
+
+    expect(error).toMatchObject({
+      code: 'INVALID_PLANT',
+      details: {
+        issues: [
+          {
+            elementId: 'm1',
+            path: ['scenarios', 0, 'overrides', 2, 'value'],
+            code: 'EMPTY_TRUNCATION',
+          },
+        ],
+      },
+    });
+  });
+
   it('UC-SIM-002: compiles the scenario it is asked for', () => {
     const plant = makePlant({
       scenarios: [
@@ -183,7 +233,7 @@ describe('compilePlant', () => {
     expect(withAnother.elements[1]).toEqual(alone.elements[1]);
   });
 
-  it('UC-SIM-002: refuses a plant whose truncated normals have no probability with INVALID_PLANT and one EMPTY_TRUNCATION each', () => {
+  it('UC-SIM-002: refuses a plant whose truncated normals have no probability with INVALID_PLANT and one EMPTY_TRUNCATION each, at the element or at the override', () => {
     const plant = makePlant({
       elements: [
         makeSource({
@@ -233,7 +283,7 @@ describe('compilePlant', () => {
           },
           {
             elementId: 'm1',
-            path: ['elements', 1, 'params', 'cycle'],
+            path: ['scenarios', 0, 'overrides', 0, 'value'],
             code: 'EMPTY_TRUNCATION',
           },
         ],

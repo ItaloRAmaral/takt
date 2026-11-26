@@ -122,6 +122,23 @@ export function takeNextSlot(queue: EventQueue): number {
 }
 
 /**
+ * The time of the next event, without taking it.
+ *
+ * @param queue - The queue.
+ * @returns The time, in seconds; `Infinity` when no slot is scheduled.
+ *
+ * @example
+ * while (nextEventTimeSec(queue) < durationSec) takeNextSlot(queue);
+ */
+export function nextEventTimeSec(queue: EventQueue): number {
+  if (queue.size === 0) {
+    return Infinity;
+  }
+
+  return itemAt(queue.timesSec, itemAt(queue.heap, 0));
+}
+
+/**
  * The time a slot was last scheduled at.
  *
  * @param queue - The queue.

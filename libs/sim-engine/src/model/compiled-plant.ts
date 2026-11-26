@@ -69,7 +69,7 @@ export type CompiledElement =
  * in seconds, the element graph built and the random streams assigned.
  */
 export interface CompiledPlant {
-  /** How long a replication runs, in seconds. */
+  /** How long a replication runs, in whole seconds. */
   readonly durationSec: number;
   /** The elements, in the order of the plant document. */
   readonly elements: readonly CompiledElement[];
