@@ -2,7 +2,7 @@
 
 | Campo | Valor |
 | --- | --- |
-| Status | Aprovado (26/11/2026) |
+| Status | Concluído (26/11/2026) |
 | Data | 26/11/2026 |
 | Pedido | "Pull feito, pode começar o sub-plano 4" (26/11/2026), para a linha 4 do roteiro aprovado: "Compilação da planta (sobreposições sem mesclagem profunda, segundos, grafo, sequências por chave); lista de eventos com desempate; fonte, estação, buffer e expedição; uma replicação no modo turno com log, indicadores (vazão, WIP, lead time, utilização), séries por minuto e estado final; tetos de segurança" |
 | Contexto | [Roteiro](2026-11-04-roteiro-motor.md) (linha 4, interfaces, segurança, pendências do 4), [UC-SIM-002](../product/use-cases/uc-sim-002-executar-simulacao.md) passos 2 a 4 e 6, [RN-SIM-001, 013 e 014](../product/rules/simulation.md), [RN-EDT-003](../product/rules/editor.md), [códigos de problema](../product/rules/README.md), [PDR-0022](../pdr/0022-modelo-de-fluxo-da-planta.md), [ADR-0011](../adr/0011-motor-de-simulacao-e-esquema.md) itens 2 a 5 e 8, [ADR-0008](../adr/0008-validacao-de-dados.md) (item 12 e poluição de protótipo), [ADR-0013](../adr/0013-erros-esperados.md), [ADR-0009](../adr/0009-estrategia-de-testes.md), [simulation.md](../product/simulation.md) (indicadores e validação), [sim-engine.md](../architecture/sim-engine.md), [plant-schema.md](../architecture/plant-schema.md), [workspace.md](../architecture/workspace.md), [pesquisa da literatura do motor](../research/literatura-do-motor.md) (Dₙ, LL.2, séries), [pesquisa do modelo de fluxo](../research/modelo-de-fluxo-da-planta.md) e debates, [code-style.md](../architecture/code-style.md) seções 3, 5, 7 e 10 |
@@ -392,13 +392,18 @@ Refatoração sob os testes existentes (o `.res` oficial e os de `jump.spec.ts`)
 **Arquivos:**
 - Modificar: `docs/architecture/sim-engine.md`, `docs/architecture/plant-schema.md` (o motor importa `applyScenario` pelo caminho próprio), `docs/architecture/workspace.md` (o motor deixa de depender só dos tipos; `fast-check` nas dependências, se a lista de lá pedir), `docs/product/simulation.md` (séries e lead time censurado), `docs/product/glossary.md` (ocupada, bloqueada, faminta → `busy`, `blocked`, `starved`, se faltarem), `docs/plans/2026-11-04-roteiro-motor.md`, `docs/plans/README.md`, este plano
 
-- [ ] **Passo 1: verificação completa:** `pnpm nx test sim-engine --coverage` (90% de linhas e ramificações), `pnpm nx run sim-engine:mutate` (≥ 80%; listar os sobreviventes e o motivo de cada um em `sim-engine.md`), `pnpm nx run-many -t lint typecheck test`, `pnpm exec prettier --check .`.
-- [ ] **Passo 2: docs:**
+- [x] **Passo 1: verificação completa:** `pnpm nx test sim-engine --coverage` (90% de linhas e ramificações), `pnpm nx run sim-engine:mutate` (≥ 80%; listar os sobreviventes e o motivo de cada um em `sim-engine.md`), `pnpm nx run-many -t lint typecheck test`, `pnpm exec prettier --check .`.
+- [x] **Passo 2: docs:**
   - `sim-engine.md`: a estrutura nova (`model/`, `events/`, `replication/`, `stats/`), a compilação, a ordem dos eventos e a varredura na ordem do documento, o movimento das peças, as definições dos indicadores e séries, os tetos, a medição dos saltos (tarefa 3) e a mutação;
   - roteiro: linha 4 como "Concluído"; nas pendências do 4, a decisão de cada uma; Φ em cache, precisão com u perto de 1 e "teto num só lugar" para o 9; testes longos para o 6; sequências separadas de falha e reparo e sorteio sempre consumido para o 5; pendência nova do `null` nas fatias para o 6 e o 7;
   - os demais arquivos listados; status "Concluído" neste plano e no índice.
 
-**Commit sugerido:** `docs: close sub-plan 4 of the engine roadmap` · arquivos: os listados.
+**Diferenças do planejado (26/11/2026):**
+- A mutação completa, com a concorrência padrão da Stryker (11 processos), parou no teste inicial: as propriedades das replicações passaram dos 5 s do Vitest. Decisão do usuário: `concurrency: 4` em `stryker.config.mjs` (as alternativas eram aumentar o tempo-limite das propriedades ou barateá-las). A rodada levou 28 min e deu 92,08%.
+- A rodada completa achou lacunas de testes das tarefas 3 e 4, corrigidas com aprovação do usuário (plano curto na conversa, 26/11/2026) num commit próprio: testes de `truncationMass` com valor positivo e nas caudas; compilação de um cenário que não é o primeiro, de roteamento na fonte e no buffer e de uma normal truncada com probabilidade; `compilePlant` passou a usar os índices do `assignStreamIndices` (por `streamIndexOf`, novo, com testes) em vez de calcular o hash de novo; e `createRandomStream` perdeu a guarda redundante da replicação. Detalhes e sobreviventes em `sim-engine.md`, seção "Mutação (sub-plano 4)".
+- O teste `streamIndexOf of a key that was not assigned throws a defect` passou já antes da implementação (o `TypeError` de função inexistente também é um `Error` sem `code`); o outro teste da função falhou como esperado.
+
+**Commit sugerido:** `test(sim-engine): close mutation gaps of the compilation and the streams` e `docs: close sub-plan 4 of the engine roadmap` · arquivos: os listados.
 
 ---
 

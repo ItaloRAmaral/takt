@@ -2,13 +2,13 @@
 
 > **Resumo.** Como o monorepo é montado hoje: projetos, versões fixadas, segurança da instalação, lint, testes, cobertura, mutação, hooks locais e CI. O porquê está nos ADRs [0001](../adr/0001-monorepo-nx-e-nomes.md), [0009](../adr/0009-estrategia-de-testes.md), [0010](../adr/0010-qualidade-e-ci.md) e [0011](../adr/0011-motor-de-simulacao-e-esquema.md); os comandos, no `CLAUDE.md`, seção "Commands".
 
-Atualizado em 18/11/2026 (medição da D4). Criado pelo plano [Workspace Nx do marco 1](../plans/2026-11-03-workspace-nx.md), cujas notas de execução registram cada desvio.
+Atualizado em 26/11/2026 (sub-plano 4 do motor: `applyScenario` pelo caminho próprio, fast-check, concorrência da Stryker). Criado pelo plano [Workspace Nx do marco 1](../plans/2026-11-03-workspace-nx.md), cujas notas de execução registram cada desvio.
 
 ## Estrutura
 
 | Caminho | O que é |
 | --- | --- |
-| `libs/sim-engine` (`@takt/sim-engine`) | Motor de simulação; tags `type:lib`, `scope:shared`; depende só dos tipos do esquema |
+| `libs/sim-engine` (`@takt/sim-engine`) | Motor de simulação; tags `type:lib`, `scope:shared`; do esquema, importa tipos e, pelo caminho `@takt/plant-schema/apply-scenario`, o `applyScenario` ([ADR-0015](../adr/0015-cenario-aplicado-e-series-do-motor.md)) |
 | `libs/plant-schema` (`@takt/plant-schema`) | Esquema da planta; mesmas tags; nunca importa o motor |
 | `apps/` | Vazia até o marco 2 |
 | `eslint.config.mjs`, `vitest.config.mts`, `tsconfig.base.json`, `nx.json` | Configuração compartilhada na raiz |
@@ -44,7 +44,7 @@ Alerta aberto de propósito: `minimatch` 10.2.5, via ESLint. A única correção
 
 ## Lint
 
-A raiz aplica os presets `strictTypeChecked` e `stylisticTypeChecked` do typescript-eslint, só em arquivos TypeScript, mais as regras da [seção 4 do guia](code-style.md#4-typescript): sem `enum`, sem `export default` (exceto em `*.config.*`), sem `console`, nomes de arquivo e pasta em *kebab-case* (`eslint-plugin-check-file`) e as fronteiras do Nx por tag. Cada biblioteca acrescenta as proibições dela no próprio `eslint.config.mjs`: o motor proíbe `Math.random`, `Date.now`, `new Date()`, `Date()`, `performance.now`, os acessos por `globalThis`, globais do navegador, React, Three.js, imports de valor do esquema e, fora dos specs e de `src/tests/`, imports de `src/tests/` (os auxiliares de teste ficam fora do *build* e da mutação), as funções de `Math` que a especificação deixa aproximadas (`log`, `exp`, `pow`, trigonométricas e afins) e `**` sobre `number` (ADR-0014); o esquema proíbe importar o motor e os globais do navegador.
+A raiz aplica os presets `strictTypeChecked` e `stylisticTypeChecked` do typescript-eslint, só em arquivos TypeScript, mais as regras da [seção 4 do guia](code-style.md#4-typescript): sem `enum`, sem `export default` (exceto em `*.config.*`), sem `console`, nomes de arquivo e pasta em *kebab-case* (`eslint-plugin-check-file`) e as fronteiras do Nx por tag. Cada biblioteca acrescenta as proibições dela no próprio `eslint.config.mjs`: o motor proíbe `Math.random`, `Date.now`, `new Date()`, `Date()`, `performance.now`, os acessos por `globalThis`, globais do navegador, React, Three.js, imports de valor do esquema (exceto o `applyScenario` pelo caminho próprio; specs e `src/tests/` podem importar valores) e, fora dos specs e de `src/tests/`, imports de `src/tests/` (os auxiliares de teste ficam fora do *build* e da mutação), as funções de `Math` que a especificação deixa aproximadas (`log`, `exp`, `pow`, trigonométricas e afins) e `**` sobre `number` (ADR-0014); o esquema proíbe importar o motor e os globais do navegador.
 
 **Uma regra redefinida num projeto substitui as opções da raiz.** Por isso a raiz exporta `noEnum` e `browserGlobals`, e o motor repete `noEnum` na própria lista de `no-restricted-syntax`.
 
@@ -53,8 +53,9 @@ A raiz aplica os presets `strictTypeChecked` e `stylisticTypeChecked` do typescr
 ## Testes, cobertura e mutação
 
 - **Vitest** em cada biblioteca, `vitest run`. Cobertura v8 sobre `src/**/*.ts`, sem os `*.spec.ts`, com mínimo de **90% de linhas e de ramificações**. As metas só são conferidas com `--coverage`.
+- **Propriedades** com `fast-check` 4.10.3 (raiz, `devDependencies`), sempre com `seed` e `numRuns` fixos (ADR-0009).
 - **JSON Schema da planta** (`libs/plant-schema/plant.schema.v1.json`, ADR-0008 item 10): gerado pelo `z.toJSONSchema` e conferido pelo teste `src/json-schema.spec.ts` com o `toMatchFileSnapshot` do Vitest. Com `CI` definido, o Vitest não grava o arquivo e o teste falha se ele estiver velho ou faltar (conferido em 25/11/2026 com `CI=true`); para regenerar depois de mudar o esquema, `pnpm nx test plant-schema -- -u`, e revisar o diff. O arquivo fica no `.prettierignore`, para o Prettier não mudar o que o teste compara.
-- **Stryker** só no motor (`pnpm nx run sim-engine:mutate`), com `break: 80`. Três contornos, comentados em `libs/sim-engine/stryker.config.mjs`: roda **da raiz**, porque um sandbox só da pasta do motor quebra os caminhos para `tsconfig.base.json` e para o ESLint da raiz; os plugins são listados pelo nome, porque com pnpm o padrão `@stryker-mutator/*` não os encontra; `vitest.related: false`, para rodar também testes que não importam código. Relatório em `reports/mutation/sim-engine.html`. Os testes de momentos das distribuições (10⁵ amostras: `exponential`, `triangular`, `truncated normal`) têm `describe(..., { timeout: 30_000 }, ...)`: fora do Stryker levam menos de 1 s, mas no teste inicial da mutação, com a cobertura por teste instrumentando o laço e os arquivos em paralelo, passaram dos 5 s padrão (medido em 18/11/2026, quando os testes do `exp` aumentaram a carga).
+- **Stryker** só no motor (`pnpm nx run sim-engine:mutate`), com `break: 80`. Três contornos, comentados em `libs/sim-engine/stryker.config.mjs`: roda **da raiz**, porque um sandbox só da pasta do motor quebra os caminhos para `tsconfig.base.json` e para o ESLint da raiz; os plugins são listados pelo nome, porque com pnpm o padrão `@stryker-mutator/*` não os encontra; `vitest.related: false`, para rodar também testes que não importam código. E `concurrency: 4`: com o padrão (núcleos − 1, 11 processos na máquina do fundador), as propriedades das replicações passaram dos 5 s do Vitest no teste inicial da mutação (26/11/2026); isoladas, levam menos de 1 s. Relatório em `reports/mutation/sim-engine.html`. Os testes de momentos das distribuições (10⁵ amostras: `exponential`, `triangular`, `truncated normal`) têm `describe(..., { timeout: 30_000 }, ...)`: fora do Stryker levam menos de 1 s, mas no teste inicial da mutação, com a cobertura por teste instrumentando o laço e os arquivos em paralelo, passaram dos 5 s padrão (medido em 18/11/2026, quando os testes do `exp` aumentaram a carga).
 
 ## Medição de `log` e `exp` entre motores (D4)
 

@@ -2,7 +2,7 @@
 
 > **Resumo.** Termos do Takt em português, o equivalente em inglês (interface) e o nome usado no código. O código é sempre em inglês; esta tabela é a ponte e a fonte para a internacionalização.
 
-Atualizado em 25/11/2026.
+Atualizado em 26/11/2026.
 
 ## Produto e acesso
 
@@ -45,7 +45,7 @@ Atualizado em 25/11/2026.
 | Regra de roteamento | Routing rule | `routing` |
 | Por qualidade · por percentual · fila mais curta | By quality · by percentage · shortest queue | `byQuality` · `byPercentage` · `shortestQueue` |
 | Retrabalho | Rework | `rework` |
-| Bloqueado · faminto | Blocked · starved | `blocked` · `starved` |
+| Ocupada · bloqueada · faminta (estado da estação) | Busy · blocked · starved | `busy` · `blocked` · `starved` (`StationStatus`) |
 | Linha travada | Deadlock | `PLANT_DEADLOCK` (código) |
 | Fila da fonte | Source queue | `queueCapacity` (capacidade) |
 | Cenário | Scenario | `scenario` |
@@ -56,7 +56,9 @@ Atualizado em 25/11/2026.
 | Subsequência (uma por replicação) | Substream | *substream* (só em comentários e docs; no código é a replicação) |
 | Chave da sequência | Stream key | `key`, no formato `<id do elemento>:<propósito>` |
 | Variabilidade (tempo fixo ou distribuição) | Variability | `Variability` (tipo interno do motor; `kind`) |
-| Log de eventos | Event log | `eventLog` |
+| Log de eventos | Event log | `eventLog`; no motor, `log` do resultado da replicação (`LogEvent`) |
+| Série por intervalo (fatia de 1 minuto) | Time series (slice) | `series` (`SeriesSlice`) |
+| Estado final | Final state | `finalState` |
 | Módulo | Module | `module` (`production`, `inventory`, `planning`, `maintenance`, `quality`) |
 
 ## Indicadores

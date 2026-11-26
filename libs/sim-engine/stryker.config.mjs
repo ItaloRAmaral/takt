@@ -21,6 +21,9 @@ export default {
     '!libs/sim-engine/src/**/*.spec.ts',
     '!libs/sim-engine/src/tests/**',
   ],
+  // With the default (cores - 1 processes), the replication properties pass
+  // Vitest's 5 s timeout in the dry run on a 12-core machine; 4 runs clean.
+  concurrency: 4,
   thresholds: { high: 90, low: 80, break: 80 },
   reporters: ['clear-text', 'progress', 'html'],
   htmlReporter: { fileName: 'reports/mutation/sim-engine.html' },
