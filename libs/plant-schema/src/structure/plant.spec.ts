@@ -145,10 +145,7 @@ describe('plant document shape', () => {
 
   it('rejects a __proto__ key parsed from JSON at the root', () => {
     const plant: unknown = JSON.parse(
-      JSON.stringify(makePlant()).replace(
-        '{',
-        '{"__proto__":{"polluted":true},',
-      ),
+      `{"__proto__":{"polluted":true},${JSON.stringify(makePlant()).slice(1)}`,
     );
 
     const result = parseStructure(plantSchema, plant);
