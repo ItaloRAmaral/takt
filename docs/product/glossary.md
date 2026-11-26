@@ -2,7 +2,7 @@
 
 > **Resumo.** Termos do Takt em português, o equivalente em inglês (interface) e o nome usado no código. O código é sempre em inglês; esta tabela é a ponte e a fonte para a internacionalização.
 
-Atualizado em 05/11/2026.
+Atualizado em 25/11/2026.
 
 ## Produto e acesso
 
@@ -45,6 +45,9 @@ Atualizado em 05/11/2026.
 | Regra de roteamento | Routing rule | `routing` |
 | Por qualidade · por percentual · fila mais curta | By quality · by percentage · shortest queue | `byQuality` · `byPercentage` · `shortestQueue` |
 | Retrabalho | Rework | `rework` |
+| Bloqueado · faminto | Blocked · starved | `blocked` · `starved` |
+| Linha travada | Deadlock | `PLANT_DEADLOCK` (código) |
+| Fila da fonte | Source queue | `queueCapacity` (capacidade) |
 | Cenário | Scenario | `scenario` |
 | Replicação | Replication | `replication` |
 | Semente | Seed | `seed` |
@@ -66,7 +69,9 @@ Atualizado em 05/11/2026.
 | Utilização | Utilization | `utilization` |
 | OEE (disponibilidade, desempenho, qualidade) | OEE (availability, performance, quality) | `oee` |
 | Gargalo | Bottleneck | `bottleneck` |
-| Tempo médio entre falhas | MTBF | `mtbfMin` |
-| Tempo médio de reparo | MTTR | `mttrMin` |
+| Tempo até a falha (média: MTBF, tempo de funcionamento) | Time to failure (MTBF) | `timeToFailure` |
+| Tempo de reparo (média: MTTR) | Repair time (MTTR) | `repairTime` |
+| Pedidos não atendidos | Lost arrivals | `lostArrivalCount` |
+| Ritmo ideal (tempo de ciclo ideal) | Ideal cycle time | `idealCycleSec` |
 | Taxa de defeitos | Defect rate | `defectRate` |
 | Intervalo de confiança | Confidence interval | `confidenceInterval` |

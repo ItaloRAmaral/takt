@@ -2,10 +2,10 @@
 
 | Campo | Valor |
 | --- | --- |
-| Status | Proposto |
+| Status | Aceito |
 | Data | 25/11/2026 |
 | Relator | Italo |
-| Aprovadores | pendente |
+| Aprovadores | Italo |
 
 ## Contexto
 

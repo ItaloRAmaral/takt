@@ -2,7 +2,7 @@
 
 > **Resumo.** O motor é determinístico com semente fixa, e a cena 3D só reproduz o que ele calculou. Os indicadores vêm de replicações, com média e intervalo de confiança. O roteamento entre elementos segue regras definidas pelo usuário.
 
-Atualizado em 04/11/2026 · Origem: [PDR-0008](../../pdr/0008-simulacao-com-reproducao.md), [PDR-0014](../../pdr/0014-roteamento-definido-pelo-usuario.md), [PDR-0020](../../pdr/0020-modos-de-simulacao-e-aquecimento.md).
+Atualizado em 25/11/2026 · Origem: [PDR-0008](../../pdr/0008-simulacao-com-reproducao.md), [PDR-0014](../../pdr/0014-roteamento-definido-pelo-usuario.md), [PDR-0020](../../pdr/0020-modos-de-simulacao-e-aquecimento.md), [PDR-0022](../../pdr/0022-modelo-de-fluxo-da-planta.md).
 
 ### RN-SIM-001: Determinismo
 
@@ -28,25 +28,25 @@ Atualizado em 04/11/2026 · Origem: [PDR-0008](../../pdr/0008-simulacao-com-repr
 
 ### RN-SIM-004: Saída com vários destinos exige regra
 
-- **Enunciado:** uma saída de elemento ligada a mais de um destino precisa de uma regra de roteamento: por qualidade, por percentual ou fila mais curta.
-- **Origem:** PDR-0014.
+- **Enunciado:** uma saída de elemento ligada a mais de um destino precisa de uma regra de roteamento: por qualidade, por percentual ou fila mais curta. A regra cobre exatamente as conexões de saída do elemento, cada destino uma vez. Uma estação com taxa de defeito acima de 0 precisa da regra por qualidade, também quando a taxa sobe só num cenário.
+- **Origem:** PDR-0014; regra por qualidade obrigatória com defeitos: PDR-0022.
 - **Exemplo:** uma estação ligada a "inspeção" e a "refugo" sem regra não deixa a planta rodar.
 - **Quando violada:** `INVALID_PLANT` ([RN-EDT-004](editor.md)).
 
 ### RN-SIM-005: Percentuais somam 100%
 
-- **Enunciado:** na regra por percentual, os percentuais dos destinos somam exatamente 100%.
+- **Enunciado:** na regra por percentual, cada destino tem um percentual inteiro de 1 a 100, e os percentuais somam exatamente 100%. Cada peça sorteia o destino de forma independente.
 - **Origem:** PDR-0014.
 - **Exemplo:** 70% para a linha A e 30% para a B.
 - **Quando violada:** `INVALID_PLANT`.
 
 ### RN-SIM-006: Limite de retrabalho
 
-- **Enunciado:** cada peça tem um único contador de retrabalhos, somado em todas as estações por onde passa. O limite é o número de retrabalhos permitidos: uma peça que sai defeituosa depois de já ter usado todos eles vai para o refugo.
-- **Origem:** PDR-0014.
+- **Enunciado:** cada peça tem um único contador de retrabalhos, somado em todas as estações por onde passa. O limite é o número de retrabalhos permitidos: uma peça que sai defeituosa depois de já ter usado todos eles vai para o refugo. A regra por qualidade tem três saídas: boa, retrabalho (opcional) e refugo, esta sempre um elemento de refugo. Enquanto o contador estiver abaixo do limite, a peça defeituosa vai para o retrabalho, e o contador sobe nesse envio; sem saída de retrabalho, ela vai direto para o refugo. Em cada passagem vale a taxa de defeito da estação onde a peça é processada.
+- **Origem:** PDR-0014; saídas da regra por qualidade e teto: PDR-0022.
 - **Exemplo:** com limite 2, uma peça defeituosa pela terceira vez vira refugo, mesmo que os defeitos tenham sido em estações diferentes (1 na M1 e 2 na M2). Com probabilidade de defeito p, a chance de refugo é p³ e a peça é processada no máximo 3 vezes.
 - **Quando violada:** é um invariante do motor.
-- **Padrão:** 2 retrabalhos (até 3 passagens), definido por planta e editável. Decisão do fundador em 04/11/2026: conta retrabalhos, não passagens, com contador por peça. **Fonte:** a literatura não traz convenção para o limite; as fórmulas estão na [pesquisa da literatura do motor](../../research/literatura-do-motor.md).
+- **Padrão:** 2 retrabalhos (até 3 passagens), definido por planta e editável de 0 a 10 (o teto é uma estimativa contra plantas que travam o motor, PDR-0022). Decisão do fundador em 04/11/2026: conta retrabalhos, não passagens, com contador por peça. **Fonte:** a literatura não traz convenção para o limite; as fórmulas estão na [pesquisa da literatura do motor](../../research/literatura-do-motor.md).
 
 ## Modos de execução e aquecimento
 
@@ -96,3 +96,45 @@ Origem: [PDR-0020](../../pdr/0020-modos-de-simulacao-e-aquecimento.md). Base: [p
 - **Origem:** PDR-0020.
 - **Exemplo:** "Modo turno: desempenho deste turno, incluindo o enchimento da linha."
 - **Quando violada:** não se aplica (apresentação).
+
+## Modelo de fluxo
+
+Origem: [PDR-0022](../../pdr/0022-modelo-de-fluxo-da-planta.md). Base: [pesquisa do modelo de fluxo](../../research/modelo-de-fluxo-da-planta.md). Uma revisão detalhada destas regras está prevista depois que o motor rodar as primeiras plantas (decisão do fundador em 25/11/2026).
+
+### RN-SIM-013: Fila da fonte e pedidos não atendidos
+
+- **Enunciado:** a fonte guarda as peças que chegam numa fila de capacidade definida pelo usuário, de 0 a 10 000. Uma chegada que encontra a fila cheia não entra na planta e é contada em "pedidos não atendidos". As chegadas seguem o sorteio da fonte, independentes do estado da linha. A fila da fonte conta no WIP, e o lead time de uma peça começa quando ela chega.
+- **Origem:** PDR-0022.
+- **Exemplo:** com fila de 20 e a estação mais lenta que as chegadas, a fila enche e, a partir daí, parte das chegadas vira pedido não atendido.
+- **Quando violada:** é um invariante do motor.
+- **Padrão:** fila de 20.
+
+### RN-SIM-014: Bloqueio depois do serviço
+
+- **Enunciado:** a estação processa uma peça por vez. Se o destino está cheio, a peça terminada fica na estação, que passa ao estado **bloqueado**, distinto de **faminto** (sem peça para processar). Com mais de uma entrada, a estação puxa a peça que espera há mais tempo; no empate, a peça retrabalhada vem primeiro.
+- **Origem:** PDR-0022.
+- **Exemplo:** M1 termina uma peça com o buffer B1 cheio e fica bloqueada até B1 abrir vaga.
+- **Quando violada:** é um invariante do motor.
+
+### RN-SIM-015: Falhas no relógio de calendário
+
+- **Enunciado:** o tempo até a falha conta desde o fim do reparo anterior, com a máquina trabalhando ou parada. O MTBF é o tempo de funcionamento, e a disponibilidade esperada é MTBF/(MTBF + MTTR). Tempo até a falha e tempo de reparo são distribuições, como o ciclo. Se a falha acontece durante o processamento, a peça termina o tempo que faltava depois do reparo. Durante o reparo, nenhuma peça entra nem sai da máquina.
+- **Origem:** PDR-0022.
+- **Exemplo:** MTBF de 240 min e MTTR de 15 min dão disponibilidade de 94,1% em regime estável.
+- **Quando violada:** é um invariante do motor.
+- **Padrão ao ligar as falhas:** exponencial, com 240 min até a falha e 15 min de reparo.
+
+### RN-SIM-016: Esteira
+
+- **Enunciado:** a esteira leva cada peça da entrada à saída em comprimento ÷ velocidade, com no máximo `capacity` peças e espaçamento mínimo de comprimento ÷ capacidade, medido em deslocamento da correia. Se a saída está bloqueada, a esteira para inteira e retoma quando a saída libera, mantendo o espaçamento. A esteira não quebra (v1) e não cria defeitos.
+- **Origem:** PDR-0022.
+- **Exemplo:** 5 m a 10 m/min dão 30 s de trânsito; com capacidade 5, uma peça entra a cada 1 m de deslocamento (6 s com a correia andando).
+- **Quando violada:** é um invariante do motor.
+- **Padrão:** 5 m, 10 m/min, capacidade 5.
+
+### RN-SIM-017: Linha travada
+
+- **Enunciado:** se peças bloqueadas passam a esperar umas pelas outras em ciclo, sem saída possível, a execução para. O resultado mostra os elementos do ciclo e o instante, informa quantas replicações travaram e não mostra indicadores; nunca se faz a média só das replicações que não travaram.
+- **Origem:** PDR-0022.
+- **Exemplo:** "A linha travou em 2h13: M1 e RW esperam uma pela outra (7 de 30 replicações)."
+- **Quando violada:** `PLANT_DEADLOCK`.
