@@ -42,7 +42,7 @@ A forma está no exemplo do [modelo da planta](../product/plant-model.md). Ponto
 | Zonas, cenários, sobreposições por cenário | 50, 20, 2000 |
 | Capacidades (buffer, esteira, fila da fonte) | até 10 000 |
 | Todo tempo | até 1 ano (31 536 000 s) |
-| Duração do cenário | até 720 h |
+| Duração do cenário | de 1 minuto a 720 h (`minDurationH`, desde o sub-plano 4: o motor arredonda a duração para segundos inteiros, e uma duração que arredondasse para 0 s daria vazão com divisão por zero) |
 | Grade | até 200 × 200 células |
 | IDs, nomes | 1 a 64 caracteres, 1 a 120 caracteres |
 | Limite de retrabalho | 0 a 10 |

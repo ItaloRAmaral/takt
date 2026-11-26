@@ -403,7 +403,14 @@ Refatoração sob os testes existentes (o `.res` oficial e os de `jump.spec.ts`)
 - A rodada completa achou lacunas de testes das tarefas 3 e 4, corrigidas com aprovação do usuário (plano curto na conversa, 26/11/2026) num commit próprio: testes de `truncationMass` com valor positivo e nas caudas; compilação de um cenário que não é o primeiro, de roteamento na fonte e no buffer e de uma normal truncada com probabilidade; `compilePlant` passou a usar os índices do `assignStreamIndices` (por `streamIndexOf`, novo, com testes) em vez de calcular o hash de novo; e `createRandomStream` perdeu a guarda redundante da replicação. Detalhes e sobreviventes em `sim-engine.md`, seção "Mutação (sub-plano 4)".
 - O teste `streamIndexOf of a key that was not assigned throws a defect` passou já antes da implementação (o `TypeError` de função inexistente também é um `Error` sem `code`); o outro teste da função falhou como esperado.
 
-**Commit sugerido:** `test(sim-engine): close mutation gaps of the compilation and the streams` e `docs: close sub-plan 4 of the engine roadmap` · arquivos: os listados.
+- **Revisão de código da branch (26/11/2026)**, quatro achados conferidos no código; decisões do usuário no mesmo dia:
+  1. Peças disponíveis no mesmo instante por eventos diferentes, com a estação livre, iam para a do evento agendado antes, e não pela ordem das conexões (RN-SIM-018). Corrigido: todos os eventos do instante primeiro, depois o movimento, depois as perdas (`nextEventTimeSec`, novo na lista de eventos). Teste: `RN-SIM-018: parts that become available at the same instant go to an idle station by connection order`. Nenhum valor esperado dos testes existentes mudou.
+  2. `durationH × 3600` nem sempre é inteiro (1,1 h dá 3960,0000000000005 s), e um evento no fim do turno acontecia. Corrigido: `Math.round` na compilação e, no esquema, duração mínima de 1 minuto (`PLANT_LIMITS.minDurationH`; JSON Schema regenerado: `exclusiveMinimum: 0` → `minimum: 1/60`). O esquema v1 ainda não foi publicado a usuários, por isso mudou no lugar, sem migração.
+  3. O `EMPTY_TRUNCATION` vindo de uma sobreposição apontava para o elemento base na planta aplicada. Corrigido: aponta para a sobreposição, como o `validatePlant`.
+  4. `SimulationError` sem união discriminada: pendência do sub-plano 6 no roteiro.
+  - A mutação depois das correções pediu dois testes a mais, escritos depois do código e provados por mutação: a ordem do fim de processamento e da chegada no log (a prioridade do tipo de evento passou a decidir só isso) e a busca da sobreposição certa entre várias.
+
+**Commit sugerido:** `test(sim-engine): close mutation gaps of the compilation and the streams`, `docs: close sub-plan 4 of the engine roadmap` e, depois da revisão de código, `fix(plant-schema): require scenarios of at least one minute`, `fix(sim-engine): settle same-instant ties, whole-second shifts and override issue paths` e `docs: record the code review fixes of sub-plan 4` · arquivos: os listados.
 
 ---
 
