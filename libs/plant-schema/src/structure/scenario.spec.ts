@@ -30,6 +30,7 @@ describe('scenarios', () => {
 
   it.each([
     { field: 'durationH', value: 0 },
+    { field: 'durationH', value: 0.0166 },
     { field: 'durationH', value: 721 },
     { field: 'seed', value: -1 },
     { field: 'seed', value: 4_294_967_296 },
@@ -44,6 +45,14 @@ describe('scenarios', () => {
       success: false,
       issues: [{ path: [field], code: 'OUT_OF_RANGE' }],
     });
+  });
+
+  it('accepts a duration of one minute', () => {
+    const scenario = makeScenario({ durationH: 1 / 60 });
+
+    const result = parseStructure(scenarioSchema, scenario);
+
+    expect(result.success).toBe(true);
   });
 
   it('rejects an unknown mode with INVALID_VALUE', () => {

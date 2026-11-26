@@ -5,7 +5,8 @@
  * the same numbers.
  *
  * Times are in seconds (`timeSec`, one year), lengths in metres, speeds in
- * metres per minute, the scenario duration in hours and text lengths
+ * metres per minute, the scenario duration in hours (`minDurationH`, one
+ * minute; `durationH`, the ceiling) and text lengths
  * (`idLength`, `nameLength`, `schemaUrlLength`) in characters.
  *
  * @example
@@ -19,6 +20,7 @@ export const PLANT_LIMITS = Object.freeze({
   overrideCount: 2000,
   capacity: 10_000,
   timeSec: 31_536_000,
+  minDurationH: 1 / 60,
   durationH: 720,
   gridCells: 200,
   idLength: 64,

@@ -1540,7 +1540,7 @@
           },
           "durationH": {
             "type": "number",
-            "exclusiveMinimum": 0,
+            "minimum": 0.016666666666666666,
             "maximum": 720
           },
           "replicationCount": {
