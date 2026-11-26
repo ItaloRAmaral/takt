@@ -3,6 +3,7 @@ import {
   assignStreamIndices,
   findStreamIndex,
   fnv1a64,
+  streamIndexOf,
 } from './stream-index.js';
 
 describe('stream index', () => {
@@ -99,5 +100,21 @@ describe('stream index', () => {
         issues: [{ elementId: 'm1', path: [], code: 'STREAM_COLLISION' }],
       },
     });
+  });
+  it('streamIndexOf gives the stream index assigned to a key', () => {
+    const indices = new Map([['m1:cycle', 4846866088661209389n]]);
+
+    const index = streamIndexOf(indices, 'm1:cycle');
+
+    expect(index).toBe(4846866088661209389n);
+  });
+
+  it('streamIndexOf of a key that was not assigned throws a defect', () => {
+    const indices = new Map([['m1:cycle', 4846866088661209389n]]);
+
+    const error = catchError(() => streamIndexOf(indices, 'm2:cycle'));
+
+    expect(error).toBeInstanceOf(Error);
+    expect(error).not.toHaveProperty('code');
   });
 });

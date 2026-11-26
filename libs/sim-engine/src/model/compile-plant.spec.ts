@@ -74,6 +74,60 @@ describe('compilePlant', () => {
     });
   });
 
+  it('UC-SIM-002: compiles the scenario it is asked for', () => {
+    const plant = makePlant({
+      scenarios: [
+        makeScenario({ durationSec: 300 }),
+        makeScenario({
+          id: 'longer',
+          name: 'Mais longo',
+          durationSec: 600,
+          seed: 7,
+        }),
+      ],
+    });
+
+    const compiled = compilePlant(plant, 'longer', options);
+
+    expect(compiled.durationSec).toBe(600);
+    expect(compiled.elements[1]).toMatchObject({
+      streamStart: findStreamStart(findStreamIndex(7, 'm1:cycle')),
+    });
+  });
+
+  it('compiles a truncated normal that holds probability', () => {
+    const plant = makeLinePlant([
+      makeSource(),
+      makeStation({
+        params: {
+          cycle: {
+            dist: 'truncatedNormal',
+            meanSec: 30,
+            standardDeviationSec: 5,
+            minSec: 0,
+            maxSec: null,
+          },
+          idealCycleSec: 30,
+          defectRate: 0,
+          failure: null,
+        },
+      }),
+      makeSink(),
+    ]);
+
+    const compiled = compilePlant(plant, 'base', options);
+
+    expect(compiled.elements[1]).toMatchObject({
+      cycle: {
+        kind: 'truncatedNormal',
+        meanSec: 30,
+        standardDeviationSec: 5,
+        minSec: 0,
+        maxSec: Infinity,
+      },
+    });
+  });
+
   it('compiles a buffer with its capacity', () => {
     const plant = makeLinePlant([
       makeSource(),
@@ -302,10 +356,28 @@ describe('compilePlant', () => {
       ]),
     },
     {
-      feature: 'a routing rule',
+      feature: 'a routing rule on a station',
       plant: makeLinePlant([
         makeSource(),
         makeStation({ routing: { rule: 'shortestQueue' } }),
+        makeSink(),
+      ]),
+    },
+    {
+      feature: 'a routing rule on a source',
+      plant: makeLinePlant([
+        makeSource({ routing: { rule: 'shortestQueue' } }),
+        makeStation(),
+        makeSink(),
+      ]),
+    },
+    {
+      feature: 'a routing rule on a buffer',
+      plant: makeLinePlant([
+        makeSource(),
+        makeStation(),
+        makeBuffer({ routing: { rule: 'shortestQueue' } }),
+        makeStation({ id: 'm2' }),
         makeSink(),
       ]),
     },

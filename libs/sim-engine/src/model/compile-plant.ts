@@ -9,7 +9,7 @@ import { truncationMass } from '../distributions/truncated-normal.js';
 import { SimulationError, type RunIssue } from '../errors/simulation-error.js';
 import type { RunOptions } from '../replication/run-options.js';
 import { findStreamStart } from '../rng/mrg32k3a.js';
-import { assignStreamIndices, findStreamIndex } from '../rng/stream-index.js';
+import { assignStreamIndices, streamIndexOf } from '../rng/stream-index.js';
 import type { CompiledElement, CompiledPlant } from './compiled-plant.js';
 import { toVariability } from './to-variability.js';
 
@@ -82,17 +82,20 @@ export function compilePlant(
     );
   }
 
-  assignStreamIndices(scenario.seed, applied.elements.flatMap(streamKeysOf));
+  const streamIndices = assignStreamIndices(
+    scenario.seed,
+    applied.elements.flatMap(streamKeysOf),
+  );
 
   const indexById = new Map(
     applied.elements.map((element, index) => [element.id, index]),
   );
-  const graph = { plant: applied, indexById };
+  const graph = { plant: applied, indexById, streamIndices };
 
   return {
     durationSec,
     elements: applied.elements.map((element, index) =>
-      compileElement(element, index, graph, scenario.seed),
+      compileElement(element, index, graph),
     ),
   };
 }
@@ -100,13 +103,13 @@ export function compilePlant(
 interface Graph {
   readonly plant: Plant;
   readonly indexById: ReadonlyMap<string, number>;
+  readonly streamIndices: ReadonlyMap<string, bigint>;
 }
 
 function compileElement(
   element: PlantElement,
   index: number,
   graph: Graph,
-  seed: number,
 ): CompiledElement {
   const base = { id: element.id, index };
 
@@ -120,7 +123,7 @@ function compileElement(
         interarrival: toVariability(element.params.interarrival),
         queueCapacity: element.params.queueCapacity,
         streamStart: findStreamStart(
-          findStreamIndex(seed, `${element.id}:interarrival`),
+          streamIndexOf(graph.streamIndices, `${element.id}:interarrival`),
         ),
         outputIndex: outputOf(element, graph),
       };
@@ -137,7 +140,7 @@ function compileElement(
         ...base,
         cycle: toVariability(element.params.cycle),
         streamStart: findStreamStart(
-          findStreamIndex(seed, `${element.id}:cycle`),
+          streamIndexOf(graph.streamIndices, `${element.id}:cycle`),
         ),
         inputIndices: inputsOf(element, graph),
         outputIndex: outputOf(element, graph),

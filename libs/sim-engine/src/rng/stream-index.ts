@@ -86,6 +86,30 @@ export function assignStreamIndices(
   return indices;
 }
 
+/**
+ * Reads the stream number assigned to a key.
+ *
+ * @param indices - The stream numbers from {@link assignStreamIndices}.
+ * @param key - A key that was assigned.
+ * @returns The stream number of the key.
+ * @throws {Error} Without a code, a defect, when the key was not assigned.
+ *
+ * @example
+ * const index = streamIndexOf(assignStreamIndices(42, ['m1:cycle']), 'm1:cycle');
+ */
+export function streamIndexOf(
+  indices: ReadonlyMap<string, bigint>,
+  key: string,
+): bigint {
+  const index = indices.get(key);
+
+  if (index === undefined) {
+    throw new Error(`The stream key ${key} was not assigned.`);
+  }
+
+  return index;
+}
+
 function elementIdOf(key: string): string {
   const [elementId = key] = key.split(':', 1);
 

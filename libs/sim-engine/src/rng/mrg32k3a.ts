@@ -14,7 +14,6 @@ const A21 = 527612;
 const A23N = 1370589;
 const NORM = 1 / (M1 + 1);
 const PACKAGE_SEED = 12345;
-const SUBSTREAMS_PER_STREAM = Number(2n ** 51n);
 
 const M1_BIG = BigInt(M1);
 const M2_BIG = BigInt(M2);
@@ -122,17 +121,14 @@ export function findStreamStart(streamIndex: bigint): StreamStart {
  *   substreams of a stream).
  * @returns A stream ready for {@link nextUniform}.
  * @throws {RangeError} When `replication` is not an integer from 0 to
- *   2^51 − 1: a negative one or one from 2^51 up would silently reuse another
- *   substream; a fraction or `NaN` is refused by the conversion to `bigint`.
+ *   2^51 − 1: a negative one or one from 2^51 up has a bit beyond the jump
+ *   table, which would silently reuse another substream; a fraction or `NaN`
+ *   is refused by the conversion to `bigint`.
  */
 export function createRandomStream(
   start: StreamStart,
   replication: number,
 ): RandomStream {
-  if (replication < 0 || replication >= SUBSTREAMS_PER_STREAM) {
-    throw new RangeError('The replication number must be from 0 to 2^51 - 1.');
-  }
-
   return jump(start, SUBSTREAM_JUMPS, BigInt(replication));
 }
 
