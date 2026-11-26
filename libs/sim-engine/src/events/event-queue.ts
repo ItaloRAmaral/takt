@@ -1,3 +1,5 @@
+import { itemAt } from '../collections/item-at.js';
+
 /**
  * The kinds of event of a replication. At the same instant an end of
  * processing comes before an arrival (RN-SIM-018).
@@ -80,7 +82,7 @@ export function scheduleSlot(
     );
   }
 
-  if (valueAt(queue.positions, slot) !== -1) {
+  if (itemAt(queue.positions, slot) !== -1) {
     throw new Error(`Slot ${String(slot)} is already scheduled.`);
   }
 
@@ -107,13 +109,13 @@ export function takeNextSlot(queue: EventQueue): number {
     return -1;
   }
 
-  const first = valueAt(queue.heap, 0);
+  const first = itemAt(queue.heap, 0);
 
   queue.positions[first] = -1;
   queue.size -= 1;
 
   if (queue.size > 0) {
-    siftDown(queue, valueAt(queue.heap, queue.size), 0);
+    siftDown(queue, itemAt(queue.heap, queue.size), 0);
   }
 
   return first;
@@ -132,40 +134,25 @@ export function takeNextSlot(queue: EventQueue): number {
  * const tSec = slotTimeSec(queue, takeNextSlot(queue));
  */
 export function slotTimeSec(queue: EventQueue, slot: number): number {
-  return valueAt(queue.timesSec, slot);
-}
-
-// Reading a typed array outside its length gives undefined, and writing
-// there is silently ignored; a slot outside the queue would corrupt the heap.
-function valueAt(
-  values: Uint8Array | Int32Array | Float64Array,
-  index: number,
-): number {
-  const value = values[index];
-
-  if (value === undefined) {
-    throw new Error(`Index ${String(index)} is outside the event queue.`);
-  }
-
-  return value;
+  return itemAt(queue.timesSec, slot);
 }
 
 function comesBefore(queue: EventQueue, a: number, b: number): boolean {
-  const timeA = valueAt(queue.timesSec, a);
-  const timeB = valueAt(queue.timesSec, b);
+  const timeA = itemAt(queue.timesSec, a);
+  const timeB = itemAt(queue.timesSec, b);
 
   if (timeA !== timeB) {
     return timeA < timeB;
   }
 
-  const priorityA = valueAt(queue.priorities, a);
-  const priorityB = valueAt(queue.priorities, b);
+  const priorityA = itemAt(queue.priorities, a);
+  const priorityB = itemAt(queue.priorities, b);
 
   if (priorityA !== priorityB) {
     return priorityA < priorityB;
   }
 
-  return valueAt(queue.sequences, a) < valueAt(queue.sequences, b);
+  return itemAt(queue.sequences, a) < itemAt(queue.sequences, b);
 }
 
 function place(queue: EventQueue, slot: number, position: number): void {
@@ -178,7 +165,7 @@ function siftUp(queue: EventQueue, slot: number, start: number): void {
 
   while (position > 0) {
     const parentPosition = (position - 1) >> 1;
-    const parent = valueAt(queue.heap, parentPosition);
+    const parent = itemAt(queue.heap, parentPosition);
 
     if (!comesBefore(queue, slot, parent)) {
       break;
@@ -202,10 +189,10 @@ function siftDown(queue: EventQueue, slot: number, start: number): void {
     const right = left + 1;
     const child =
       right < queue.size &&
-      comesBefore(queue, valueAt(queue.heap, right), valueAt(queue.heap, left))
+      comesBefore(queue, itemAt(queue.heap, right), itemAt(queue.heap, left))
         ? right
         : left;
-    const childSlot = valueAt(queue.heap, child);
+    const childSlot = itemAt(queue.heap, child);
 
     if (!comesBefore(queue, childSlot, slot)) {
       break;

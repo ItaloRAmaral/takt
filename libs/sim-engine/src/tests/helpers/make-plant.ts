@@ -1,3 +1,7 @@
+import {
+  createDefaultElement,
+  createDefaultScenario,
+} from '@takt/plant-schema';
 import type {
   BufferElement,
   Connection,
@@ -261,5 +265,85 @@ export function makeLinePlant(
     elements: elements.map((element, i) => ({ ...element, pos: [2 * i, 0] })),
     connections,
     scenarios: [scenario],
+  });
+}
+
+/**
+ * A source whose parts arrive at a fixed interval.
+ *
+ * @param fields - The interval, the queue capacity and, optionally, the id.
+ * @returns The source.
+ *
+ * @example
+ * const source = makeFixedSource({ intervalSec: 10, queueCapacity: 2 });
+ */
+export function makeFixedSource(fields: {
+  readonly id?: string;
+  readonly intervalSec: number;
+  readonly queueCapacity: number;
+}): SourceElement {
+  return makeSource({
+    id: fields.id ?? 'src1',
+    params: {
+      interarrival: { dist: 'fixed', valueSec: fields.intervalSec },
+      queueCapacity: fields.queueCapacity,
+    },
+  });
+}
+
+/**
+ * A station with a fixed cycle and the other editor defaults.
+ *
+ * @param fields - The cycle and, optionally, the id.
+ * @returns The station.
+ *
+ * @example
+ * const station = makeFixedStation({ id: 'm2', cycleSec: 30 });
+ */
+export function makeFixedStation(fields: {
+  readonly id?: string;
+  readonly cycleSec: number;
+}): StationElement {
+  const station = makeStation({ id: fields.id ?? 'm1' });
+
+  return {
+    ...station,
+    params: {
+      ...station.params,
+      cycle: { dist: 'fixed', valueSec: fields.cycleSec },
+    },
+  };
+}
+
+/**
+ * A source, a station and a sink in a line, built only from the editor
+ * defaults of the plant schema (`createDefaultElement`,
+ * `createDefaultScenario`).
+ *
+ * @returns The plant.
+ *
+ * @example
+ * const plant = makeDefaultLinePlant();
+ */
+export function makeDefaultLinePlant(): Plant {
+  return makePlant({
+    elements: [
+      createDefaultElement('production.source', {
+        id: 'src1',
+        zoneId: 'z1',
+        pos: [0, 0],
+      }),
+      createDefaultElement('production.station', {
+        id: 'm1',
+        zoneId: 'z1',
+        pos: [2, 0],
+      }),
+      createDefaultElement('production.sink', {
+        id: 'snk1',
+        zoneId: 'z1',
+        pos: [4, 0],
+      }),
+    ],
+    scenarios: [createDefaultScenario({ id: 'base', name: 'Atual' })],
   });
 }

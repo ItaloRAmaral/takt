@@ -306,8 +306,8 @@ Refatoração sob os testes existentes (o `.res` oficial e os de `jump.spec.ts`)
   - **andar:** os elementos com vaga (estação sem peça, buffer abaixo da capacidade, expedição sempre), na ordem do documento, puxam pela `chooseInput`; a estação que recebe começa a processar (`start`, agenda o fim em t + sorteio); a varredura se repete até uma passada inteira não mover nada;
   - **fim:** antes de processar um evento em t ≥ T, para; cada evento processado conta para `limits.eventCount` e, passando dele, `SIMULATION_LIMIT_EXCEEDED` com `limit: 'eventCount'`.
 
-- [ ] **Passo 1: auxiliares de teste**, com seus specs: `exitTimesSec` (um log literal com dois `move` para a expedição e um para um buffer → os dois tempos) e `arbitraryLine` (100 plantas geradas, todas aceitas pelo `validatePlant`).
-- [ ] **Passo 2: testes que falham** (os da tarefa 6 no "Plano de testes"), com estes dados:
+- [x] **Passo 1: auxiliares de teste**, com seus specs: `exitTimesSec` (um log literal com dois `move` para a expedição e um para um buffer → os dois tempos) e `arbitraryLine` (100 plantas geradas, todas aceitas pelo `validatePlant`).
+- [x] **Passo 2: testes que falham** (os da tarefa 6 no "Plano de testes"), com estes dados:
   - **Planta A:** fonte fixa de 10 s, fila 2; estação fixa de 50 s; expedição; T = 300 s (`makeScenario({ durationSec: 300 })`).
     - `RN-SIM-013: a full source queue loses arrivals ...`: `exitTimesSec` = `[60, 110, 160, 210, 260]`; log com `lose` das peças 4, 5, 7, 8, 9, 10 e 29, entre outras; estado final com a estação ocupada (peça 16, faltando 10 s) e a fila com as peças 21 e 26.
     - `RN-SIM-018: an end of processing frees the place ...`: log com `arrive` da peça 6 às 60 s e sem `lose` dela.
@@ -324,9 +324,20 @@ Refatoração sob os testes existentes (o `.res` oficial e os de `jump.spec.ts`)
   - `UC-SIM-002: records no log unless asked`: `recordLog: false` → `log: null`.
   - Propriedades (`properties.spec.ts`, fast-check, `seed: 42`, `numRuns: 100`, sobre `arbitraryLine`): `arrivals = lost + exits + parts left inside, for any line` (contagem pelos `arrive`, `lose` e `exitTimesSec` do log contra `finalState.parts.length`, pelos auxiliares); `RN-SIM-001: two runs of the same input give identical results` (`toEqual` entre duas execuções com log).
   - `RN-EDT-003: a source, a station and a sink with the editor defaults run`: planta de `createDefaultElement` e `createDefaultScenario`, aceita pelo `validatePlant`; `exitTimesSec` com pelo menos um valor.
-- [ ] **Passo 3:** rodar `pnpm nx test sim-engine` · Esperado: FALHA (`simulateReplication` não existe).
-- [ ] **Passo 4:** implementar.
-- [ ] **Passo 5:** rodar `pnpm nx test sim-engine` · Esperado: PASSA. Se a configuração (ii) ou (iii) não der Dₙ, parar e trazer ao usuário: a recursão é derivação própria da pesquisa, conferida só por simulação.
+- [x] **Passo 3:** rodar `pnpm nx test sim-engine` · Esperado: FALHA (`simulateReplication` não existe).
+- [x] **Passo 4:** implementar.
+- [x] **Passo 5:** rodar `pnpm nx test sim-engine` · Esperado: PASSA. Se a configuração (ii) ou (iii) não der Dₙ, parar e trazer ao usuário: a recursão é derivação própria da pesquisa, conferida só por simulação.
+
+**Diferenças do planejado (26/11/2026):**
+- `exit-times-sec.ts` virou `log-queries.ts`, com `exitTimesSec` e mais três consultas ao log: `selectLogEvents`, `selectPartIds` e `countUnaccountedParts` (a conservação sem conta no teste). As quatro recebem `log: null` e lançam erro, para os testes não precisarem de `?? []`.
+- Construtores a mais em `make-plant.ts`: `makeFixedSource`, `makeFixedStation` e `makeDefaultLinePlant` (a planta da RN-EDT-003, conferida pelo `validatePlant` no spec do auxiliar).
+- `src/collections/item-at.ts` (com spec): leitura de vetor que lança defeito fora do tamanho, exigida pelo `noUncheckedIndexedAccess`; substitui o `valueAt` privado da lista de eventos (tarefa 5).
+- Tipos nomeados no resultado: `PartInLine`, `FinalStation` e `FinalSource`, com os campos do plano.
+- A planta A confere as 21 perdas inteiras (4, 5, 7 a 10, 12 a 15, 17 a 20, 22 a 25, 27 a 29), calculadas à mão, e as partidas da B saem de `selectPartIds`.
+- Teste a mais: `UC-SIM-002: the final state gives each station busy, blocked or starved` (estações de 10, 30 e 1 s, T = 305 s: M1 bloqueada, M2 ocupada faltando 15 s, M3 sem peça).
+- `RN-SIM-018: an end of processing frees the place ...` usa outra planta (fonte fixa de 30 s com fila 0, estação fixa de 30 s, T = 100 s: `start` das peças 1, 2 e 3, nenhum `lose`). Na planta A, o fim das 60 s é agendado antes da chegada das 60 s, então a ordem de agendamento já o põe na frente e o teste passava sem a prioridade; a mutação mostrou isso. Aqui a chegada é agendada antes do fim, e só a prioridade do tipo salva a peça 2.
+- Teste a mais: `RN-SIM-014: a station before a full buffer stays blocked` (buffer de 1 entre M1 de 10 s e M2 de 30 s: a peça 3 termina em M1 aos 40 s e só passa ao buffer aos 50 s). A mutação mostrou que nenhum teste dependia da capacidade do buffer: na configuração (iii), o gargalo esconde o buffer.
+- As duas propriedades foram escritas depois do código (falha no TDD); a mutação dos arquivos novos mostra que elas e os testes unitários falham quando o código muda.
 
 **Commit sugerido:** `feat(sim-engine): run one shift replication of a line` · arquivos: os listados.
 

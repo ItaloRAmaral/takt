@@ -2,6 +2,9 @@ import { createDefaultElement, validatePlant } from '@takt/plant-schema';
 import {
   makeBuffer,
   makeConveyor,
+  makeDefaultLinePlant,
+  makeFixedSource,
+  makeFixedStation,
   makeLinePlant,
   makePlant,
   makeScenario,
@@ -74,5 +77,51 @@ describe('engine test plants', () => {
     const scenario = makeScenario();
 
     expect(scenario.durationH).toBe(8);
+  });
+
+  it('makeFixedSource builds a source with a fixed interval', () => {
+    const source = makeFixedSource({
+      id: 'src2',
+      intervalSec: 10,
+      queueCapacity: 0,
+    });
+
+    expect(source).toMatchObject({
+      id: 'src2',
+      params: {
+        interarrival: { dist: 'fixed', valueSec: 10 },
+        queueCapacity: 0,
+      },
+    });
+  });
+
+  it('makeFixedStation builds a station with a fixed cycle', () => {
+    const station = makeFixedStation({ id: 'm2', cycleSec: 0 });
+
+    expect(station).toMatchObject({
+      id: 'm2',
+      params: {
+        cycle: { dist: 'fixed', valueSec: 0 },
+        defectRate: 0,
+        failure: null,
+      },
+    });
+  });
+
+  it('makeFixedSource and makeFixedStation default to the ids src1 and m1', () => {
+    const ids = [
+      makeFixedSource({ intervalSec: 10, queueCapacity: 0 }).id,
+      makeFixedStation({ cycleSec: 10 }).id,
+    ];
+
+    expect(ids).toEqual(['src1', 'm1']);
+  });
+
+  it('makeDefaultLinePlant builds a valid plant', () => {
+    const plant = makeDefaultLinePlant();
+
+    const validation = validatePlant(plant);
+
+    expect(validation.valid).toBe(true);
   });
 });
