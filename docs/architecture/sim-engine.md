@@ -2,7 +2,7 @@
 
 > **Resumo.** Como o motor é construído hoje. O motor é um núcleo funcional em TypeScript puro, sem React, Three.js nem DOM, que roda num Web Worker do `takt-web-app`. O porquê está no [ADR-0011](../adr/0011-motor-de-simulacao-e-esquema.md) e no [ADR-0013](../adr/0013-erros-esperados.md); o plano que o constrói é o [roteiro do motor](../plans/2026-11-04-roteiro-motor.md). Este documento cresce a cada sub-plano.
 
-Atualizado em 18/11/2026 (sub-plano 2 concluído: `log` e `exp` próprios, ADR-0014).
+Atualizado em 26/11/2026 (sub-plano 4 concluído: compilação da planta, lista de eventos, uma replicação no modo turno, indicadores e séries; [ADR-0015](../adr/0015-cenario-aplicado-e-series-do-motor.md) e RN-SIM-018).
 
 ## Estrutura
 
@@ -11,17 +11,22 @@ Pastas por conceito ([guia de estilo](code-style.md), seção 7), dentro de `lib
 | Pasta | O que tem | Sub-plano |
 | --- | --- | --- |
 | `errors/` | `SimulationError`, o erro esperado do motor | 1 |
-| `tests/helpers/` | Auxiliares só de teste (`catchError`, `drawUniforms`, `summarizeUniforms`, `drawTimesSec`, `sampleMean`, `sampleVariance`, `relativeError`; e, do sub-plano 2, `toBits`, `fromBits`, `ulpDistance`, `findFdlibmMismatches` e `maxUlpDistance`), cada um com o spec ao lado; não saem pelo `index.ts`, não entram no *build* (`exclude` do `tsconfig.lib.json`) nem na mutação (`mutate` da Stryker), mas contam na cobertura; o lint do motor proíbe importá-los fora dos specs (`no-restricted-imports`, com caso no teste de conformidade) | 1 |
+| `tests/helpers/` | Auxiliares só de teste (`catchError`, `drawUniforms`, `summarizeUniforms`, `drawTimesSec`, `sampleMean`, `sampleVariance`, `relativeError`; e, do sub-plano 2, `toBits`, `fromBits`, `ulpDistance`, `findFdlibmMismatches` e `maxUlpDistance`), cada um com o spec ao lado; do sub-plano 4, `makePlant` e os construtores de elementos e cenário, `testLimits`, `withUncheckedOverride`, `scheduleSlots`, `takeAllSlots`, `sortSlotsByEventOrder`, as consultas ao log (`exitTimesSec`, `selectLogEvents`, `selectPartIds`, `countUnaccountedParts`), `sumTimeInWindowSec` e `arbitraryLine` (plantas geradas pelo fast-check); não saem pelo `index.ts`, não entram no *build* (`exclude` do `tsconfig.lib.json`) nem na mutação (`mutate` da Stryker), mas contam na cobertura; o lint do motor proíbe importá-los fora dos specs (`no-restricted-imports`, com caso no teste de conformidade) | 1 |
 | `math/` | `log` (`log.ts`) e `exp` (`exp.ts`), ports do fdlibm 5.3 que dá os mesmos bits em todo motor JavaScript ([ADR-0014](../adr/0014-log-e-exp-proprios-no-motor.md)); bits altos e baixos de um `double` (`float-words.ts`) | 2 |
 | `tests/fixtures/` | Casos de referência de `log` e `exp` (`fdlibm-cases.ts`, gerado; tipos em `fdlibm-case.ts`); ver "Casos de referência de `log` e `exp`" | 2 |
 | `rng/` | Gerador MRG32k3a (`mrg32k3a.ts`), saltos por potência de matriz (`jump.ts`), índice da sequência por chave (`stream-index.ts`) | 1 |
-| `distributions/` | `Variability` e `drawTimeSec` (`variability.ts`); quantis da exponencial (`exponential.ts`), da triangular (`triangular.ts`) e da normal truncada (`truncated-normal.ts`); quantil, função de distribuição e cauda superior da normal padrão (`normal.ts`) | 1 |
+| `distributions/` | `Variability` e `drawTimeSec` (`variability.ts`); quantis da exponencial (`exponential.ts`), da triangular (`triangular.ts`) e da normal truncada (`truncated-normal.ts`, com `truncationMass` desde o 4); quantil, função de distribuição e cauda superior da normal padrão (`normal.ts`) | 1 |
+| `collections/` | `itemAt`, leitura de vetor que lança defeito fora do tamanho (o `noUncheckedIndexedAccess` tipa a leitura como `T \| undefined`, e escrever fora de um vetor tipado é ignorado em silêncio) | 4 |
+| `model/` | `compilePlant` (`compile-plant.ts`), `CompiledPlant` e `CompiledElement` (`compiled-plant.ts`), `toVariability` (`to-variability.ts`) | 4 |
+| `events/` | A lista de eventos (`event-queue.ts`) | 4 |
+| `replication/` | `simulateReplication` (`simulate-replication.ts`), `chooseInput` (`choose-input.ts`), os tipos do resultado (`replication-result.ts`) e das opções (`run-options.ts`) | 4 |
+| `stats/` | Valor ponderado pelo tempo (`time-weighted.ts`) e séries por fatia (`series.ts`) | 4 |
 
-O `src/index.ts` é a API pública: hoje só `SimulationError` e `SimulationErrorCode`. O resto é interno e usado pelos sub-planos seguintes.
+O `src/index.ts` é a API pública: hoje só `SimulationError` e os tipos que aparecem nele (`SimulationErrorCode`, `SimulationErrorDetails`, `SimulationLimit`, `RunIssue`, `RunIssueCode`). O resto é interno; a função pública `run`, com `RunOptions`, é do sub-plano 6.
 
 ## Erros
 
-- **Erro esperado:** `SimulationError`, com `code` literal (`'SIMULATION_LIMIT_EXCEEDED'` ou `'INVALID_PLANT'`) e `name = 'SimulationError'`. A mensagem é interna, para o log. Ainda não há `details`: o formato de cada código é declarado pelos sub-planos 4 e 6, que lançam os primeiros erros com dados.
+- **Erro esperado:** `SimulationError<C>`, com `code` literal, `details` tipados pelo código (`SimulationErrorDetails[C]`) e `name = 'SimulationError'`. `SIMULATION_LIMIT_EXCEEDED` traz `{ limit }` (`'elementCount'`, `'durationSec'` ou `'eventCount'`); `INVALID_PLANT` traz `{ issues }`, a lista `{ elementId?, path, code }` das [regras](../product/rules/README.md), com os códigos de execução `EMPTY_TRUNCATION` e `STREAM_COLLISION` (o 6 acrescenta os do modo). A mensagem é interna, para o log, e só leva IDs, que o esquema restringe a ASCII.
 - **Defeito:** qualquer outro erro, sem `code` (ADR-0013).
 - **Teste:** em código síncrono, `catchError(fn)` devolve o erro lançado e falha se nada for lançado; `fn` tem tipo `() => void`, e a regra `no-misused-promises` do typescript-eslint recusa no lint uma função assíncrona; em código assíncrono, `await expect(promise).rejects.toMatchObject({ code })`.
 - **Conferência do ADR-0013 ("Em aberto"), feita em 04/11/2026 com o Vitest 5.0.5:** `toMatchObject` e `rejects.toMatchObject` verificam o `code` de uma subclasse de `Error`, e um `code` diferente falha. Testes em `src/errors/simulation-error.spec.ts`: `toMatchObject checks the code of a simulation error`, `toMatchObject fails on a different code` e `rejects.toMatchObject checks the code of a rejected simulation error`. Pelos critérios da skill de registros, isso confirma o ADR-0013 e não pede registro novo.
@@ -31,9 +36,9 @@ O `src/index.ts` é a API pública: hoje só `SimulationError` e `SimulationErro
 **MRG32k3a** (L'Ecuyer 1999; L'Ecuyer et al. 2002), escrito a partir do artigo, sem código copiado do RngStreams.
 
 - **Constantes:** m1 = 4294967087, m2 = 4294944443, a12 = 1403580, a13n = 810728, a21 = 527612, a23n = 1370589, norm = 1 / (m1 + 1). Estado inicial do pacote: 12345 nos seis valores.
-- **Sequências e subsequências:** `findStreamStart(índice)` salta `índice · 2¹²⁷` passos a partir do estado do pacote, uma vez por chave; `createRandomStream(início, replicação)` salta `replicação · 2⁷⁶` passos e lança `RangeError` (defeito) com replicação negativa, que daria em silêncio a mesma subsequência da replicação 0, ou a partir de 2⁵¹ (2¹²⁷ / 2⁷⁶ subsequências por sequência), que cairia em silêncio na sequência seguinte. Os saltos usam potência de matriz 3 × 3 módulo m em `bigint` (`jump.ts`), só na preparação. O `jump.spec.ts` testa a potência e o produto com módulo 7 e entradas entre 2 e 6: com 0 ou 1 nos dados, trocar `*` por `/` não muda o resultado e o mutante sobrevive.
+- **Sequências e subsequências:** `findStreamStart(índice)` salta `índice · 2¹²⁷` passos a partir do estado do pacote, uma vez por chave, e lança `RangeError` com índice fora de 0 a 2⁶⁴ − 1; `createRandomStream(início, replicação)` salta `replicação · 2⁷⁶` passos e lança `RangeError` (defeito) com replicação negativa, que daria em silêncio a mesma subsequência da replicação 0, ou a partir de 2⁵¹ (2¹²⁷ / 2⁷⁶ subsequências por sequência), que cairia em silêncio na sequência seguinte. Os saltos usam matrizes 3 × 3 módulo m em `bigint` (`jump.ts`), só na preparação: desde o sub-plano 4, as tabelas de A^(2^k) (k de 0 a 63 para as sequências, de 0 a 50 para as subsequências, nos dois componentes) são calculadas uma vez ao carregar o módulo (`powerOfTwoTable`), e cada salto só aplica matriz × vetor para cada bit ligado do número de passos (`applyPowerTable`). **Medição** (26/11/2026, Node 24.22.2, WSL na máquina do fundador, script temporário fora do repositório): `findStreamStart` para 1000 índices levava de 222 a 376 ms (3 rodadas) e passou a levar de 30 a 158 ms (8 rodadas, mediana de cerca de 40 ms); `createRandomStream` para 1000 chaves × 30 replicações, de 489 a 617 ms para de 150 a 368 ms (mediana de cerca de 180 ms). A variação entre rodadas é grande, mas o pior depois fica abaixo do melhor antes. Os estados de 2⁶⁴ − 1 (sequência) e 2⁵¹ − 1 (replicação), gerados pelo script abaixo com esses índices no laço final, fixaram o resultado antes da troca. O `jump.spec.ts` testa a potência e o produto com módulo 7 e entradas entre 2 e 6: com 0 ou 1 nos dados, trocar `*` por `/` não muda o resultado e o mutante sobrevive.
 - **Geração:** `nextUniform` usa `number`; o invariante abaixo de 2⁵³ é o único comentário do gerador além da fonte, por decisão do usuário de 05/11/2026 (comentário de invariante só quando a correção depende dele; o outro do motor é a ordem dos coeficientes em `normal.ts`, do maior grau para o menor, da qual depende o Horner). Todos os produtos ficam abaixo de 2⁵³ (o maior, a12 · s, é cerca de 6,0×10¹⁵), por isso a conta é exata e igual em qualquer motor JavaScript; só a multiplicação final por `norm` é arredondada, e é a mesma operação do pacote de referência. A saída fica estritamente em (0, 1): com p₁ ≤ p₂ soma-se m1, então p₁ = p₂ dá m1 · norm, não 0.
-- **Mutantes equivalentes conhecidos:** a mensagem do `RangeError` da replicação negativa trocada por texto vazio sobrevive, porque os testes nunca verificam mensagens; e trocar `p1 < 0` por `p1 <= 0` grava m1 em vez de 0 no estado, mas toda conta seguinte é módulo m1, onde os dois valem o mesmo; nenhum número sorteado muda.
+- **Mutantes equivalentes conhecidos:** a mensagem do `RangeError` da tabela de saltos (`applyPowerTable`, que desde o sub-plano 4 é quem recusa o índice e a replicação fora da faixa) trocada por texto vazio sobrevive, porque os testes nunca verificam mensagens; e trocar `p1 < 0` por `p1 <= 0` grava m1 em vez de 0 no estado, mas toda conta seguinte é módulo m1, onde os dois valem o mesmo; nenhum número sorteado muda.
 
 ### Dados de referência
 
@@ -212,7 +217,7 @@ for name, f, m, v, m4 in [("exp", inv_exp, 30.0, 900.0, 9 * 30.0**4),
 - **a ≥ 0** (o intervalo inteiro na média ou acima dela): trabalha com a cauda superior, p = Q(a) − u·(Q(a) − Q(b)) e z = −Φ⁻¹(p). Assim, um intervalo longe na cauda não perde os algarismos que 1 − Φ perderia. O plano dizia "acima de 0"; a = 0 entrou no mesmo ramo sem custo (o teste com u = 0,999999999 cobre o caso).
 - **Limite de precisão conhecido (medido):** no outro ramo, com u perto de 1, p fica perto de 1 e 1 − p perde algarismos. Com o maior uniforme do gerador (1 − 2,3×10⁻¹⁰), o erro é de 1,5×10⁻¹⁰ desvios-padrão no caso realista (média 30, desvio 5, mínimo 0) e chega a 7,3×10⁻⁸ quando o intervalo começa logo abaixo da média (a = −10⁻⁹). Invisível no produto, pelo mesmo critério da decisão sobre Hart; o sub-plano 4 reavalia, junto com guardar Φ(a) e Φ(b) na compilação, se um terceiro ramo (escolher a cauda pelo lado em que p < 0,5) vale o código.
 - **Senão:** p = Φ(a) + u·(Φ(b) − Φ(a)) e z = Φ⁻¹(p). Os dois ramos são crescentes em u.
-- **Resultado** = média + desvio·z, **limitado a [mínimo, máximo]**: o arredondamento nunca põe um tempo fora do intervalo. **Probabilidade zero em dupla precisão** (por exemplo [40, 41] ou [40, ∞) desvios; o Hart dá 0 a partir de 37): a área calculada é 0 e a função devolve a **borda mais próxima da média** (o mínimo no ramo da cauda superior, o máximo no outro), que é onde a massa de uma normal cortada longe na cauda se concentra. Antes da revisão final, o ±∞ do Φ⁻¹ ia para o limite: [40, 41] dava 41, a borda errada, e [40, ∞) dava `Infinity`, um tempo infinito no laço de eventos (corrigido em 06/11/2026, com teste). A recusa da planta nesse caso é do sub-plano 4.
+- **Resultado** = média + desvio·z, **limitado a [mínimo, máximo]**: o arredondamento nunca põe um tempo fora do intervalo. **Probabilidade zero em dupla precisão** (por exemplo [40, 41] ou [40, ∞) desvios; o Hart dá 0 a partir de 37): a área calculada é 0 e a função devolve a **borda mais próxima da média** (o mínimo no ramo da cauda superior, o máximo no outro), que é onde a massa de uma normal cortada longe na cauda se concentra. Antes da revisão final, o ±∞ do Φ⁻¹ ia para o limite: [40, 41] dava 41, a borda errada, e [40, ∞) dava `Infinity`, um tempo infinito no laço de eventos (corrigido em 06/11/2026, com teste). Desde o sub-plano 4, a compilação recusa esse caso com `INVALID_PLANT` (`EMPTY_TRUNCATION`), por `truncationMass(média, desvio, mínimo, máximo)`, a área que o sorteio reescala, com as mesmas funções (`normalSurvival`, `normalCdf`) e o mesmo ramo (`a ≥ 0`) do sorteio, para as duas contas não divergirem se o Hart for trocado. O sorteio não chama `truncationMass`: calcularia Φ três vezes em vez de duas.
 
 ### Φ⁻¹: AS 241 (Wichura 1988)
 
@@ -341,6 +346,85 @@ n = 100_000
 se_mean, se_var = (float(var) / n) ** 0.5, ((float(mu4) - float(var) ** 2) / n) ** 0.5
 print("bounds: mean 10 +-", 1.96 * se_mean, "variance", float(var) - 1.96 * se_var, float(var) + 1.96 * se_var)
 ```
+
+## Compilação da planta (sub-plano 4)
+
+`compilePlant(plant, scenarioId, options)` recebe uma planta já aceita pelo `validatePlant` (o motor não revalida) e devolve `CompiledPlant { durationSec, elements }`, nesta ordem:
+
+1. **Teto de elementos:** mais elementos que `limits.elementCount` → `SIMULATION_LIMIT_EXCEEDED` (`limit: 'elementCount'`), antes de qualquer outra conta (UC-SIM-002, 2a).
+2. **Cenário:** `scenarioId` inexistente é defeito de quem chama; modo diferente de `shift` é defeito até o sub-plano 6.
+3. **Cenário aplicado** pelo `applyScenario` do esquema, importado de `@takt/plant-schema/apply-scenario` ([ADR-0015](../adr/0015-cenario-aplicado-e-series-do-motor.md)): cada sobreposição troca o valor inteiro do campo, sem mesclagem, o que fecha a poluição de protótipo (ADR-0008). Teste de defesa em profundidade: uma sobreposição com `__proto__` (montada por `withUncheckedOverride`, porque o modo estrito do esquema recusa a chave) não muda o `Object.prototype`.
+4. **Duração em segundos inteiros:** `Math.round(durationH × 3600)`, porque o produto nem sempre é exato (1,1 h dá 3960,0000000000005 s, e um evento em 3960 s aconteceria contra a RN-SIM-018); o esquema exige pelo menos 1 minuto, então a duração nunca arredonda para 0. **Teto de duração:** acima de `limits.durationSec` → `SIMULATION_LIMIT_EXCEEDED` (`limit: 'durationSec'`).
+5. **Normais truncadas sem probabilidade:** um `EMPTY_TRUNCATION` por distribuição, todos num só `INVALID_PLANT`. O caminho é o do documento do usuário, como no `validatePlant`: a sobreposição do cenário quando é ela que traz a distribuição (`['scenarios', i, 'overrides', k, 'value']`), senão o parâmetro do elemento (`['elements', 1, 'params', 'cycle']`).
+6. **Sequências:** chaves `<id>:interarrival` (fonte) e `<id>:cycle` (estação), com a semente do cenário; colisão → `INVALID_PLANT` com `STREAM_COLLISION`.
+7. **Elementos**, na ordem do documento, discriminados por `kind`: `source` (`interarrival`, `queueCapacity`, `streamStart`, `outputIndex`), `station` (`cycle`, `streamStart`, `inputIndices`, `outputIndex`), `buffer` (`capacity`, `inputIndices`, `outputIndex`) e `sink` (`inputIndices`). As entradas ficam na ordem das conexões no documento. `TimeDistribution` vira `Variability` por `toVariability` (`dist` → `kind`; `maxSec: null` → `Infinity`).
+
+**Fora do escopo até o sub-plano 5:** esteira, refugo, estação com `defectRate > 0` ou `failure`, e qualquer `routing` diferente de `null` são defeito na compilação. Sem roteamento, todo elemento tem uma saída só; entradas, várias.
+
+## Lista de eventos (sub-plano 4)
+
+`events/event-queue.ts`: um *heap* binário indexado sobre **posições fixas**, uma por evento possível (a próxima chegada de cada fonte e o fim de processamento de cada estação), em vetores tipados (`Float64Array` de tempos e de ordem de agendamento, `Uint8Array` de prioridades, `Int32Array` do *heap* e das posições). Nenhum objeto é criado por evento (guia, seção 7).
+
+- **Ordem** (ADR-0011, item 3; RN-SIM-018): tempo; depois o tipo (`finishProcessing` antes de `arrival`); depois a ordem de agendamento.
+- `scheduleSlot(fila, posição, t)` lança **defeito** com tempo não finito (a guarda única contra um sorteio infinito, pendência do sub-plano 1), com posição já agendada (reagendar é do sub-plano 5, que adia o fim de processamento durante o reparo) ou fora da lista. `takeNextSlot` devolve −1 com a lista vazia; `slotTimeSec` lê o tempo de uma posição, que continua lá depois de tirada.
+- **Propriedade:** para 200 conjuntos de eventos gerados (tempos inteiros de 0 a 100, para forçar empates), a lista devolve cada evento uma vez, na ordem de uma ordenação estável por (tempo, tipo), o oráculo `sortSlotsByEventOrder`.
+
+## Uma replicação (sub-plano 4)
+
+`simulateReplication(plantaCompilada, replicação, opções)` roda o modo turno sobre [0, T) e devolve `{ replication, indicators, series, finalState, log }`.
+
+- **Laço, por instante:** enquanto o próximo evento (`nextEventTimeSec`, `Infinity` com a lista vazia) vem antes de T, processa **todos** os eventos daquele instante (fins de processamento, depois chegadas, depois a ordem de agendamento), só então as peças andam, e só então cada fila de fonte acima da capacidade perde a chegada mais nova. Assim, peças que ficam disponíveis no mesmo instante por eventos diferentes empatam de verdade e a ordem das conexões decide (RN-SIM-018), mesmo com a estação livre; antes da revisão de código, as peças andavam depois de cada evento, e a peça do evento agendado antes ganhava. Um fim de processamento agendado durante o movimento para o mesmo instante (ciclo 0) forma um novo lote no mesmo t. Um evento exatamente em T não acontece, então uma saída em T não conta. Cada evento processado soma 1 e, passando de `limits.eventCount`, lança `SIMULATION_LIMIT_EXCEEDED` (`limit: 'eventCount'`).
+- **Chegada:** agenda a próxima em t + sorteio; a primeira vem depois do primeiro intervalo, não em 0 (RN-SIM-018). A peça recebe o próximo número, a partir de 1, perdida ou não (o que liga `arrive` e `lose` no log), e entra na fila da fonte; depois do movimento do instante, se a fila ficou acima da capacidade, a última sai e conta como perdida (RN-SIM-013). Com fila 0, a chegada passa direto se o destino tem vaga naquele instante.
+- **Fim de processamento:** a estação fica com a peça pronta, disponível desde t. Se o destino não tem vaga, ela fica bloqueada (bloqueio depois do serviço, RN-SIM-014).
+- **As peças andam:** os elementos com vaga (estação vazia, buffer abaixo da capacidade, expedição sempre), **na ordem do documento**, puxam de uma entrada; a varredura se repete até uma passada inteira não mover nada. A estação que recebe começa a processar e agenda o fim em t + sorteio. Uma estação pode ficar "bloqueada por 0 s" dentro de um instante: soma 0 s aos estados e aparece no log só como `finish` seguido de `move` no mesmo t.
+- **De onde se puxa** (RN-SIM-014 e 018): `chooseInput(entradas, disponívelDesde)` escolhe a entrada cuja peça espera há mais tempo (menor instante de disponibilidade: entrada na fila da fonte ou no buffer, ou fim de processamento numa estação bloqueada), com empate pela ordem das conexões; −1 quando nenhuma tem peça. Lê vetores do estado, sem montar lista de candidatas.
+- **Sequências:** `createRandomStream(início, replicação)` por chave; a fixa não consome número.
+- **Log** só com `recordLog: true`; senão `log: null`. Eventos: `arrive`, `lose`, `move`, `start`, `finish`, com `tSec` e o número da peça.
+- **Estado final:** as peças na linha (elemento e chegada), cada estação (`busy` com o tempo que falta, `blocked` ou `starved`) e a próxima chegada de cada fonte, na ordem do documento e, dentro de cada elemento, na ordem da fila.
+
+## Indicadores e séries (sub-plano 4)
+
+Sobre o turno inteiro [0, T):
+
+| Indicador | Definição |
+| --- | --- |
+| `throughputPerHour` | Saídas nas expedições × 3600 ÷ T. Igual em matemática a saídas ÷ (T ÷ 3600), mas 300 ÷ 3600 não é exato em dupla precisão, e a planta de 300 s daria um vizinho de 60 |
+| `wipAverage` | Peças nas filas das fontes, nos buffers e nas estações (inclusive bloqueadas), média ponderada pelo tempo (RN-SIM-013) |
+| `leadTimeAverageSec` | Da chegada à fonte até a expedição, média das peças que saíram; `null` quando nenhuma saiu. As que ficam na linha não contam (o turno corta o tempo delas) |
+| `arrivalCount`, `lostArrivalCount`, `exitCount` | Chegadas (perdidas inclusive), perdidas e saídas; `sources` dá chegadas e perdidas por fonte |
+| `stations` | Por estação, `busyRatio` (a utilização), `blockedRatio` e `starvedRatio`: três valores 0 ou 1 ponderados pelo tempo, que somam 1 |
+
+- **Média ponderada pelo tempo** (`stats/time-weighted.ts`): o valor guarda desde quando vale e a área acumulada; cada mudança soma valor × duração; a média é a área até T ÷ T. As áreas de durações inteiras são somas exatas, e os testes comparam as razões com igualdade (por exemplo `110 / 300`).
+- **Séries** (`stats/series.ts`): fatias de 60 s (`SERIES_SLICE_SEC`) desde 0, a última menor quando T não é múltiplo de 60, cada uma com `startSec`, `endSec`, `exitCount`, `wipAverage` (área do WIP dividida entre as fatias, sobre o comprimento da própria fatia) e `leadTimeAverageSec` das peças que saíram nela, `null` sem saída ([ADR-0015](../adr/0015-cenario-aplicado-e-series-do-motor.md)). Uma saída em t pertence à fatia que contém t.
+- **Lei de Little em janela finita (Little 2011, LL.2):** a soma, peça a peça, de min(saída, T) − chegada sobre as chegadas aceitas é igual à área do WIP (`wipAverage × T`). O auxiliar `sumTimeInWindowSec` calcula a soma pelo log; o teste unitário (fonte exponencial de 60 s, duas estações e um buffer, 8 h, semente 42) e a propriedade sobre 100 linhas geradas exigem erro relativo menor que 10⁻⁹.
+
+## Testes do sub-plano 4
+
+- **Plantas de referência** com tempos fixos, valores calculados à mão (`simulate-replication.spec.ts`): a fonte que perde chegadas com a fila cheia (21 perdas, saídas em 60, 110, 160, 210 e 260 s, vazão 60/h, WIP 2,8, lead time 114 s); fila 0; estação bloqueada por outra e por um buffer cheio; junção de duas fontes, com e sem empate; cada regra da RN-SIM-018.
+- **Linha em série** com tempos fixos (pesquisa da literatura do motor, Dₙ = a + Σt + (n − 1)·max(a, t_max)): três configurações de 8 h, ligadas direto e com buffers.
+- **Propriedades** (`properties.spec.ts`, fast-check 4.10.3, `seed: 42`, `numRuns: 100`, sobre `arbitraryLine`: uma ou duas fontes que se juntam numa estação, de 1 a 4 estações ou buffers, uma expedição, tempos fixos, exponenciais ou triangulares): conservação (chegadas = perdidas + saídas + peças dentro), determinismo (RN-SIM-001: duas execuções com log, `toEqual`) e LL.2.
+- **RN-EDT-003:** fonte, estação e expedição com os padrões do editor rodam e entregam peças.
+- **Cobertura** (26/11/2026): 100% das instruções (688/688), dos ramos (267/267) e das linhas (674/674) do motor.
+
+## Mutação (sub-plano 4)
+
+Rodada completa em 26/11/2026 (`pnpm nx run sim-engine:mutate`, 28 min, `concurrency: 4`; ver [workspace.md](workspace.md#testes-cobertura-e-mutação)): **92,08%** no motor (787 mortos, 38 por tempo esgotado, 71 sobreviventes), acima do corte de 80%. Ela achou lacunas que as rodadas por arquivo das tarefas não mostraram, todas fechadas no mesmo dia e conferidas por nova rodada dos arquivos:
+
+- **`truncationMass`** só tinha testes que davam 0 ou com média 0 e desvio 1, que não separam `(mínimo − média) / desvio` de outras contas; nem a escolha do ramo pela cauda. Testes novos: média 10 e desvio 2 em [8, 12], e [8, 9] e [−9, −8] desvios com erro relativo menor que 10⁻⁷ contra Q(8) − Q(9) = 6,21983198586583×10⁻¹⁶ (100 algarismos, pela função `upper` do script da normal); no ramo errado, o cancelamento erra cerca de 7%. `truncated-normal.ts`: de 76,92% para 97,44%.
+- **`compilePlant`:** nenhum teste compilava um cenário que não fosse o primeiro (teste novo com dois cenários, que confere a duração e a semente do pedido), roteamento numa fonte ou num buffer (duas linhas a mais na tabela de defeitos), nem uma normal truncada **com** probabilidade (com o mutante, toda truncada seria recusada). E a compilação calculava o índice de cada chave duas vezes; agora usa o que o `assignStreamIndices` devolve, lido por `streamIndexOf` (defeito se a chave não foi atribuída), e apagar a atribuição ou esvaziar as chaves quebra os testes. `compile-plant.ts`: de 76,19% para 86,75%, só com mensagens sobrevivendo.
+- **`createRandomStream`:** a guarda da replicação fora de 0 a 2⁵¹ − 1 ficou redundante na tarefa 3 (o `applyPowerTable` já lança `RangeError` com um bit além da tabela, inclusive para negativos) e foi removida; os testes de replicação negativa e de 2⁵¹ continuam passando. `mrg32k3a.ts`: de 81,82% para 96,97%.
+
+**Depois da revisão de código** (lote por instante, duração em segundos inteiros e caminho da sobreposição; ver "Uma replicação" e "Compilação da planta"), nova rodada de `simulate-replication.ts`, `event-queue.ts` e `compile-plant.ts`. Ela mostrou que a prioridade do tipo de evento já não muda nenhum indicador: com o instante inteiro processado antes do movimento, ela só decide a ordem no log (o fim de processamento antes da chegada, como pede o ADR-0011, item 3). Teste novo: `RN-SIM-018: at the same instant, the log shows the end of processing before the arrival`. E a busca da sobreposição só era testada com uma sobreposição; teste novo com sobreposições de outro elemento e de outro parâmetro antes da certa. Resultado: `simulate-replication.ts` 99,40%, `compile-plant.ts` 88,18% e `event-queue.ts` 90,91%, só com os equivalentes abaixo.
+
+**Sobreviventes equivalentes dos arquivos do sub-plano 4:**
+
+- Mensagens de erro trocadas por texto vazio (`item-at.ts`, `compile-plant.ts`, `event-queue.ts`, `simulate-replication.ts`, `jump.ts`, `stream-index.ts`): os testes nunca verificam mensagens (ADR-0013).
+- `event-queue.ts`, em `comesBefore`: `timeA <= timeB` e `priorityA <= priorityB` estão dentro de um ramo em que os dois valores já são diferentes; e a ordem de agendamento com `<=` só difere de `<` com a mesma posição dos dois lados, comparação que o *heap* nunca faz.
+- `compile-plant.ts`: a guarda do cenário inexistente trocada por `false` ou apagada; o `itemAt` seguinte lança o mesmo defeito, só sem a mensagem própria.
+- `event-queue.ts`, em `siftDown`: `left <= queue.size` e `right < queue.size` trocado por `true`. O `siftDown` só desce a posição que saiu do fim do *heap*, então a posição `size` ainda guarda a própria posição que desce, e `comesBefore(x, x)` é falso: o laço para no mesmo lugar.
+- `truncated-normal.ts`, `lower >= 0` por `lower > 0`: em a = 0 os dois ramos dão o mesmo valor matemático (Q(0) − Q(b) = Φ(b) − Φ(0)), como o `x >= 0` de Φ.
+
+Os demais sobreviventes são os já registrados nos sub-planos 1 e 2 (gerador, normal, triangular, `log` e `exp`).
 
 ## Casos de referência de `log` e `exp` (sub-plano 2)
 

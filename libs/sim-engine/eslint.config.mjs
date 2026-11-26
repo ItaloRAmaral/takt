@@ -17,12 +17,23 @@ const forbiddenImportPaths = [
     name: 'three',
     message: 'The engine never imports Three.js (ADR-0011).',
   },
-  {
-    name: '@takt/plant-schema',
-    allowTypeImports: true,
-    message: 'The engine depends only on the plant schema types (ADR-0011).',
-  },
 ];
+
+// Engine code takes only types from the plant schema, plus applyScenario
+// through its own path, which loads no Zod (ADR-0011, ADR-0015). Specs and
+// test helpers may import schema values to build valid plants.
+const plantSchemaImportPath = {
+  name: '@takt/plant-schema',
+  allowTypeImports: true,
+  message:
+    'Engine code imports only types from the plant schema, and applyScenario from @takt/plant-schema/apply-scenario (ADR-0015).',
+};
+
+const plantSchemaImportPattern = {
+  regex: '^@takt/plant-schema/(?!apply-scenario$)',
+  message:
+    'Engine code imports only types from the plant schema, and applyScenario from @takt/plant-schema/apply-scenario (ADR-0015).',
+};
 
 const nondeterministicProperties = [
   { object: 'Math', property: 'random', message: nondeterminism },
@@ -127,9 +138,10 @@ export default defineConfig(
       '@typescript-eslint/no-restricted-imports': [
         'error',
         {
-          paths: forbiddenImportPaths,
+          paths: [...forbiddenImportPaths, plantSchemaImportPath],
           patterns: [
             ...forbiddenImportPatterns,
+            plantSchemaImportPattern,
             {
               regex: '(^|/)tests/',
               message:

@@ -2,7 +2,7 @@
 
 > **Resumo.** Como o esquema da planta é construído hoje. É a única entrada do motor: o Zod 4 define a forma do documento (objetos estritos, todo valor escrito), funções puras verificam as regras da planta, e o resultado é a planta tipada ou a lista completa de problemas `{ elementId?, path, code }`. O JSON Schema publicado é gerado do mesmo esquema. O porquê está no [ADR-0008](../adr/0008-validacao-de-dados.md), no [ADR-0011](../adr/0011-motor-de-simulacao-e-esquema.md) e no [PDR-0022](../pdr/0022-modelo-de-fluxo-da-planta.md); o plano que o construiu é o [esquema da planta v1](../plans/2026-11-25-esquema-da-planta-v1.md).
 
-Atualizado em 26/11/2026 (sub-plano 3 concluído: esquema v1; pastas `structure/` e `semantics/`).
+Atualizado em 26/11/2026 (sub-plano 4 concluído: o motor importa `applyScenario` pelo caminho próprio).
 
 ## Estrutura
 
@@ -18,7 +18,7 @@ Em `libs/plant-schema/src/`, pastas pelos dois níveis de validação do ADR-000
 | `semantics/` | As regras da planta: referências, faixas, grafo, grade, roteamento, cenários |
 | `tests/helpers/` | `makePlant` e os construtores de elementos; `catchError` (cópia do motor, que o esquema não pode importar). Fora do build (`tsconfig.lib.json`) e proibidos fora dos specs pelo lint, com teste de conformidade |
 
-O esquema não importa o motor (lint e teste de conformidade). O motor só importa **tipos** do esquema (ADR-0011, item 2; o lint do motor recusa importar valores).
+O esquema não importa o motor (lint e teste de conformidade). Do pacote principal, o código do motor só importa **tipos** (ADR-0011, item 2); o único valor que ele importa é o `applyScenario`, pelo caminho `@takt/plant-schema/apply-scenario` ([ADR-0015](../adr/0015-cenario-aplicado-e-series-do-motor.md)). O lint do motor recusa qualquer outro valor do esquema, com casos no teste de conformidade; os specs e os auxiliares de teste do motor podem importar valores (`validatePlant`, `createDefault*`) para montar plantas válidas.
 
 ## O documento
 
@@ -42,7 +42,7 @@ A forma está no exemplo do [modelo da planta](../product/plant-model.md). Ponto
 | Zonas, cenários, sobreposições por cenário | 50, 20, 2000 |
 | Capacidades (buffer, esteira, fila da fonte) | até 10 000 |
 | Todo tempo | até 1 ano (31 536 000 s) |
-| Duração do cenário | até 720 h |
+| Duração do cenário | de 1 minuto a 720 h (`minDurationH`, desde o sub-plano 4: o motor arredonda a duração para segundos inteiros, e uma duração que arredondasse para 0 s daria vazão com divisão por zero) |
 | Grade | até 200 × 200 células |
 | IDs, nomes | 1 a 64 caracteres, 1 a 120 caracteres |
 | Limite de retrabalho | 0 a 10 |
@@ -70,7 +70,9 @@ O `elementId` de um problema de forma vem do `id` bruto do elemento (ou do `elem
 
 ## Cenários aplicados
 
-`applyScenario(plant, scenarioId)` devolve a planta como o cenário a roda: cada sobreposição troca o valor inteiro de um campo, sem mesclagem profunda; nem a planta base nem seus objetos mudam (os objetos que não mudam são compartilhados). Um `scenarioId` inexistente é defeito de quem chama (erro sem `code`). O motor não importa a função (ADR-0011, item 2); como ele recebe o cenário aplicado é pendência do sub-plano 4 no [roteiro](../plans/2026-11-04-roteiro-motor.md).
+`applyScenario(plant, scenarioId)` devolve a planta como o cenário a roda: cada sobreposição troca o valor inteiro de um campo, sem mesclagem profunda; nem a planta base nem seus objetos mudam (os objetos que não mudam são compartilhados). Um `scenarioId` inexistente é defeito de quem chama (erro sem `code`). O motor aplica o cenário ele mesmo, na compilação ([ADR-0015](../adr/0015-cenario-aplicado-e-series-do-motor.md)).
+
+**Caminho próprio:** o `package.json` exporta `"./apply-scenario"` → `./src/apply-scenario.ts`, com as mesmas condições do `"."`. O arquivo só importa tipos, então importá-lo não carrega o Zod, que o `index.ts` carrega. O teste `the apply-scenario path exports applyScenario` (`src/apply-scenario-path.spec.ts`) confere a exportação.
 
 ## Padrões do editor
 

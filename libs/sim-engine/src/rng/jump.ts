@@ -138,3 +138,70 @@ export function applyMatrix(
       modulus,
   };
 }
+
+/**
+ * Lists a matrix raised to the powers 2^0, 2^1, …, 2^(count − 1) modulo
+ * `modulus`, so a jump by any exponent below 2^count needs only
+ * matrix-by-vector products ({@link applyPowerTable}).
+ *
+ * @param matrix - The base, with entries in [0, modulus).
+ * @param count - How many powers of two to list.
+ * @param modulus - The modulus of every entry.
+ * @returns The powers, the k-th being `matrix` to the power 2^k.
+ *
+ * @example
+ * const table = powerOfTwoTable(a1StreamJump, 64, m1); // jumps of up to 2^64 − 1 streams
+ */
+export function powerOfTwoTable(
+  matrix: Matrix3,
+  count: number,
+  modulus: bigint,
+): Matrix3[] {
+  const table: Matrix3[] = [];
+  let power = matrix;
+
+  for (let k = 0; k < count; k++) {
+    table.push(power);
+    power = multiplyMatrices(power, power, modulus);
+  }
+
+  return table;
+}
+
+/**
+ * Multiplies a vector by a matrix raised to `exponent` modulo `modulus`,
+ * applying one entry of a {@link powerOfTwoTable} for each bit set in the
+ * exponent. The powers of one matrix commute, so the order of the bits does
+ * not change the result.
+ *
+ * @param table - The matrix to the powers 2^0, 2^1, …, from {@link powerOfTwoTable}.
+ * @param exponent - The power, from 0 to 2^(table length) − 1.
+ * @param vector - The vector, with entries in [0, modulus).
+ * @param modulus - The modulus of every entry.
+ * @returns The product, modulo `modulus`.
+ * @throws {RangeError} When the exponent has a bit beyond the table: a defect
+ *   of the caller, which would otherwise jump by the wrong amount in silence.
+ *
+ * @example
+ * applyPowerTable(table, 5n, state, m1); // the matrix to the power 5, applied to the state
+ */
+export function applyPowerTable(
+  table: readonly Matrix3[],
+  exponent: bigint,
+  vector: Vector3,
+  modulus: bigint,
+): Vector3 {
+  if (exponent >> BigInt(table.length) !== 0n) {
+    throw new RangeError('The exponent has a bit beyond the power table.');
+  }
+
+  let result = vector;
+
+  table.forEach((power, k) => {
+    if (((exponent >> BigInt(k)) & 1n) !== 0n) {
+      result = applyMatrix(power, result, modulus);
+    }
+  });
+
+  return result;
+}

@@ -1,4 +1,9 @@
-import { applyMatrix, powerMatrix, type Matrix3 } from './jump.js';
+import {
+  applyPowerTable,
+  powerMatrix,
+  powerOfTwoTable,
+  type Matrix3,
+} from './jump.js';
 
 // L'Ecuyer et al. (2002), MRG32k3a
 const M1 = 4294967087;
@@ -9,7 +14,6 @@ const A21 = 527612;
 const A23N = 1370589;
 const NORM = 1 / (M1 + 1);
 const PACKAGE_SEED = 12345;
-const SUBSTREAMS_PER_STREAM = Number(2n ** 51n);
 
 const M1_BIG = BigInt(M1);
 const M2_BIG = BigInt(M2);
@@ -37,10 +41,21 @@ const A2: Matrix3 = {
   a22: BigInt(A21),
 };
 
-const A1_STREAM_JUMP = powerMatrix(A1, 2n ** 127n, M1_BIG);
-const A2_STREAM_JUMP = powerMatrix(A2, 2n ** 127n, M2_BIG);
-const A1_SUBSTREAM_JUMP = powerMatrix(A1, 2n ** 76n, M1_BIG);
-const A2_SUBSTREAM_JUMP = powerMatrix(A2, 2n ** 76n, M2_BIG);
+interface JumpTables {
+  readonly component1: readonly Matrix3[];
+  readonly component2: readonly Matrix3[];
+}
+
+// Computed once at load, so each jump needs only matrix-by-vector products:
+// 64 bits cover every stream number, 51 bits every replication.
+const STREAM_JUMPS: JumpTables = {
+  component1: powerOfTwoTable(powerMatrix(A1, 2n ** 127n, M1_BIG), 64, M1_BIG),
+  component2: powerOfTwoTable(powerMatrix(A2, 2n ** 127n, M2_BIG), 64, M2_BIG),
+};
+const SUBSTREAM_JUMPS: JumpTables = {
+  component1: powerOfTwoTable(powerMatrix(A1, 2n ** 76n, M1_BIG), 51, M1_BIG),
+  component2: powerOfTwoTable(powerMatrix(A2, 2n ** 76n, M2_BIG), 51, M2_BIG),
+};
 
 const PACKAGE_STATE: StreamStart = {
   s10: PACKAGE_SEED,
@@ -90,9 +105,11 @@ export interface RandomStream {
  *
  * @param streamIndex - The stream number, from 0 to 2^64 − 1.
  * @returns The state at the start of that stream.
+ * @throws {RangeError} When `streamIndex` is outside 0 to 2^64 − 1, the range
+ *   of the 64-bit hash that gives stream numbers.
  */
 export function findStreamStart(streamIndex: bigint): StreamStart {
-  return jump(PACKAGE_STATE, A1_STREAM_JUMP, A2_STREAM_JUMP, streamIndex);
+  return jump(PACKAGE_STATE, STREAM_JUMPS, streamIndex);
 }
 
 /**
@@ -104,34 +121,32 @@ export function findStreamStart(streamIndex: bigint): StreamStart {
  *   substreams of a stream).
  * @returns A stream ready for {@link nextUniform}.
  * @throws {RangeError} When `replication` is not an integer from 0 to
- *   2^51 − 1: a negative one or one from 2^51 up would silently reuse another
- *   substream; a fraction or `NaN` is refused by the conversion to `bigint`.
+ *   2^51 − 1: a negative one or one from 2^51 up has a bit beyond the jump
+ *   table, which would silently reuse another substream; a fraction or `NaN`
+ *   is refused by the conversion to `bigint`.
  */
 export function createRandomStream(
   start: StreamStart,
   replication: number,
 ): RandomStream {
-  if (replication < 0 || replication >= SUBSTREAMS_PER_STREAM) {
-    throw new RangeError('The replication number must be from 0 to 2^51 - 1.');
-  }
-
-  return jump(start, A1_SUBSTREAM_JUMP, A2_SUBSTREAM_JUMP, BigInt(replication));
+  return jump(start, SUBSTREAM_JUMPS, BigInt(replication));
 }
 
 function jump(
   state: StreamStart,
-  component1Jump: Matrix3,
-  component2Jump: Matrix3,
+  jumps: JumpTables,
   jumpCount: bigint,
 ): RandomStream {
-  const component1 = applyMatrix(
-    powerMatrix(component1Jump, jumpCount, M1_BIG),
+  const component1 = applyPowerTable(
+    jumps.component1,
+    jumpCount,
     { x0: BigInt(state.s10), x1: BigInt(state.s11), x2: BigInt(state.s12) },
     M1_BIG,
   );
 
-  const component2 = applyMatrix(
-    powerMatrix(component2Jump, jumpCount, M2_BIG),
+  const component2 = applyPowerTable(
+    jumps.component2,
+    jumpCount,
     { x0: BigInt(state.s20), x1: BigInt(state.s21), x2: BigInt(state.s22) },
     M2_BIG,
   );

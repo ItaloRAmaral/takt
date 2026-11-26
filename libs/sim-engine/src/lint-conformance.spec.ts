@@ -126,6 +126,42 @@ describe('engine lint rules', { timeout: 30_000 }, () => {
     ]);
   });
 
+  it('allows importing applyScenario from its plant schema path in engine code', async () => {
+    const code = `import { applyScenario } from '@takt/plant-schema/apply-scenario';\n\nexport const apply = applyScenario;\n`;
+
+    const messages = await lintEngineFile('model/value.ts', code);
+
+    expect(messages).toEqual([]);
+  });
+
+  it.each([
+    { name: 'applyScenario', from: '@takt/plant-schema' },
+    { name: 'validatePlant', from: '@takt/plant-schema' },
+    { name: 'validatePlant', from: '@takt/plant-schema/src/validate-plant.js' },
+  ])(
+    'rejects importing $name from $from in engine code',
+    async ({ name, from }) => {
+      const code = `import { ${name} } from '${from}';\n\nexport const value = ${name};\n`;
+
+      const messages = await lintEngineFile('model/value.ts', code);
+
+      expect(messages).toEqual([
+        expect.objectContaining({
+          ruleId: '@typescript-eslint/no-restricted-imports',
+          line: 1,
+        }),
+      ]);
+    },
+  );
+
+  it('allows value imports from the plant schema in engine specs', async () => {
+    const code = `import { validatePlant } from '@takt/plant-schema';\n\nexport const validate = validatePlant;\n`;
+
+    const messages = await lintEngineFile('model/value.spec.ts', code);
+
+    expect(messages).toEqual([]);
+  });
+
   it('rejects importing a test helper from engine code', async () => {
     const code = `import { catchError } from '../tests/helpers/catch-error.js';\n\nexport const value = catchError;\n`;
 

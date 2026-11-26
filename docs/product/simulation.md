@@ -2,7 +2,7 @@
 
 > **Resumo.** O motor é o principal ativo técnico: simulação de eventos discretos, determinística com semente fixa, com replicações e intervalo de confiança. A cena 3D só reproduz o log de eventos. Antes de aparecer em aula, o motor precisa reproduzir resultados conhecidos da literatura.
 
-Atualizado em 25/11/2026 · Decisões: [PDR-0008](../pdr/0008-simulacao-com-reproducao.md), [PDR-0014](../pdr/0014-roteamento-definido-pelo-usuario.md), [PDR-0022](../pdr/0022-modelo-de-fluxo-da-planta.md) · Regras: [rules/simulation.md](rules/simulation.md).
+Atualizado em 26/11/2026 · Decisões: [PDR-0008](../pdr/0008-simulacao-com-reproducao.md), [PDR-0014](../pdr/0014-roteamento-definido-pelo-usuario.md), [PDR-0022](../pdr/0022-modelo-de-fluxo-da-planta.md) · Regras: [rules/simulation.md](rules/simulation.md).
 
 ## Como funciona
 
@@ -35,13 +35,15 @@ O usuário escolhe; cada modo é explicado na interface ([PDR-0020](../pdr/0020-
 
 - **Vazão:** peças boas por hora.
 - **WIP:** peças no sistema, em média.
-- **Lead time:** tempo médio de uma peça da entrada à saída.
+- **Lead time:** tempo médio de uma peça da chegada à fonte até a expedição, contando a espera na fila da fonte (RN-SIM-013). Conta só as peças que saíram no turno: as que ainda estão na linha no fim ficam de fora (o turno corta o tempo delas), e o indicador é vazio quando nenhuma saiu. A interface diz isso no marco 2.
 - **Utilização:** fração do tempo em que cada estação está processando.
 - **OEE** = D × P × Q: disponibilidade (tempo produzindo / tempo planejado), desempenho (ritmo real / ritmo ideal) e qualidade (peças boas / total).
 - **Gargalo:** a estação de maior fração ativa (processando ou em reparo), com a incerteza entre replicações; só a utilização (processando) aponta a estação errada quando há falhas (ver a [pesquisa do modelo de fluxo](../research/modelo-de-fluxo-da-planta.md)). Definição fechada no sub-plano 5 do motor.
 - **Pedidos não atendidos:** chegadas perdidas com a fila da fonte cheia (RN-SIM-013).
 
 Todos com média e intervalo de confiança de 95%.
+
+**Séries por intervalo:** cada replicação devolve também os indicadores em fatias de 1 minuto simulado, a partir do instante 0; a última fatia é menor quando a duração não é múltipla de 1 minuto. Em cada fatia: saídas, WIP médio da fatia e lead time médio das peças que **saíram nela**, vazio quando nenhuma saiu ([ADR-0015](../adr/0015-cenario-aplicado-e-series-do-motor.md)).
 
 ## Validação contra a literatura
 

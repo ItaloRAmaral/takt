@@ -59,7 +59,10 @@ export const scenarioSchema = z.strictObject({
   id: idSchema,
   name: nameSchema,
   mode: z.literal(['shift', 'continue', 'steadyState']),
-  durationH: z.number().gt(0).max(PLANT_LIMITS.durationH),
+  durationH: z
+    .number()
+    .min(PLANT_LIMITS.minDurationH)
+    .max(PLANT_LIMITS.durationH),
   replicationCount: z
     .int()
     .min(PLANT_LIMITS.minReplicationCount)

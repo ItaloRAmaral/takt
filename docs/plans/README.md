@@ -2,7 +2,7 @@
 
 > **Resumo.** Planos de implementação: o que vai ser construído, em quais arquivos, com quais testes, quais ameaças são tratadas e quais princípios de estilo são quebrados e por quê. Toda mudança de código ou configuração começa por um plano aprovado: curto, na conversa, para mudanças pequenas e locais; completo, nesta pasta, para o resto. Só texto de documentação, comentários e formatação dispensam plano. Os planos são escritos com a skill `planning-code-changes` (`.claude/skills/planning-code-changes/`).
 
-Atualizado em 25/11/2026.
+Atualizado em 26/11/2026.
 
 ## Como funciona
 
@@ -18,10 +18,11 @@ Atualizado em 25/11/2026.
 | Plano | Status | Data |
 | --- | --- | --- |
 | [Workspace Nx do marco 1](2026-11-03-workspace-nx.md) | Concluído (PR #1, 04/11/2026) | 03/11/2026 |
-| [Roteiro: esquema da planta e motor (marco 1)](2026-11-04-roteiro-motor.md) | Aprovado; sub-planos 1 a 3 concluídos | 04/11/2026 |
+| [Roteiro: esquema da planta e motor (marco 1)](2026-11-04-roteiro-motor.md) | Aprovado; sub-planos 1 a 4 concluídos | 04/11/2026 |
 | [Fundamentos do motor (sub-plano 1)](2026-11-04-motor-fundamentos.md) | Concluído (05/11/2026) | 04/11/2026 |
 | [Medição da D4 e `log`/`exp` do motor (sub-plano 2)](2026-11-18-motor-d4-log-exp.md) | Concluído (18/11/2026) | 18/11/2026 |
 | [Esquema da planta v1 (sub-plano 3)](2026-11-25-esquema-da-planta-v1.md) | Concluído (25/11/2026) | 25/11/2026 |
+| [Núcleo de eventos e linha simples (sub-plano 4)](2026-11-26-motor-nucleo-e-linha-simples.md) | Concluído (26/11/2026) | 26/11/2026 |
 
 ## Medição do revisor
 
@@ -34,3 +35,4 @@ O revisor fica só se achar o que a autorrevisão não acha. Depois de cinco pla
 | [Fundamentos do motor](2026-11-04-motor-fundamentos.md) | 04/11/2026 | 5 (determinismo do motor) | 5 | 3 / 8 | 1 |
 | [Medição da D4 e `log`/`exp`](2026-11-18-motor-d4-log-exp.md) | 18/11/2026 | 5 (determinismo do motor) | 6 | 5 / 10 | 1 |
 | [Esquema da planta v1](2026-11-25-esquema-da-planta-v1.md) | 25/11/2026 | 2 e 3 (regras RN; validação da entrada) | 11 | 5 / 13 | 0 |
+| [Núcleo de eventos e linha simples](2026-11-26-motor-nucleo-e-linha-simples.md) | 26/11/2026 | 2 e 5 (regras RN; determinismo do motor) | 7 | 9 / 10 | 0 |

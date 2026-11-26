@@ -51,8 +51,9 @@ export function findStreamIndex(seed: number, key: string): bigint {
  * @param seed - The seed of the run.
  * @param keys - What draws from a stream, as `<element id>:<purpose>`.
  * @returns The stream number of each key.
- * @throws {SimulationError} `INVALID_PLANT` when two keys get the same stream
- * number, a repeated key included.
+ * @throws {SimulationError} `INVALID_PLANT` with a `STREAM_COLLISION` issue
+ * for the element of the second key, when two keys get the same stream number,
+ * a repeated key included.
  * @throws {RangeError} When a key has a character outside ASCII.
  */
 export function assignStreamIndices(
@@ -69,6 +70,11 @@ export function assignStreamIndices(
     if (otherKey !== undefined) {
       throw new SimulationError(
         'INVALID_PLANT',
+        {
+          issues: [
+            { elementId: elementIdOf(key), path: [], code: 'STREAM_COLLISION' },
+          ],
+        },
         `Stream keys ${otherKey} and ${key} share a stream.`,
       );
     }
@@ -78,4 +84,34 @@ export function assignStreamIndices(
   }
 
   return indices;
+}
+
+/**
+ * Reads the stream number assigned to a key.
+ *
+ * @param indices - The stream numbers from {@link assignStreamIndices}.
+ * @param key - A key that was assigned.
+ * @returns The stream number of the key.
+ * @throws {Error} Without a code, a defect, when the key was not assigned.
+ *
+ * @example
+ * const index = streamIndexOf(assignStreamIndices(42, ['m1:cycle']), 'm1:cycle');
+ */
+export function streamIndexOf(
+  indices: ReadonlyMap<string, bigint>,
+  key: string,
+): bigint {
+  const index = indices.get(key);
+
+  if (index === undefined) {
+    throw new Error(`The stream key ${key} was not assigned.`);
+  }
+
+  return index;
+}
+
+function elementIdOf(key: string): string {
+  const [elementId = key] = key.split(':', 1);
+
+  return elementId;
 }
