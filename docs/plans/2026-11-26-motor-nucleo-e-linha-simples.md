@@ -269,10 +269,16 @@ Refatoração sob os testes existentes (o `.res` oficial e os de `jump.spec.ts`)
   - `slotTimeSec(queue: EventQueue, slot: number): number`.
   - Estrutura: *heap* binário de posições sobre vetores de tempo e de ordem de agendamento, sem objeto por evento.
 
-- [ ] **Passo 1: testes que falham:** `takes events by time, then kind, then scheduling order` (posições agendadas em 10 s `arrival`, 10 s `finishProcessing`, 5 s `arrival`, 10 s `finishProcessing` → ordem 5 s, os dois `finishProcessing` na ordem em que foram agendados, depois a chegada das 10 s); `refuses to schedule a time that is not finite` (`Infinity` e `NaN`, `catchError` sem `code`); `refuses to schedule a slot already scheduled`; propriedade `takes every scheduled event once, in (time, kind, sequence) order` (fast-check, `seed: 42`, `numRuns: 200`, tempos inteiros de 0 a 100 para forçar empates).
-- [ ] **Passo 2:** rodar `pnpm nx test sim-engine` · Esperado: FALHA.
-- [ ] **Passo 3:** instalar `fast-check@4.10.3` exato e implementar.
-- [ ] **Passo 4:** rodar `pnpm nx test sim-engine` · Esperado: PASSA.
+- [x] **Passo 1: testes que falham:** `takes events by time, then kind, then scheduling order` (posições agendadas em 10 s `arrival`, 10 s `finishProcessing`, 5 s `arrival`, 10 s `finishProcessing` → ordem 5 s, os dois `finishProcessing` na ordem em que foram agendados, depois a chegada das 10 s); `refuses to schedule a time that is not finite` (`Infinity` e `NaN`, `catchError` sem `code`); `refuses to schedule a slot already scheduled`; propriedade `takes every scheduled event once, in (time, kind, sequence) order` (fast-check, `seed: 42`, `numRuns: 200`, tempos inteiros de 0 a 100 para forçar empates).
+- [x] **Passo 2:** rodar `pnpm nx test sim-engine` · Esperado: FALHA.
+- [x] **Passo 3:** instalar `fast-check@4.10.3` exato e implementar.
+- [x] **Passo 4:** rodar `pnpm nx test sim-engine` · Esperado: PASSA.
+
+**Diferenças do planejado (26/11/2026):**
+- O `fast-check` foi instalado antes dos testes, para que o vermelho viesse do módulo ausente e não do pacote ausente. Sem scripts de instalação nele nem na dependência `pure-rand` 8.4.2 (publicada em 10/07/2026).
+- Auxiliares de teste a mais, com spec: `scheduleSlots`, `takeAllSlots` e `sortSlotsByEventOrder` (`src/tests/helpers/scheduled-slots.ts`). O último é o oráculo da propriedade: ordenação estável por tempo e tipo, sem *heap*.
+- Testes a mais: lista vazia dá `-1`; `slotTimeSec`; reagendar uma posição depois de tirada; posição fora da lista é defeito, no `scheduleSlot` e no `slotTimeSec`.
+- Leituras dos vetores por uma função só (`valueAt`) que lança defeito fora do tamanho: o `noUncheckedIndexedAccess` tipa a leitura como `number | undefined`, e escrever fora de um vetor tipado é ignorado em silêncio, o que corromperia o *heap*.
 
 **Commit sugerido:** `feat(sim-engine): add the event list with a deterministic tie-break` · arquivos: os listados.
 

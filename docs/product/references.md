@@ -2,7 +2,7 @@
 
 > **Resumo.** Bibliografia que embasa o Takt e o que cada obra sustenta. A literatura valida a engenharia do motor e a didática; ela não valida a demanda.
 
-Atualizado em 25/11/2026.
+Atualizado em 26/11/2026.
 
 **Regra:** toda referência usada no produto, nos PDRs ou nos ADRs entra neste arquivo, com o que ela embasa. Pesquisas completas ficam em [`../research/`](../research/README.md).
 
@@ -275,6 +275,7 @@ Usadas no plano [Workspace Nx do marco 1](../plans/2026-11-03-workspace-nx.md) e
 | [husky](https://github.com/typicode/husky) 9.1.7; [lint-staged](https://github.com/lint-staged/lint-staged) 17.6.0; [commitlint](https://commitlint.js.org/) 21.2.4 com `config-conventional` | Hooks locais; mensagens de commit, inclusive o limite de 100 caracteres por linha do corpo |
 | gitleaks. [Release 8.30.1](https://github.com/gitleaks/gitleaks/releases/tag/v8.30.1) e [gitleaks-action](https://github.com/gitleaks/gitleaks-action) v3.0.0 (README e `src/gitleaks.js`) | Busca de segredos no pre-commit e no CI; sem licença em conta pessoal; `pull-requests: read` num repositório privado |
 | Semgrep. [Semgrep CE](https://docs.semgrep.dev/deployment/oss-deployment); imagem `semgrep/semgrep` 1.182.1 no Docker Hub | Análise estática no CI sem conta, no lugar do CodeQL (ADR-0010) |
+| [fast-check](https://github.com/dubzzz/fast-check) 4.10.3 (MIT), com [`pure-rand`](https://github.com/dubzzz/pure-rand) 8.4.2 (MIT): datas de publicação e scripts conferidos com `pnpm view` em 26/11/2026; parâmetros `seed` e `numRuns` conferidos em `lib/fast-check.d.ts` | Testes por propriedade do motor (ADR-0009), a partir do sub-plano 4; 7 dias de idade e sem script de instalação |
 | GitHub. Releases de [`actions/checkout`](https://github.com/actions/checkout/releases) v7.0.1, [`actions/setup-node`](https://github.com/actions/setup-node/releases) v7.1.0 e [`pnpm/action-setup`](https://github.com/pnpm/action-setup/releases) v6.1.0 (suporte ao pnpm 12) | Actions fixadas pelo hash do commit |
 
 ## Mercado
