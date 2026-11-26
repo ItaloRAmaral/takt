@@ -360,8 +360,8 @@ Refatoração sob os testes existentes (o `.res` oficial e os de `jump.spec.ts`)
   - auxiliar de teste `sumTimeInWindowSec(log: readonly LogEvent[], sinkIds: readonly string[], durationSec: number): number`: soma, peça a peça, de min(saída, T) − chegada, pelas chegadas aceitas (`arrive` sem `lose`); a saída é o `move` para uma das `sinkIds`.
 - Definições: vazão = saídas na expedição ÷ (T ÷ 3600); WIP = peças na fila das fontes, nos buffers e nas estações (inclusive bloqueadas), média ponderada pelo tempo em [0, T); lead time = da chegada à expedição, média das peças que saíram; `arrivalCount` conta as perdidas; uma saída em t pertence à fatia [início, fim) que contém t.
 
-- [ ] **Passo 1:** o auxiliar `sumTimeInWindowSec` com seu spec (um log literal de três peças, uma ainda dentro em T).
-- [ ] **Passo 2: testes que falham**, com as plantas da tarefa 6:
+- [x] **Passo 1:** o auxiliar `sumTimeInWindowSec` com seu spec (um log literal de três peças, uma ainda dentro em T).
+- [x] **Passo 2: testes que falham**, com as plantas da tarefa 6:
   - `RN-SIM-013: WIP and lead time count the source queue ...` (planta A): vazão 60 por hora, WIP 2,8, lead time 114 s (lead times de 50, 90, 130, 150 e 150 s; a peça 2 espera na fila das 20 às 60 s);
   - `RN-SIM-013: counts 29 arrivals and 21 lost` (planta A, total e por fonte);
   - `UC-SIM-002: series slices of 60 s ...` (planta A): cinco fatias; saídas 0, 2, 1, 1, 1; WIP 2, 3, 3, 3, 3; lead time `null`, 70, 130, 150, 150;
@@ -370,9 +370,18 @@ Refatoração sob os testes existentes (o `.res` oficial e os de `jump.spec.ts`)
   - `UC-SIM-002: lead time is null when no part leaves`: estação de 400 s, T = 300 s;
   - `UC-SIM-002: the time of every part inside the shift equals the WIP area (Little 2011, LL.2)`: fonte exponencial de 60 s, estação exponencial de 50 s, buffer 5, estação triangular (30, 40, 55), semente 42, 8 h, `recordLog: true`; `sumTimeInWindowSec(log, ['snk1'], T)` igual a `wipAverage × T` com erro relativo menor que 10⁻⁹ (`relativeError`, sub-plano 1);
   - propriedade `the time of every part inside the shift equals the WIP area, for any line` (mesma comparação sobre `arbitraryLine`, `seed: 42`, `numRuns: 100`).
-- [ ] **Passo 3:** rodar `pnpm nx test sim-engine` · Esperado: FALHA (sem `indicators` nem `series`).
-- [ ] **Passo 4:** implementar.
-- [ ] **Passo 5:** rodar `pnpm nx test sim-engine` · Esperado: PASSA.
+- [x] **Passo 3:** rodar `pnpm nx test sim-engine` · Esperado: FALHA (sem `indicators` nem `series`).
+- [x] **Passo 4:** implementar.
+- [x] **Passo 5:** rodar `pnpm nx test sim-engine` · Esperado: PASSA.
+
+**Diferenças do planejado (26/11/2026):**
+- A vazão é calculada como saídas × 3600 ÷ T, igual em matemática a saídas ÷ (T ÷ 3600): 300 ÷ 3600 não é exato em dupla precisão, e a planta A daria um valor vizinho de 60.
+- As razões da planta C são comparadas exatamente (`110 / 300` e as outras), sem a tolerância de 12 casas: as áreas são somas de durações inteiras, então a divisão dá os mesmos bits.
+- `sumTimeInWindowSec` aceita `log: null` e lança erro, como as consultas de `log-queries.ts`.
+- A API de `stats/`: `createTimeWeightedValue`, `changeTimeWeightedValue` e `timeWeightedAverage`; `createSeries`, `addWipArea`, `recordSeriesExit` e `summarizeSeries`. O tipo `SeriesSlice` mora em `stats/series.ts`, e o resultado da replicação o importa. Cada módulo tem testes unitários próprios, além dos da replicação.
+- O estado de cada estação é medido por três valores ponderados pelo tempo (0 ou 1 para ocupada, bloqueada e sem peça).
+- Teste a mais: `RN-SIM-014: busy and starved ratios of a station that waits for parts` (planta B: 70/100 ocupada, 30/100 sem peça). A mutação mostrou que, na planta C, as estações só ficam sem peça no início, e nenhum teste cobria a volta ao estado "sem peça".
+- Fora do escopo da tarefa, só em comentários: a JSDoc de `compile-plant.ts` e `run-options.ts` deixou de citar ADR (regra de comentários do projeto).
 
 **Commit sugerido:** `feat(sim-engine): compute indicators, per-minute series and Little's law` · arquivos: os listados.
 

@@ -13,17 +13,41 @@ import type {
   CompiledPlant,
 } from '../model/compiled-plant.js';
 import { createRandomStream, type RandomStream } from '../rng/mrg32k3a.js';
+import {
+  addWipArea,
+  createSeries,
+  recordSeriesExit,
+  summarizeSeries,
+  type SeriesTotals,
+} from '../stats/series.js';
+import {
+  changeTimeWeightedValue,
+  createTimeWeightedValue,
+  timeWeightedAverage,
+  type TimeWeightedValue,
+} from '../stats/time-weighted.js';
 import { chooseInput } from './choose-input.js';
 import type {
   FinalStation,
   FinalState,
   LogEvent,
+  ReplicationIndicators,
   ReplicationResult,
+  StationStatus,
 } from './replication-result.js';
 import type { RunOptions } from './run-options.js';
 
 type Source = Extract<CompiledElement, { kind: 'source' }>;
 type Station = Extract<CompiledElement, { kind: 'station' }>;
+
+/** How long a station has been in each state, each as a 0 or 1 value. */
+type StatusClock = Readonly<Record<StationStatus, TimeWeightedValue>>;
+
+/** The counters of a replication. */
+interface Counts {
+  exitCount: number;
+  leadTimeSumSec: number;
+}
 
 /** The mutable state of one replication, created once and never shared. */
 interface Run {
@@ -43,6 +67,17 @@ interface Run {
   readonly arrivalSecByPart: number[];
   /** When part `n` entered the element that holds it, at index `n − 1`, in seconds. */
   readonly entrySecByPart: number[];
+  /** The parts in the line. */
+  readonly wip: TimeWeightedValue;
+  /** The totals of each slice of 60 s. */
+  readonly series: SeriesTotals;
+  /** The arrivals of each element; only sources count. */
+  readonly arrivalCountByElement: number[];
+  /** The lost arrivals of each element; only sources count. */
+  readonly lostCountByElement: number[];
+  /** The state clock of each element; only stations change theirs. */
+  readonly statusClockByElement: readonly StatusClock[];
+  readonly counts: Counts;
   readonly log: LogEvent[] | null;
 }
 
@@ -59,7 +94,8 @@ interface Run {
  * @param replication - The replication number, which picks the substream of
  *   every stream.
  * @param options - The run options: the event limit and whether to log.
- * @returns The final state and, when asked, the log.
+ * @returns The indicators, the series of 60 s, the final state and, when
+ *   asked, the log.
  * @throws {SimulationError} `SIMULATION_LIMIT_EXCEEDED` with `limit:
  *   'eventCount'` when the replication would process more events than the
  *   limit.
@@ -102,8 +138,12 @@ export function simulateReplication(
     handleEvent(run, slot, slotTimeSec(run.queue, slot));
   }
 
+  addWipArea(run.series, run.wip.sinceSec, plant.durationSec, run.wip.value);
+
   return {
     replication,
+    indicators: summarizeIndicators(run),
+    series: summarizeSeries(run.series),
     finalState: describeFinalState(run),
     log: run.log,
   };
@@ -118,6 +158,7 @@ function createRun(
     (element): element is Source | Station =>
       element.kind === 'source' || element.kind === 'station',
   );
+
   return {
     plant,
     queue: createEventQueue(
@@ -136,6 +177,16 @@ function createRun(
     availableSinceSec: plant.elements.map(() => Infinity),
     arrivalSecByPart: [],
     entrySecByPart: [],
+    wip: createTimeWeightedValue(0),
+    series: createSeries(plant.durationSec),
+    arrivalCountByElement: plant.elements.map(() => 0),
+    lostCountByElement: plant.elements.map(() => 0),
+    statusClockByElement: plant.elements.map(() => ({
+      busy: createTimeWeightedValue(0),
+      blocked: createTimeWeightedValue(0),
+      starved: createTimeWeightedValue(1),
+    })),
+    counts: { exitCount: 0, leadTimeSumSec: 0 },
     log: recordLog ? [] : null,
   };
 }
@@ -177,6 +228,9 @@ function arrive(run: Run, source: Source, slot: number, tSec: number): number {
   const partId = run.arrivalSecByPart.length;
 
   itemAt(run.partsByElement, source.index).push(partId);
+  run.arrivalCountByElement[source.index] =
+    itemAt(run.arrivalCountByElement, source.index) + 1;
+  changeWip(run, tSec, 1);
   record(run, { tSec, type: 'arrive', sourceId: source.id, partId });
   refreshHeadAvailability(run, source.index);
 
@@ -196,12 +250,16 @@ function loseOverflow(
   }
 
   queued.pop();
+  run.lostCountByElement[source.index] =
+    itemAt(run.lostCountByElement, source.index) + 1;
+  changeWip(run, tSec, -1);
   record(run, { tSec, type: 'lose', sourceId: source.id, partId });
   refreshHeadAvailability(run, source.index);
 }
 
 function finishProcessing(run: Run, station: Station, tSec: number): void {
   run.availableSinceSec[station.index] = tSec;
+  changeStatus(run, station, 'blocked', tSec);
   record(run, {
     tSec,
     type: 'finish',
@@ -269,9 +327,15 @@ function movePart(
   // A station holds one part, so after it moves the station has none.
   refreshHeadAvailability(run, from.index);
 
+  if (from.kind === 'station') {
+    changeStatus(run, from, 'starved', tSec);
+  }
+
   record(run, { tSec, type: 'move', partId, fromId: from.id, toId: to.id });
 
   if (to.kind === 'sink') {
+    leaveLine(run, partId, tSec);
+
     return;
   }
 
@@ -293,12 +357,40 @@ function startProcessing(
 ): void {
   const slot = itemAt(run.slotByElement, station.index);
 
+  changeStatus(run, station, 'busy', tSec);
   record(run, { tSec, type: 'start', stationId: station.id, partId });
   scheduleSlot(
     run.queue,
     slot,
     tSec + drawTimeSec(station.cycle, itemAt(run.streams, slot)),
   );
+}
+
+function leaveLine(run: Run, partId: number, tSec: number): void {
+  const leadTimeSec = tSec - itemAt(run.arrivalSecByPart, partId - 1);
+
+  run.counts.exitCount += 1;
+  run.counts.leadTimeSumSec += leadTimeSec;
+  recordSeriesExit(run.series, tSec, leadTimeSec);
+  changeWip(run, tSec, -1);
+}
+
+function changeWip(run: Run, tSec: number, change: number): void {
+  addWipArea(run.series, run.wip.sinceSec, tSec, run.wip.value);
+  changeTimeWeightedValue(run.wip, tSec, run.wip.value + change);
+}
+
+function changeStatus(
+  run: Run,
+  station: Station,
+  status: StationStatus,
+  tSec: number,
+): void {
+  const clock = itemAt(run.statusClockByElement, station.index);
+
+  changeTimeWeightedValue(clock.busy, tSec, status === 'busy' ? 1 : 0);
+  changeTimeWeightedValue(clock.blocked, tSec, status === 'blocked' ? 1 : 0);
+  changeTimeWeightedValue(clock.starved, tSec, status === 'starved' ? 1 : 0);
 }
 
 function refreshHeadAvailability(run: Run, index: number): void {
@@ -359,5 +451,43 @@ function describeFinalState(run: Run): FinalState {
           itemAt(run.slotByElement, source.index),
         ),
       })),
+  };
+}
+
+function summarizeIndicators(run: Run): ReplicationIndicators {
+  const { plant, counts } = run;
+  const durationSec = plant.durationSec;
+  const sources = run.slotElements
+    .filter((element) => element.kind === 'source')
+    .map((source) => ({
+      elementId: source.id,
+      arrivalCount: itemAt(run.arrivalCountByElement, source.index),
+      lostArrivalCount: itemAt(run.lostCountByElement, source.index),
+    }));
+
+  return {
+    throughputPerHour: (counts.exitCount * 3600) / durationSec,
+    wipAverage: timeWeightedAverage(run.wip, durationSec),
+    leadTimeAverageSec:
+      counts.exitCount === 0 ? null : counts.leadTimeSumSec / counts.exitCount,
+    arrivalCount: run.arrivalSecByPart.length,
+    lostArrivalCount: sources.reduce(
+      (total, { lostArrivalCount }) => total + lostArrivalCount,
+      0,
+    ),
+    exitCount: counts.exitCount,
+    stations: run.slotElements
+      .filter((element) => element.kind === 'station')
+      .map((station) => {
+        const clock = itemAt(run.statusClockByElement, station.index);
+
+        return {
+          elementId: station.id,
+          busyRatio: timeWeightedAverage(clock.busy, durationSec),
+          blockedRatio: timeWeightedAverage(clock.blocked, durationSec),
+          starvedRatio: timeWeightedAverage(clock.starved, durationSec),
+        };
+      }),
+    sources,
   };
 }

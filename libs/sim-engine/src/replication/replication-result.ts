@@ -1,3 +1,5 @@
+import type { SeriesSlice } from '../stats/series.js';
+
 /**
  * One step of a replication, in the order it happened, for the 3D scene to
  * replay. Parts are numbered from 1 in arrival order, lost ones included.
@@ -76,10 +78,62 @@ export interface FinalState {
   readonly sources: readonly FinalSource[];
 }
 
+/** The time a station spent in each state, as ratios of the shift. */
+export interface StationIndicators {
+  /** The station id. */
+  readonly elementId: string;
+  /** Processing a part: the station's utilization. */
+  readonly busyRatio: number;
+  /** Holding a finished part that could not move on. */
+  readonly blockedRatio: number;
+  /** Waiting for a part. */
+  readonly starvedRatio: number;
+}
+
+/** The arrivals of one source. */
+export interface SourceIndicators {
+  /** The source id. */
+  readonly elementId: string;
+  /** Every arrival, lost ones included. */
+  readonly arrivalCount: number;
+  /** The arrivals lost because the source queue was full (RN-SIM-013). */
+  readonly lostArrivalCount: number;
+}
+
+/** The indicators of one replication, over the whole shift [0, T). */
+export interface ReplicationIndicators {
+  /** Parts that left at the sinks, per hour of shift. */
+  readonly throughputPerHour: number;
+  /**
+   * The time-weighted average of the parts in the line: source queues,
+   * buffers and stations, blocked ones included (RN-SIM-013).
+   */
+  readonly wipAverage: number;
+  /**
+   * The average time from arrival to exit of the parts that left, in
+   * seconds; `null` when none left. Parts still inside are not counted.
+   */
+  readonly leadTimeAverageSec: number | null;
+  /** Every arrival, lost ones included. */
+  readonly arrivalCount: number;
+  /** The arrivals lost at full source queues. */
+  readonly lostArrivalCount: number;
+  /** The parts that left at the sinks. */
+  readonly exitCount: number;
+  /** Every station, in document order. */
+  readonly stations: readonly StationIndicators[];
+  /** Every source, in document order. */
+  readonly sources: readonly SourceIndicators[];
+}
+
 /** What one replication gives. */
 export interface ReplicationResult {
   /** The replication number, which picks the substream of every stream. */
   readonly replication: number;
+  /** The indicators over the whole shift. */
+  readonly indicators: ReplicationIndicators;
+  /** The indicators per slice of 60 s. */
+  readonly series: readonly SeriesSlice[];
   /** The line at the end of the replication. */
   readonly finalState: FinalState;
   /** Every step, when the run asked for the log; `null` otherwise. */

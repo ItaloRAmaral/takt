@@ -1,6 +1,8 @@
 import type { PlantElement } from '@takt/plant-schema';
 import { compilePlant } from '../model/compile-plant.js';
 import { catchError } from '../tests/helpers/catch-error.js';
+import { relativeError } from '../tests/helpers/relative-error.js';
+import { sumTimeInWindowSec } from '../tests/helpers/time-in-window.js';
 import {
   exitTimesSec,
   selectLogEvents,
@@ -15,6 +17,8 @@ import {
   makePlant,
   makeScenario,
   makeSink,
+  makeSource,
+  makeStation,
   testLimits,
 } from '../tests/helpers/make-plant.js';
 import type { RunOptions } from './run-options.js';
@@ -438,5 +442,232 @@ describe('simulateReplication', () => {
     );
 
     expect(exitTimesSec(result.log, ['snk1']).length).toBeGreaterThan(0);
+  });
+
+  it('RN-SIM-013: WIP and lead time count the source queue: throughput 60 per hour, WIP 2.8, lead time 114 s', () => {
+    const plant = plantA;
+
+    const result = simulateReplication(
+      compilePlant(plant, 'base', logged),
+      0,
+      logged,
+    );
+
+    expect(result.indicators).toMatchObject({
+      throughputPerHour: 60,
+      wipAverage: 2.8,
+      leadTimeAverageSec: 114,
+      exitCount: 5,
+    });
+  });
+
+  it('RN-SIM-013: counts 29 arrivals and 21 lost', () => {
+    const plant = plantA;
+
+    const result = simulateReplication(
+      compilePlant(plant, 'base', logged),
+      0,
+      logged,
+    );
+
+    expect(result.indicators).toMatchObject({
+      arrivalCount: 29,
+      lostArrivalCount: 21,
+      sources: [{ elementId: 'src1', arrivalCount: 29, lostArrivalCount: 21 }],
+    });
+  });
+
+  it('UC-SIM-002: series slices of 60 s give exits, WIP and lead time, with null when nothing left', () => {
+    const plant = plantA;
+
+    const result = simulateReplication(
+      compilePlant(plant, 'base', logged),
+      0,
+      logged,
+    );
+
+    expect(result.series).toEqual([
+      {
+        startSec: 0,
+        endSec: 60,
+        exitCount: 0,
+        wipAverage: 2,
+        leadTimeAverageSec: null,
+      },
+      {
+        startSec: 60,
+        endSec: 120,
+        exitCount: 2,
+        wipAverage: 3,
+        leadTimeAverageSec: 70,
+      },
+      {
+        startSec: 120,
+        endSec: 180,
+        exitCount: 1,
+        wipAverage: 3,
+        leadTimeAverageSec: 130,
+      },
+      {
+        startSec: 180,
+        endSec: 240,
+        exitCount: 1,
+        wipAverage: 3,
+        leadTimeAverageSec: 150,
+      },
+      {
+        startSec: 240,
+        endSec: 300,
+        exitCount: 1,
+        wipAverage: 3,
+        leadTimeAverageSec: 150,
+      },
+    ]);
+  });
+
+  it('UC-SIM-002: the last slice is shorter when the duration is not a multiple of 60 s', () => {
+    const plant = makeLinePlant(
+      [
+        makeFixedSource({ intervalSec: 10, queueCapacity: 2 }),
+        makeFixedStation({ cycleSec: 50 }),
+        makeSink(),
+      ],
+      makeScenario({ durationSec: 90 }),
+    );
+
+    const result = simulateReplication(
+      compilePlant(plant, 'base', logged),
+      0,
+      logged,
+    );
+
+    expect(result.series).toEqual([
+      {
+        startSec: 0,
+        endSec: 60,
+        exitCount: 0,
+        wipAverage: 2,
+        leadTimeAverageSec: null,
+      },
+      {
+        startSec: 60,
+        endSec: 90,
+        exitCount: 1,
+        wipAverage: 3,
+        leadTimeAverageSec: 50,
+      },
+    ]);
+  });
+
+  it('RN-SIM-014: busy, blocked and starved ratios of a blocked station', () => {
+    const plant = plantC;
+
+    const result = simulateReplication(
+      compilePlant(plant, 'base', logged),
+      0,
+      logged,
+    );
+
+    expect(result.indicators.stations).toEqual([
+      {
+        elementId: 'm1',
+        busyRatio: 110 / 300,
+        blockedRatio: 180 / 300,
+        starvedRatio: 10 / 300,
+      },
+      {
+        elementId: 'm2',
+        busyRatio: 280 / 300,
+        blockedRatio: 0,
+        starvedRatio: 20 / 300,
+      },
+    ]);
+  });
+
+  it('RN-SIM-014: busy and starved ratios of a station that waits for parts', () => {
+    const plant = plantB;
+
+    const result = simulateReplication(
+      compilePlant(plant, 'base', logged),
+      0,
+      logged,
+    );
+
+    expect(result.indicators.stations).toEqual([
+      {
+        elementId: 'm1',
+        busyRatio: 70 / 100,
+        blockedRatio: 0,
+        starvedRatio: 30 / 100,
+      },
+    ]);
+  });
+
+  it('UC-SIM-002: lead time is null when no part leaves', () => {
+    const plant = makeLinePlant(
+      [
+        makeFixedSource({ intervalSec: 10, queueCapacity: 2 }),
+        makeFixedStation({ cycleSec: 400 }),
+        makeSink(),
+      ],
+      makeScenario({ durationSec: 300 }),
+    );
+
+    const result = simulateReplication(
+      compilePlant(plant, 'base', logged),
+      0,
+      logged,
+    );
+
+    expect(result.indicators).toMatchObject({
+      throughputPerHour: 0,
+      exitCount: 0,
+      leadTimeAverageSec: null,
+    });
+    expect(result.series).toMatchObject([
+      { leadTimeAverageSec: null },
+      { leadTimeAverageSec: null },
+      { leadTimeAverageSec: null },
+      { leadTimeAverageSec: null },
+      { leadTimeAverageSec: null },
+    ]);
+  });
+
+  it('UC-SIM-002: the time of every part inside the shift equals the WIP area (Little 2011, LL.2)', () => {
+    const plant = makeLinePlant(
+      [
+        makeSource(),
+        makeStation({
+          id: 'm1',
+          params: {
+            ...makeStation().params,
+            cycle: { dist: 'exponential', meanSec: 50 },
+          },
+        }),
+        makeBuffer({ id: 'b1', params: { capacity: 5 } }),
+        makeStation({
+          id: 'm2',
+          params: {
+            ...makeStation().params,
+            cycle: { dist: 'triangular', minSec: 30, modeSec: 40, maxSec: 55 },
+          },
+        }),
+        makeSink(),
+      ],
+      makeScenario({ durationSec: 28_800 }),
+    );
+
+    const result = simulateReplication(
+      compilePlant(plant, 'base', logged),
+      0,
+      logged,
+    );
+
+    expect(
+      relativeError(
+        sumTimeInWindowSec(result.log, ['snk1'], 28_800),
+        result.indicators.wipAverage * 28_800,
+      ),
+    ).toBeLessThan(1e-9);
   });
 });

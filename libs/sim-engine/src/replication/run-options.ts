@@ -1,5 +1,5 @@
 /**
- * The safety limits of a run (ADR-0011). Passing one stops the run with
+ * The safety limits of a run. Passing one stops the run with
  * `SIMULATION_LIMIT_EXCEEDED`; a value equal to the limit is accepted.
  */
 export interface SimulationLimits {

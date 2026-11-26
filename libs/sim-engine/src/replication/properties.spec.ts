@@ -6,6 +6,8 @@ import {
 } from '../tests/helpers/arbitrary-line.js';
 import { countUnaccountedParts } from '../tests/helpers/log-queries.js';
 import { testLimits } from '../tests/helpers/make-plant.js';
+import { relativeError } from '../tests/helpers/relative-error.js';
+import { sumTimeInWindowSec } from '../tests/helpers/time-in-window.js';
 import type { RunOptions } from './run-options.js';
 import { simulateReplication } from './simulate-replication.js';
 
@@ -53,6 +55,28 @@ describe('replication properties', () => {
         );
 
         expect(second).toEqual(first);
+      }),
+      { seed: 42, numRuns: 100 },
+    );
+  });
+
+  it('the time of every part inside the shift equals the WIP area, for any line', () => {
+    const lines = arbitraryLine();
+
+    fc.assert(
+      fc.property(lines, (plant) => {
+        const result = simulateReplication(
+          compilePlant(plant, 'base', logged),
+          0,
+          logged,
+        );
+
+        expect(
+          relativeError(
+            sumTimeInWindowSec(result.log, [ARBITRARY_LINE_SINK_ID], 3600),
+            result.indicators.wipAverage * 3600,
+          ),
+        ).toBeLessThan(1e-9);
       }),
       { seed: 42, numRuns: 100 },
     );

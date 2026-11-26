@@ -15,7 +15,7 @@ import { toVariability } from './to-variability.js';
 
 /**
  * Prepares a validated plant to run one scenario: applies the scenario's
- * overrides field by field (`applyScenario`, ADR-0015), converts the times to
+ * overrides field by field (`applyScenario`), converts the times to
  * the engine's variabilities, builds the element graph with inputs in
  * connection order, and assigns each random element its stream from the
  * scenario's seed (`<id>:interarrival`, `<id>:cycle`).
