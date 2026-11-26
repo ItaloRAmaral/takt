@@ -108,6 +108,43 @@ describe('MRG32k3a', () => {
     },
   );
 
+  it('stream 2^64 − 1 starts at the independently computed state', () => {
+    const start = findStreamStart(2n ** 64n - 1n);
+
+    expect(start).toEqual({
+      s10: 3499337715,
+      s11: 3317800935,
+      s12: 2460652361,
+      s20: 2838770478,
+      s21: 2111791322,
+      s22: 3058833276,
+    });
+  });
+
+  it.each([{ index: -1n }, { index: 2n ** 64n }])(
+    'refuses stream number $index',
+    ({ index }) => {
+      const error = catchError(() => findStreamStart(index));
+
+      expect(error).toBeInstanceOf(RangeError);
+    },
+  );
+
+  it('stream 0, replication 2^51 − 1 starts at the independently computed state', () => {
+    const start = findStreamStart(0n);
+
+    const stream = createRandomStream(start, 2 ** 51 - 1);
+
+    expect(stream).toEqual({
+      s10: 1709191501,
+      s11: 4222349477,
+      s12: 1266608840,
+      s20: 640307515,
+      s21: 126606725,
+      s22: 2331036540,
+    });
+  });
+
   it('uniforms stay strictly between 0 and 1', () => {
     const stream = createRandomStream(findStreamStart(0n), 0);
 
