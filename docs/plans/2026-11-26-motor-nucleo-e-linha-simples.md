@@ -181,10 +181,10 @@ Nenhuma.
   - `class SimulationError<C extends SimulationErrorCode = SimulationErrorCode> extends Error` com `readonly code: C`, `readonly details: SimulationErrorDetails[C]` e `constructor(code: C, details: SimulationErrorDetails[C], message: string)`;
   - `index.ts` exporta também `SimulationErrorDetails`, `SimulationLimit`, `RunIssue` e `RunIssueCode`, que aparecem no tipo público do erro (a casca do Worker manda `{ code, details }`); `RunOptions` e `SimulationLimits` saem pelo `index.ts` só no sub-plano 6, com o `run`.
 
-- [ ] **Passo 1: testes que falham:** `a simulation error carries details for its code` (`new SimulationError('SIMULATION_LIMIT_EXCEEDED', { limit: 'eventCount' }, '...')` → `toMatchObject({ code: 'SIMULATION_LIMIT_EXCEEDED', details: { limit: 'eventCount' } })`); em `stream-index.spec.ts`, a colisão espera `details: { issues: [{ elementId: <id da segunda chave>, path: [], code: 'STREAM_COLLISION' }] }`.
-- [ ] **Passo 2:** rodar `pnpm nx test sim-engine` · Esperado: FALHA (sem `details`).
-- [ ] **Passo 3:** implementar; ajustar as chamadas existentes do construtor; acrescentar os dois códigos ao README das regras.
-- [ ] **Passo 4:** rodar `pnpm nx test sim-engine` e `pnpm nx typecheck sim-engine` · Esperado: PASSA.
+- [x] **Passo 1: testes que falham:** `a simulation error carries details for its code` (`new SimulationError('SIMULATION_LIMIT_EXCEEDED', { limit: 'eventCount' }, '...')` → `toMatchObject({ code: 'SIMULATION_LIMIT_EXCEEDED', details: { limit: 'eventCount' } })`); em `stream-index.spec.ts`, a colisão espera `details: { issues: [{ elementId: <id da segunda chave>, path: [], code: 'STREAM_COLLISION' }] }`.
+- [x] **Passo 2:** rodar `pnpm nx test sim-engine` · Esperado: FALHA (sem `details`).
+- [x] **Passo 3:** implementar; ajustar as chamadas existentes do construtor; acrescentar os dois códigos ao README das regras.
+- [x] **Passo 4:** rodar `pnpm nx test sim-engine` e `pnpm nx typecheck sim-engine` · Esperado: PASSA.
 
 **Commit sugerido:** `feat(sim-engine): add error details and run options` · arquivos: os listados.
 

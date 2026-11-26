@@ -88,11 +88,16 @@ describe('stream index', () => {
     );
   });
 
-  it('rejects repeated stream indices as an invalid plant', () => {
+  it('refuses two keys that share a stream with INVALID_PLANT and STREAM_COLLISION', () => {
     const error = catchError(() =>
       assignStreamIndices(42, ['m1:cycle', 'm1:cycle']),
     );
 
-    expect(error).toMatchObject({ code: 'INVALID_PLANT' });
+    expect(error).toMatchObject({
+      code: 'INVALID_PLANT',
+      details: {
+        issues: [{ elementId: 'm1', path: [], code: 'STREAM_COLLISION' }],
+      },
+    });
   });
 });

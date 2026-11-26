@@ -72,6 +72,8 @@ Cada problema de uma planta inválida é `{ elementId?, path, code }` ([ADR-0008
 | `INVALID_ROUTING_RULE` | Regra que o elemento não pode ter, ou destino de tipo errado ([RN-SIM-006](simulation.md)) | Planta |
 | `OVERRIDE_NOT_APPLICABLE`, `DUPLICATE_OVERRIDE` | Sobreposição para elemento ou parâmetro que não existe, ou repetida | Cenário |
 | `INVALID_WARMUP` | Aquecimento fora do regime estável, ou maior ou igual à duração | Cenário |
+| `EMPTY_TRUNCATION` | Normal truncada sem probabilidade em dupla precisão (intervalo longe demais da média); só o motor detecta, ao preparar a execução | Execução |
+| `STREAM_COLLISION` | Duas sequências de números aleatórios da execução com o mesmo número; só o motor detecta, ao preparar a execução | Execução |
 
 ## Índice
 
